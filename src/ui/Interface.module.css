@@ -1,0 +1,51 @@
+.ui { position: absolute; inset: 0; pointer-events: none; }
+.layer { position: absolute; inset: 0; }
+
+/* sticky header: the horizontal lockup from the brand kit, never retyped */
+.header { position: absolute; top: var(--edge); left: var(--edge); right: var(--edge); display: flex; justify-content: space-between; align-items: center; z-index: 6; }
+.logo { display: block; height: var(--logo-height); width: auto; }
+.label { opacity: 0.82; }
+
+/* sticky phase indicator: a hairline track + "01 Accepted" */
+.phase { position: absolute; left: var(--edge); top: calc(50% + 0.5px); transform: translateY(-50%); display: flex; flex-direction: column; gap: var(--phase-gap); width: var(--phase-width); z-index: 3; }
+/* while the preloader is up its layer is transparent (the cover is drawn in WebGL), so the hero UI and the
+   phase indicator stay hidden and fade in as the circle opens */
+.ui [data-ui='hero'], .phase { transition: opacity 0.9s var(--ease-out) 0.25s; }
+.ui[data-loading] [data-ui='hero'], .ui[data-loading] .phase { opacity: 0; transition: none; }
+.track { position: relative; display: block; width: 1px; height: var(--phase-h); background: var(--track); overflow: hidden; }
+.fill { position: absolute; inset: 0; background: var(--hw-neon); transform: scaleY(0); transform-origin: top; will-change: transform; }
+.phaseLabel { display: flex; gap: 7px; align-items: center; }
+.phaseName { opacity: 0.6; }
+
+/* hero */
+.heroShade { position: absolute; left: 0; right: 0; bottom: 0; height: var(--hero-shade); background: linear-gradient(to bottom, var(--shade-0), var(--shade)); }
+.heroTitle { position: absolute; left: var(--edge); bottom: var(--edge); }
+.heroText { position: absolute; right: var(--edge); bottom: var(--text-bottom); }
+.hint { position: absolute; right: var(--edge); bottom: var(--edge); opacity: 0.75; }
+
+/* closing section */
+.finalText { position: absolute; left: var(--final-text-left); bottom: var(--final-text-bottom); }
+.finalLine1 { position: absolute; left: var(--edge); bottom: var(--final-line-bottom); }
+.finalLine2 { position: absolute; right: var(--edge); bottom: var(--edge); text-align: right; }
+.restart { position: absolute; left: var(--final-text-left); bottom: 212px; pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; color: var(--hw-neon); transition: opacity 0.4s ease; }
+.restart:hover { opacity: 0.7; }
+.restart:focus-visible { outline: 1px solid var(--focus); outline-offset: 6px; }
+
+/* later layers stay hidden until the timeline brings them in */
+[data-ui='final'] [data-fade] { visibility: hidden; opacity: 0; }
+
+/* Tall or narrow screens (phones, upright tablets): the globe spans the width, so the scene runs bright behind
+   the header and the copy. Both sit on a soft Ink shade, and the phase indicator joins the copy, clear of the globe. */
+@media (max-width: 760px), (max-aspect-ratio: 5/4) {
+  .ui::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: var(--top-shade); background: linear-gradient(to bottom, var(--shade-top), var(--shade-top-mid) 34%, var(--shade-0)); }
+  .heroShade { background: linear-gradient(to bottom, var(--shade-0), var(--shade-mid) 36%, var(--shade)); }
+  .heroText, .finalText { text-shadow: var(--text-halo); }
+  .phase { top: auto; bottom: var(--phase-bottom); transform: none; }
+}
+
+@media (max-width: 760px) {
+  .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .heroTitle { bottom: var(--hero-title-bottom); }
+  .finalText { left: auto; right: var(--edge); }
+  .restart { left: auto; right: var(--edge); bottom: var(--restart-bottom); }
+}

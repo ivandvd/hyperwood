@@ -1,0 +1,98 @@
+/* Design tokens: every colour, typeface and fixed size of the interface lives here.
+   Colours and type come from the Hyperwood brand kit (hyperwood-tokens.css). */
+:root {
+  --hw-neon: #ccff00;
+  --hw-ink: #0a0a0a;
+  --hw-white: #ffffff;
+  --hw-paper: #f4f5f0;
+  --hw-slate: #62685d;
+  --hw-line: #d9dcd2;
+
+  --ink: var(--hw-paper);
+  --white: var(--hw-white);
+  /* = config.preloader.color: if the canvas ever drops a frame, the page underneath is Ink */
+  --bg: var(--hw-ink);
+  --shade: rgba(10, 10, 10, 0.62);
+  --shade-0: rgba(10, 10, 10, 0);
+  --track: rgba(255, 255, 255, 0.3);
+  --focus: rgba(204, 255, 0, 0.7);
+
+  /* Manrope for everything people read; IBM Plex Mono for labels and technical values */
+  --font-text: 'Manrope Variable', 'Manrope', Arial, sans-serif;
+  --font-display: var(--font-text);
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --size-display: clamp(44px, 6.4vw, 92px);
+  --size-text: 14px;
+  --size-label: 11px;
+  --size-micro: 10px;
+  --size-counter: 92px;
+  --size-counter-pct: 26px;
+  --logo-height: 21px;
+  --weight-display: 600;
+  --track-display: -0.045em;
+  --track-text: -0.012em;
+  --track-mono: 0.04em;
+
+  /* layout (px, from the 1440 × 900 design) */
+  --edge: 28px;
+  --body-width: 214px;
+  --hero-shade: 260px;
+  --title-gap: 20px;
+  --phase-width: 110px;
+  --phase-h: 50px;
+  --phase-gap: 9px;
+  --text-bottom: 111px;
+  --final-text-bottom: 264px;
+  /* the closing lines keep their gap as the type scales (118px at the full 92px size) */
+  --final-line-bottom: calc(var(--edge) + 0.72 * var(--size-display) + 23.76px);
+  /* the closing paragraph keeps its column but never runs off the right edge */
+  --final-text-left: min(calc(75% + 7px), calc(100% - var(--edge) - var(--body-width)));
+  /* where the phase indicator sits on tall screens: above the hero title and the first closing line */
+  --phase-bottom: calc(max(var(--edge) + 1.44 * var(--size-display) + var(--title-gap), var(--final-line-bottom) + 0.72 * var(--size-display)) + 26px);
+  --preloader-sphere: 50px;
+
+  /* cursor (Default 24 / 8 px, Hover 32 / 12 px) */
+  --cursor-ring: 24px;
+  --cursor-dot: 8px;
+  --cursor-ring-hover: 32px;
+  --cursor-dot-hover: 12px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-cursor: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Tall or narrow screens: shades behind the header and the copy, and a soft halo that keeps small text
+   readable while the burst runs behind it. */
+@media (max-width: 760px), (max-aspect-ratio: 5/4) {
+  :root {
+    --top-shade: 130px;
+    --shade-top: rgba(10, 10, 10, 0.7);
+    --shade-top-mid: rgba(10, 10, 10, 0.56);
+    --hero-shade: 330px;
+    --shade-mid: rgba(10, 10, 10, 0.6);
+    --shade: rgba(10, 10, 10, 0.78);
+    --text-halo: 0 0 14px rgba(10, 10, 10, 0.5), 0 0 3px rgba(10, 10, 10, 0.4);
+  }
+}
+
+/* Phones: the widest title fits the width, the edges tighten. */
+@media (max-width: 760px) {
+  :root {
+    --edge: 20px;
+    --size-display: min(44px, (100vw - 2 * var(--edge)) / 9.6);
+    --size-counter: 64px;
+    --size-counter-pct: 20px;
+    /* the hero title sits one line above the edge, so the scroll hint has its own line under it */
+    --hero-title-bottom: calc(var(--edge) + 30px);
+    --text-bottom: calc(var(--hero-title-bottom) + 1.44 * var(--size-display) + var(--title-gap) + 26px);
+    --final-line-bottom: calc(var(--edge) + 1.3 * var(--size-display));
+    /* closing section, bottom to top: line 2, line 1, the restart link, the paragraph */
+    --restart-bottom: calc(var(--final-line-bottom) + 0.72 * var(--size-display) + 18px);
+    --final-text-bottom: calc(var(--restart-bottom) + 34px);
+    /* the header stacks into two rows and the copy stands taller, so both shades reach further */
+    --top-shade: 190px;
+    --hero-shade: 380px;
+    --phase-bottom: var(--text-bottom);
+  }
+}

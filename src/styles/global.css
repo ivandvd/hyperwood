@@ -1,0 +1,29 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { background: var(--bg); color: var(--ink); font-family: var(--font-text); -webkit-font-smoothing: antialiased; }
+body { overscroll-behavior: none; }
+
+/* ---------------- Typography: Manrope 14 for reading, 92 for titles; IBM Plex Mono for labels ---------------- */
+.t-display, .t-label, .t-body, .t-micro { text-box: trim-both cap alphabetic; color: var(--white); font-style: normal; line-height: normal; margin: 0; }
+.t-display { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--size-display); letter-spacing: var(--track-display); white-space: nowrap; }
+.t-label { font-family: var(--font-mono); font-size: var(--size-label); font-weight: 400; letter-spacing: var(--track-mono); text-transform: uppercase; white-space: nowrap; }
+.t-body { font-family: var(--font-text); font-size: var(--size-text); font-weight: 400; letter-spacing: var(--track-text); line-height: 1.42; width: var(--body-width); color: var(--ink); }
+.t-micro { font-family: var(--font-mono); font-size: var(--size-micro); font-weight: 400; letter-spacing: var(--track-mono); text-transform: uppercase; white-space: nowrap; }
+
+/* Focus Reveal titles (per-character split; positions are measured from the real font) */
+.fr { position: relative; display: block; width: fit-content; }
+.fr--stack { display: flex; flex-direction: column; gap: var(--title-gap); }
+.fr-line { display: block; text-box: trim-both cap alphabetic; white-space: nowrap; }
+.fr-word { display: inline-block; white-space: nowrap; }
+.fr-char { display: inline-block; transform-origin: 50% 50%; opacity: 0; }
+.fr-sr, .ul-sr { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* line-by-line body copy (Fade Up); .ul takes its position from its layout class */
+.ul:not([data-ul-ready]) { visibility: hidden; }
+.ul-visual { display: block; }
+.ul-word { display: inline-block; white-space: nowrap; }
+.ul-line { display: flow-root; position: relative; }
+.ul-line-inner { display: block; opacity: 0; }
+
+/* the native cursor is hidden only while the custom one runs (fine pointers) */
+html.has-cursor, html.has-cursor * { cursor: none !important; }
