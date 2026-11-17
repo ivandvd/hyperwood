@@ -1,13 +1,13 @@
-/* The web app's preview: one window, three columns under a bar. Ink surfaces and hairlines; Neon only where the
-   product acts (the side taken, the price line, the proof) and on what is sealed. Falling prices are not red:
-   they are the quieter of the two tones. */
+/* The web app's window: three columns under a bar. One surface, the page's own Ink, and hairlines: nothing is
+   lifted by a lighter black, a tint or a shadow. Neon only where the product acts (the side taken, the price
+   line, the proof) and on what is sealed. Falling prices are not red: they are the quieter of the two tones. */
 .app {
-  --line: rgba(244, 245, 240, 0.09);
+  --line: rgba(244, 245, 240, 0.1);
   --dim: rgba(244, 245, 240, 0.46);
   --mid: rgba(244, 245, 240, 0.74);
   position: relative; display: grid; grid-template-columns: 236px minmax(0, 1fr) 280px; grid-template-rows: 52px minmax(0, 1fr);
-  height: 620px; overflow: hidden; border-radius: 18px;
-  background: #0e0f0d; color: var(--hw-paper); text-align: left;
+  height: 620px; overflow: hidden;
+  background: var(--hw-ink); color: var(--hw-paper); text-align: left;
   font-family: var(--font-text); font-size: 12.5px; line-height: 1.2; letter-spacing: -0.005em;
 }
 .app button { font: inherit; letter-spacing: inherit; }
@@ -23,8 +23,12 @@
   -webkit-mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
   mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
 }
-.tabs { display: flex; gap: 20px; margin-right: auto; font-weight: 500; color: var(--dim); }
+.tabs { display: flex; gap: 20px; margin: 0 auto 0 0; font-weight: 500; color: var(--dim); }
+.tabs span { position: relative; padding: 18px 0; transition: color 0.3s linear; }
+/* (the screen that is open: its name lit, a Neon line under it on the bar's edge) */
+.tabs span::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--hw-neon); transform: scaleX(0); transition: transform 0.45s var(--ease-out); }
 .tabs [data-on] { color: var(--hw-paper); }
+.tabs [data-on]::after { transform: none; }
 .pill {
   display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 99px;
   font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid);
@@ -32,21 +36,22 @@
 .pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--hw-neon); }
 .wallet { font-family: var(--font-mono); font-size: 11px; color: var(--mid); }
 
-/* ---------------- the markets */
+/* ---------------- the Trade screen: the markets */
 /* (every part has its own cell by name: the payout sheet lies over one of them, and must not push the rest on) */
+.list, .main, .ticket { transition: opacity 0.35s linear, visibility 0s; }
 .list { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; min-height: 0; padding-top: 14px; border-right: 1px solid var(--line); }
 .list .label { padding: 0 16px 8px; }
-.list ul {
-  flex: 1; min-height: 0; margin: 0; padding: 0; list-style: none; overflow: hidden;
-  -webkit-mask: linear-gradient(to bottom, #000 78%, transparent); mask: linear-gradient(to bottom, #000 78%, transparent);
-}
+.list ul { flex: 1; min-height: 0; margin: 0; padding: 0; list-style: none; overflow: hidden; }
+/* (twelve rows fill the list: the rest wait in the Markets screen, so none is cut by the window's foot) */
+.list li:nth-child(n + 13) { display: none; }
 .row {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; width: 100%; padding: 7px 16px;
-  border: 0; background: none; color: inherit; text-align: left; cursor: pointer; transition: background 0.15s linear;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; gap: 2px 8px; width: 100%; height: 44px; padding: 0 16px;
+  border: 0; background: none; color: inherit; text-align: left; cursor: pointer; transition: box-shadow 0.15s linear;
 }
-.row:hover { background: rgba(244, 245, 240, 0.04); }
-.row[data-on] { background: rgba(204, 255, 0, 0.07); box-shadow: inset 2px 0 0 var(--hw-neon); }
+.row:hover { box-shadow: inset 2px 0 0 rgba(244, 245, 240, 0.3); }
+.row[data-on] { box-shadow: inset 2px 0 0 var(--hw-neon); }
 .ticker { font-weight: 600; }
+.row[data-on] .ticker { color: var(--hw-neon); }
 .name { grid-row: 2; font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .price { grid-row: 1; grid-column: 2; justify-self: end; font-family: var(--font-mono); font-size: 12px; }
 .row .change { grid-row: 2; grid-column: 2; justify-self: end; font-size: 11px; }
@@ -63,13 +68,13 @@
 /* (the box is the plot itself: the scale and the last price hang outside it, to its right) */
 .chart { position: relative; min-height: 0; margin: 16px 66px 20px 20px; }
 .chart svg { display: block; width: 100%; height: 100%; overflow: visible; animation: wipe 1.2s var(--ease-out) both; }
-/* (the line draws itself in from the left, once the section is seen and whenever the market changes) */
+/* (the line draws itself in from the left, once the window is seen and whenever the market changes) */
 @keyframes wipe { from { clip-path: inset(-10px 100% -10px 0); } to { clip-path: inset(-10px 0 -10px 0); } }
 @keyframes appear { from { opacity: 0; } }
 .app:not([data-live]) .chart svg { animation: none; clip-path: inset(0 100% 0 0); }
 .app:not([data-live]) .last { animation: none; opacity: 0; }
 .grid { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.line { fill: none; stroke: var(--hw-neon); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.line { fill: none; stroke: var(--hw-neon); stroke-width: 1.8; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .scale { position: absolute; left: 100%; top: 0; bottom: 0; width: 56px; margin: 0; padding: 0; list-style: none; }
 .scale li { position: absolute; right: 0; transform: translateY(-50%); font-family: var(--font-mono); font-size: 10px; color: var(--dim); }
 .last {
@@ -77,11 +82,11 @@
   background: var(--hw-neon); color: var(--hw-ink); font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
   animation: appear 0.35s linear 0.85s both;
 }
-/* what the network has of all this: a sealed instruction */
+/* what the network has of all this: a sealed instruction. The plot goes; nothing of it shows through. */
 .veil {
   position: absolute; inset: -16px -66px -20px -20px; display: grid; place-content: center; justify-items: center; gap: 8px; text-align: center;
-  background: rgba(14, 15, 13, 0.74); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-  opacity: 0; visibility: hidden; transition: opacity 0.45s linear, visibility 0s linear 0.45s;
+  background: var(--hw-ink);
+  opacity: 0; visibility: hidden; transition: opacity 0.4s linear, visibility 0s linear 0.4s;
 }
 .veil p { margin: 6px 0 0; font-size: 15px; font-weight: 600; letter-spacing: -0.015em; }
 .veil small { max-width: 30ch; font-size: 12px; line-height: 1.45; color: var(--dim); }
@@ -97,8 +102,8 @@
 
 /* ---------------- the order */
 .ticket { grid-column: 3; grid-row: 2; display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 16px; border-left: 1px solid var(--line); }
-.sides { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; border-radius: 12px; background: rgba(244, 245, 240, 0.05); }
-.sides button { height: 38px; border: 0; border-radius: 9px; background: none; color: var(--mid); font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.18s linear, color 0.18s linear; }
+.sides { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; }
+.sides button { height: 36px; border: 0; border-radius: 8px; background: none; color: var(--mid); font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.18s linear, color 0.18s linear; }
 .sides button[data-on] { background: var(--hw-paper); color: var(--hw-ink); }
 .sides button[data-on][data-long] { background: var(--hw-neon); }
 .fields { display: grid; gap: 8px; margin: 0; }
@@ -107,9 +112,8 @@
 .fields dd { margin: 0; font-family: var(--font-mono); font-size: 12.5px; }
 .sign {
   height: 44px; border: 0; border-radius: 11px; background: var(--hw-neon); color: var(--hw-ink);
-  font-weight: 700; font-size: 13.5px; cursor: pointer; transition: transform 0.15s ease-out, filter 0.15s linear;
+  font-weight: 700; font-size: 13.5px; cursor: pointer; transition: transform 0.15s ease-out;
 }
-.sign:hover { filter: brightness(1.07); }
 .sign:active { transform: scale(0.985); }
 .stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
 .stages li {
@@ -117,7 +121,7 @@
   transition: color 0.3s linear, border-color 0.3s linear;
 }
 .stages li[data-on] { border-top-color: var(--hw-neon); color: var(--hw-paper); }
-.sees { display: grid; gap: 7px; margin-top: auto; padding: 13px; border: 1px solid transparent; border-radius: 12px; background: rgba(244, 245, 240, 0.04); transition: border-color 0.4s linear; }
+.sees { display: grid; gap: 7px; margin-top: auto; padding: 13px; border: 1px solid var(--line); border-radius: 12px; transition: border-color 0.4s linear; }
 .sees p { margin: 0; color: var(--mid); }
 .sees .label { margin-bottom: 2px; color: var(--dim); }
 .sees code { font-family: var(--font-mono); font-size: 11.5px; color: var(--hw-paper); }
@@ -125,11 +129,11 @@
 .proof i { width: 6px; height: 6px; border-radius: 50%; background: var(--hw-neon); }
 
 /* ---------------- closing a position: the sheet that asks where its proceeds go. It lies over the lower part
-   of the middle column and comes up from below. */
+   of the middle column and comes up from below: Ink on Ink, told apart by its edge alone. */
 .sheet {
   grid-column: 2; grid-row: 2; align-self: end; z-index: 3; margin: 0 22px 22px; padding: 18px 20px 20px; border-radius: 16px;
-  background: #151712; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.12), inset 0 1px 0 rgba(204, 255, 0, 0.5), 0 -30px 80px 10px rgba(14, 15, 13, 0.94);
-  opacity: 0; transform: translate3d(0, 26px, 0); pointer-events: none; transition: opacity 0.45s linear, transform 0.6s var(--ease-out);
+  background: var(--hw-ink); border: 1px solid rgba(244, 245, 240, 0.2);
+  opacity: 0; transform: translate3d(0, 26px, 0); pointer-events: none; transition: opacity 0.4s linear, transform 0.6s var(--ease-out);
 }
 .sheet[data-on] { opacity: 1; transform: none; }
 .sheet p { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin: 0; }
@@ -140,17 +144,26 @@
 .sheetSum { margin-top: 8px !important; color: var(--mid); }
 .sheetSum strong { font-size: 30px; font-weight: 600; letter-spacing: -0.04em; color: var(--hw-paper); }
 .payouts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
-.payouts div { display: grid; gap: 6px; padding: 12px 13px; border-radius: 11px; background: rgba(244, 245, 240, 0.04); box-shadow: inset 0 0 0 1px var(--line); }
-.payouts div[data-on] { background: rgba(204, 255, 0, 0.08); box-shadow: inset 0 0 0 1.5px var(--hw-neon); }
+.payouts div { display: grid; gap: 6px; padding: 12px 13px; border-radius: 11px; box-shadow: inset 0 0 0 1px var(--line); }
+.payouts div[data-on] { box-shadow: inset 0 0 0 1.5px var(--hw-neon); }
 .payouts b { font-size: 13px; font-weight: 600; }
 .payouts span { font-family: var(--font-mono); font-size: 11px; color: var(--mid); }
 .confirm { display: grid; place-items: center; height: 40px; margin-top: 12px; border-radius: 10px; background: var(--hw-neon); color: var(--hw-ink); font-size: 13px; font-weight: 700; }
 
 /* ---------------- the network's view (what is sealed turns into bars: sealed.module.css) */
-.app[data-view='network'] .veil { opacity: 1; visibility: visible; transition: opacity 0.45s linear; }
-.app[data-view='network'] .row[data-on] { background: none; box-shadow: none; }
+.app[data-view='network'] .veil { opacity: 1; visibility: visible; transition: opacity 0.4s linear; }
+.app[data-view='network'] .row[data-on] { box-shadow: none; }
+.app[data-view='network'] .row[data-on] .ticker { color: inherit; }
 .app[data-view='network'] .sides button[data-on] { background: none; color: var(--mid); }
-.app[data-view='network'] .sees { border-color: rgba(204, 255, 0, 0.45); }
+.app[data-view='network'] .sees { border-color: var(--hw-neon); }
+
+/* ---------------- the Markets screen: it takes the whole window under the bar, and the Trade screen goes */
+.board {
+  grid-column: 1 / -1; grid-row: 2; z-index: 4; min-height: 0; container: board / inline-size; background: var(--hw-ink);
+  opacity: 0; visibility: hidden; transition: opacity 0.35s linear, visibility 0s linear 0.35s;
+}
+.app[data-tab='markets'] .board { opacity: 1; visibility: visible; transition: opacity 0.45s linear 0.2s; }
+.app[data-tab='markets'] .list, .app[data-tab='markets'] .main, .app[data-tab='markets'] .ticket { opacity: 0; visibility: hidden; transition: opacity 0.3s linear, visibility 0s linear 0.3s; }
 
 /* ---------------- narrower: the markets go, then the window becomes one column */
 /* (the window answers to its own width, not the screen's: whoever shows it makes its box a container named
@@ -166,6 +179,7 @@
   .ticket { grid-column: 1; grid-row: 3; }
   .sheet { display: none; }
   .tabs span:not([data-on]), .wallet { display: none; }
+  .tabs span { padding: 16px 0; }
   .head { gap: 18px; padding: 14px 16px; }
   .stat:last-child { display: none; }
   .chart { height: 210px; margin: 14px 60px 18px 16px; }
@@ -174,6 +188,6 @@
   .ticket { border-left: 0; border-top: 1px solid var(--line); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .veil, .stages li, .sees, .sheet { transition: none; }
+  .veil, .stages li, .sees, .sheet, .board, .list, .main, .ticket, .tabs span, .tabs span::after { transition: none; }
   .chart svg, .last { animation: none; }
 }

@@ -3,14 +3,13 @@
  * insist on being said.
  */
 import { BRAND, home } from '../content.home'
-import k from './kit.module.css'
 import s from './footer.module.css'
 
 export function Footer() {
   const F = home.footer
   return (
     <footer className={s.footer}>
-      <div className={k.wrap}>
+      <div className={s.wrap}>
         <div className={s.top}>
           <p className={s.tagline}>
             {F.tagline.map((line) => (

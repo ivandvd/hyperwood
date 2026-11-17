@@ -24,6 +24,7 @@ export function Journey() {
   const word = useRef<HTMLHeadingElement>(null)
   const closing = useRef<HTMLDivElement>(null)
   const door = useRef<HTMLSpanElement>(null)
+  const hold = useRef<HTMLSpanElement>(null)
 
   useEffect(
     () =>
@@ -39,6 +40,7 @@ export function Journey() {
         word: word.current!,
         closing: closing.current!,
         door: door.current!,
+        hold: hold.current!,
       }),
     [],
   )
@@ -46,6 +48,7 @@ export function Journey() {
   // id "top": the mark in the header comes back here
   return (
     <section ref={journey} id="top" className={s.journey} aria-label={home.label}>
+      <span ref={hold} className={s.hold} aria-hidden="true" />
       <div ref={stage} className={s.stage}>
         <canvas ref={canvas} className={s.light} aria-hidden="true" />
         {/* (the header lies on the page itself, so it can stay over the sections after the journey) */}

@@ -1,0 +1,25 @@
+/* The live chart (LiveChart.tsx): the widget's frame fills the box, and comes in once its line is there. Until
+   then the box shows the chart's own hairlines, so nothing jumps. */
+.chart { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; height: 100%; min-height: 0; margin: 0; }
+.frame {
+  position: relative; min-height: 0; opacity: 0; transition: opacity 0.5s linear;
+  /* (the page is a dark page, the widget's document is not marked as one: a browser paints such a frame on
+     white unless the two agree. Here they are made to agree, and the frame stays see-through) */
+  color-scheme: light;
+  /* (the frame is a plain block in the box: no gap under it) */
+  line-height: 0;
+}
+.chart[data-state='there'] .frame { opacity: 1; }
+.chart::before {
+  content: ''; position: absolute; inset: 8% 56px 34px 0; pointer-events: none; opacity: 1; transition: opacity 0.4s linear;
+  background: repeating-linear-gradient(to bottom, rgba(244, 245, 240, 0.07) 0 1px, transparent 1px 20%);
+}
+.chart[data-state='there']::before { opacity: 0; }
+.none { position: absolute; inset: 0 0 34px; display: grid; place-content: center; margin: 0; font-size: 13px; color: rgba(244, 245, 240, 0.5); }
+.credit { padding-top: 8px; text-align: right; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; }
+.credit a { color: rgba(244, 245, 240, 0.42); text-decoration: none; transition: color 0.18s linear; }
+.credit a:hover { color: var(--hw-paper); }
+.credit a:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 3px; border-radius: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .frame, .chart::before { transition: none; }
+}

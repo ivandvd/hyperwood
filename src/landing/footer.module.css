@@ -1,14 +1,18 @@
-/* The footer: Ink like the page, a hairline above it, the tagline large, the cautions small. */
+/* The footer: on the page's Ink and on the same three columns as what is above it (after.module.css): the
+   tagline over two of them, the way around the page in the third. Then the cautions, small. */
 .footer {
-  position: relative; z-index: 3; padding: clamp(96px, 16vh, 200px) var(--edge) 32px;
-  background: var(--hw-ink); color: var(--hw-paper); font-family: var(--font-text);
+  position: relative; z-index: 3; padding: clamp(40px, 8vh, 110px) var(--edge) 32px;
+  color: var(--hw-paper); font-family: var(--font-text);
 }
+.wrap { padding: 0 20px; }
 
-.top { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: start; gap: 32px 56px; }
+.top { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; gap: 32px 0; }
+.top > nav, .top > a { grid-column: 2; margin-left: 20px; }
+.top > a { justify-self: start; }
 .tagline { margin: 0; font-family: var(--font-display); font-weight: var(--weight-display); font-size: clamp(40px, 6.3vw, 108px); line-height: 0.94; letter-spacing: -0.05em; }
 .tagline span { display: block; }
 .tagline span + span { color: rgba(244, 245, 240, 0.44); }
-.links { display: grid; gap: 12px; padding-top: 8px; font-size: 14px; }
+.links { display: grid; justify-items: start; gap: 12px; padding-top: 8px; font-size: 14px; }
 .links a, .launch { color: var(--hw-paper); text-decoration: none; }
 .links a { opacity: 0.72; transition: opacity 0.18s linear; }
 .links a:hover { opacity: 1; }
@@ -36,13 +40,12 @@
   mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
 }
 
-@media (max-width: 900px) {
-  .top { grid-template-columns: minmax(0, 1fr) auto; }
-  .tagline { grid-column: 1 / -1; }
+@media (max-width: 999px) {
+  .top { grid-template-columns: minmax(0, 1fr); }
+  .top > nav, .top > a { grid-column: 1; margin-left: 0; }
   .notes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 520px) {
-  .top { grid-template-columns: minmax(0, 1fr); }
-  .launch { justify-self: start; }
+  .wrap { padding: 0; }
   .notes { grid-template-columns: minmax(0, 1fr); }
 }

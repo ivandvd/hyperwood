@@ -1,26 +1,7 @@
-/* What the sections after the journey share: Ink like the stage above them, one column 1280 wide, a small
-   label, one large statement, a short text. Few things, large. Nothing here moves by itself: a part comes in
-   once, when it is first seen. */
-.section {
-  position: relative; z-index: 3; padding: clamp(96px, 16vh, 200px) var(--edge);
-  background: var(--hw-ink); color: var(--hw-paper); font-family: var(--font-text); overflow-x: clip;
-}
-.wrap { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; }
-.label {
-  display: flex; align-items: center; gap: 10px; margin: 0 0 28px;
-  font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); text-transform: uppercase; color: rgba(244, 245, 240, 0.5);
-}
-.label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--hw-neon); }
-.statement { margin: 0; font-family: var(--font-display); font-weight: var(--weight-display); font-size: clamp(44px, 7vw, 124px); line-height: 0.94; letter-spacing: -0.05em; text-wrap: balance; }
-.body { max-width: 38ch; margin: 28px 0 0; font-size: 17px; line-height: 1.5; letter-spacing: var(--track-text); color: rgba(244, 245, 240, 0.66); }
-.caption { margin: 18px 0 0; font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--track-mono); text-transform: uppercase; color: rgba(244, 245, 240, 0.4); }
-
-/* coming in: once, softly, each part a little after the one before it (--i) */
+/* How a part of the page comes in. Nothing here moves by itself: a part comes in once, softly, when it is first
+   seen, each a little after the one before it (--i). */
 .reveal { opacity: 0; transform: translate3d(0, 24px, 0); transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out); transition-delay: calc(var(--i, 0) * 90ms); }
 .reveal.shown { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
-}
-@media (max-width: 760px) {
-  .body { font-size: 16px; }
 }

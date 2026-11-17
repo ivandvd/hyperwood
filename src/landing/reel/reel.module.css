@@ -1,0 +1,168 @@
+/* A reel (Reel.tsx): the frame of a short film of the app, and the app's parts as the films' sets show them
+   (sets.tsx). The frame is a picture of a lit screen, like a photograph: charcoal panels, light on their
+   edges, one part in focus. Colour is Paper on charcoal, with Hyper Neon where the product acts. */
+
+/* ---------------- the frame, and the two copies of the set in it */
+.reel {
+  --k: 1; --focus: 50% 50%; --soft: 0; --lit: 0;
+  position: relative; width: 100%; overflow: hidden; background: #1d1e1b; isolation: isolate;
+  content-visibility: auto; contain-intrinsic-size: auto 400px;
+}
+.far, .near { position: absolute; inset: 0; perspective: calc(var(--k) * 1150px); perspective-origin: 50% 50%; }
+/* behind: out of focus, and not there at all where the lens is focused (a soft copy under a sharp one would
+   show round it as a halo) */
+.far {
+  filter: blur(calc((var(--soft) + 5.5) * var(--k) * 1px));
+  -webkit-mask-image: radial-gradient(ellipse 66% 60% at var(--focus), transparent 44%, #000 98%);
+  mask-image: radial-gradient(ellipse 66% 60% at var(--focus), transparent 44%, #000 98%);
+}
+/* in front: sharp, where the lens is focused; softer only when the whole picture is */
+.near {
+  filter: blur(calc(var(--soft) * var(--k) * 1px));
+  -webkit-mask-image: radial-gradient(ellipse 66% 60% at var(--focus), #000 48%, transparent 100%);
+  mask-image: radial-gradient(ellipse 66% 60% at var(--focus), #000 48%, transparent 100%);
+}
+/* the lens: a light across the picture, darker corners, and a little grain */
+.lens {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, 0) 44%, rgba(255, 255, 255, calc(0.08 * var(--lit))) 64%, rgba(255, 255, 255, 0) 84%),
+    radial-gradient(ellipse 84% 84% at 50% 46%, rgba(0, 0, 0, 0) 56%, rgba(0, 0, 0, 0.26) 100%);
+}
+.lens::after {
+  content: ''; position: absolute; inset: 0; opacity: 0.07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------------- the set: the app's screen, laid flat; Reel.tsx turns it and brings it closer */
+.set {
+  --line: rgba(255, 255, 255, 0.24); --dim: rgba(255, 255, 255, 0.54); --mid: rgba(255, 255, 255, 0.8);
+  position: absolute; left: 50%; top: 50%; width: 900px; height: 680px; transform-origin: 0 0;
+  background: #1d1e1b; box-shadow: 0 0 0 900px #1d1e1b; /* (the screen runs on past the set on every side) */
+  color: #fff; font-family: var(--font-text); font-size: 16px; line-height: 1.2; letter-spacing: -0.01em; text-align: left;
+  backface-visibility: hidden;
+}
+.set p, .set dl, .set ol, .set ul { margin: 0; padding: 0; list-style: none; }
+
+/* a panel of the app: charcoal, a thin light edge, and light caught along its sides */
+.panel {
+  position: absolute; border-radius: 16px; border: 1px solid var(--line);
+  background: linear-gradient(165deg, #363733, #282926 62%, #232421);
+}
+.panel::before, .panel::after {
+  content: ''; position: absolute; top: 9%; bottom: 9%; width: 1.5px; border-radius: 2px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 42%, rgba(255, 255, 255, 0.9) 58%, rgba(255, 255, 255, 0));
+  box-shadow: 0 0 9px 1px rgba(255, 255, 255, 0.34);
+}
+.panel::before { left: -1px; }
+.panel::after { right: -1px; opacity: 0.55; }
+.label { font-family: var(--font-mono); font-size: 0.7em; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+
+/* what is far behind the panels: other parts of the app, never in focus */
+.ghost { position: absolute; opacity: 0.75; }
+.ghost i { display: block; height: 15px; margin-bottom: 13px; border-radius: 4px; background: rgba(244, 245, 240, 0.2); }
+.ghost i[data-neon] { background: color-mix(in srgb, var(--hw-neon) 62%, #1d1e1c); }
+.ghost svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ghost path { fill: none; stroke: var(--hw-neon); stroke-width: 3; stroke-linejoin: round; }
+
+/* the pointer */
+.cursor { position: absolute; left: 0; top: 0; z-index: 9; width: 22px; height: 30px; transform: translate3d(var(--x, 0), var(--y, 0), 0) scale(var(--press, 1)); transform-origin: 4px 3px; pointer-events: none; }
+.cursor svg { display: block; width: 100%; height: 100%; }
+
+/* ---------------- the order */
+.ticket { left: 440px; top: 52px; width: 400px; padding: 22px 24px 26px; }
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.chips span { display: grid; place-items: center; height: 38px; border-radius: 9px; border: 1px solid var(--line); background: linear-gradient(170deg, rgba(244, 245, 240, 0.2), rgba(244, 245, 240, 0.09)); font-size: 0.94em; font-weight: 600; }
+.tabs { display: flex; gap: 26px; margin: 20px -24px 0; padding: 0 24px; border-bottom: 1px solid var(--line); font-size: 1em; font-weight: 600; color: var(--dim); }
+.tabs span { position: relative; padding: 0 0 13px; }
+.tabs span[data-on] { color: var(--hw-paper); }
+.tabs span[data-on]::after { content: ''; position: absolute; left: 0; bottom: -1px; width: 62%; height: 2px; background: var(--hw-neon); }
+.row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 20px; font-size: 0.9em; color: var(--mid); }
+.row small { font-size: 0.86em; color: var(--dim); }
+.row small b { margin-left: 6px; font-family: var(--font-mono); font-weight: 400; color: var(--hw-paper); }
+.field { display: flex; justify-content: space-between; align-items: center; height: 58px; margin-top: 9px; padding: 0 18px; border: 1px solid var(--line); border-radius: 13px; font-family: var(--font-mono); font-size: 1.12em; }
+.field span { font-family: var(--font-text); font-size: 0.86em; font-weight: 600; color: var(--mid); }
+.slider { position: relative; height: 22px; margin: 16px 4px 0; }
+.slider::before { content: ''; position: absolute; left: 0; right: 0; top: 10px; height: 2px; border-radius: 2px; background: rgba(244, 245, 240, 0.22); }
+.slider em { position: absolute; top: 6px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #2a2b28; box-shadow: inset 0 0 0 1.5px rgba(244, 245, 240, 0.36); }
+.fill { position: absolute; left: 0; top: 10px; height: 2px; width: var(--at, 0%); border-radius: 2px; background: var(--hw-neon); }
+.knob { position: absolute; top: 2px; left: var(--at, 0%); width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: #2a2b28; box-shadow: inset 0 0 0 3px var(--hw-neon); }
+.sides { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+.sides span, .sign {
+  display: grid; place-items: center; height: 56px; border-radius: 13px; border: 1px solid var(--line); font-size: 1em; font-weight: 700;
+  background: linear-gradient(170deg, rgba(244, 245, 240, 0.16), rgba(244, 245, 240, 0.06)); color: var(--mid);
+  transition: background 0.16s linear, color 0.16s linear, border-color 0.16s linear, transform 0.12s ease-out;
+}
+.sides span[data-on] { border-color: var(--hw-paper); background: var(--hw-paper); color: var(--hw-ink); }
+.sides span[data-on][data-long] { border-color: var(--hw-neon); background: linear-gradient(170deg, #dcff4d, var(--hw-neon) 60%); }
+.sign { margin-top: 12px; border-color: var(--hw-paper); background: linear-gradient(170deg, #ffffff, var(--hw-paper) 60%); color: var(--hw-ink); }
+.sign[data-down] { transform: scale(0.972); }
+
+/* the order, sealed: what comes back */
+.toast { left: 250px; top: 468px; width: 540px; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0 20px; padding: 14px 22px 14px 14px; opacity: 0; transition: opacity 0.2s linear; }
+.toast[data-on] { opacity: 1; }
+.tick { position: relative; grid-row: span 2; width: 78px; height: 78px; border-radius: 11px; background: var(--hw-neon); }
+.tick::before { content: ''; position: absolute; left: 50%; top: 50%; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; background: var(--hw-ink); }
+.tick::after { content: ''; position: absolute; left: 50%; top: 50%; width: 13px; height: 7px; margin: -6px 0 0 -7px; border-left: 2.5px solid var(--hw-neon); border-bottom: 2.5px solid var(--hw-neon); transform: rotate(-45deg); }
+.toast b { align-self: end; font-size: 1.12em; font-weight: 700; }
+.toast > span { align-self: start; margin-top: 5px; font-family: var(--font-mono); font-size: 0.86em; color: var(--mid); }
+.stages { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+.stages li { padding-top: 9px; border-top: 2px solid rgba(244, 245, 240, 0.2); font-family: var(--font-mono); font-size: 0.7em; letter-spacing: 0.05em; text-transform: uppercase; color: var(--dim); transition: color 0.2s linear, border-color 0.2s linear; }
+.stages li[data-on] { border-top-color: var(--hw-neon); color: var(--hw-paper); }
+
+/* ---------------- the positions, and what the network has of them */
+.book { left: 44px; top: 56px; width: 720px; padding: 20px 26px 22px; }
+.book .tabs { margin: 0 -26px; padding: 0 26px; }
+.table { display: grid; grid-template-columns: 1.45fr 0.8fr 0.7fr 1fr 1.05fr; margin-top: 6px; }
+.table > span { padding: 15px 0; border-bottom: 1px solid rgba(244, 245, 240, 0.12); font-family: var(--font-mono); font-size: 1em; white-space: nowrap; }
+.table > span[data-head] { padding: 16px 0 12px; font-size: 0.7em; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+.table > span[data-last] { border-bottom: 0; }
+/* a value, and the bar the network gets in its place */
+.cell { position: relative; display: inline-block; }
+.cell b { font-weight: 400; transition: opacity 0.22s linear; }
+.cell b[data-neon] { color: var(--hw-neon); }
+.cell i { position: absolute; left: 0; right: -4px; top: 50%; height: 0.82em; margin-top: -0.41em; border-radius: 3px; background: var(--hw-neon); transform: scaleX(0); transform-origin: 0 50%; transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
+.cell[data-sealed] b { opacity: 0; }
+.cell[data-sealed] i { transform: none; }
+.sees { left: 400px; top: 420px; width: 440px; padding: 22px 26px 24px; }
+.sees p { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-top: 15px; font-size: 0.96em; color: var(--mid); }
+.sees p:first-child { margin-top: 0; }
+.sees code { font-family: var(--font-mono); font-size: 0.98em; color: var(--hw-paper); }
+.proof { justify-content: flex-start !important; gap: 12px !important; padding-top: 16px; border-top: 1px solid rgba(244, 245, 240, 0.14); font-weight: 700; color: var(--dim) !important; transition: color 0.25s linear; }
+.proof i { position: relative; width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(244, 245, 240, 0.3); transition: box-shadow 0.25s linear, background 0.25s linear; }
+.proof i::after { content: ''; position: absolute; left: 7px; top: 7.5px; width: 9px; height: 5px; border-left: 2px solid var(--hw-ink); border-bottom: 2px solid var(--hw-ink); transform: rotate(-45deg); opacity: 0; transition: opacity 0.2s linear; }
+.proof[data-on] { color: var(--hw-neon) !important; }
+.proof[data-on] i { background: var(--hw-neon); box-shadow: none; }
+.proof[data-on] i::after { opacity: 1; }
+
+/* ---------------- closing a position: what it made, and where it goes */
+.sheet { left: 60px; top: 50px; width: 600px; padding: 24px 28px 26px; }
+.sheet p { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.sheetHead b { font-size: 1.2em; font-weight: 700; }
+.sheetHead span { font-family: var(--font-mono); font-size: 0.8em; color: var(--dim); }
+.sheetRow { margin-top: 18px !important; padding-top: 16px; border-top: 1px solid rgba(244, 245, 240, 0.14); font-size: 0.96em; color: var(--mid); }
+.sheetRow b { font-family: var(--font-mono); font-size: 1.06em; font-weight: 400; color: var(--hw-paper); }
+.sheetRow b[data-neon] { color: var(--hw-neon); }
+.sheetSum { margin-top: 20px !important; font-size: 0.96em; color: var(--mid); }
+.sheetSum strong { font-size: 3.1em; font-weight: 600; line-height: 1; letter-spacing: -0.045em; color: var(--hw-paper); font-variant-numeric: tabular-nums; }
+/* a figure while it is still moving: it flares, as figures on a screen do */
+.sheet [data-hot], .cell b[data-hot] { text-shadow: 0 0 14px rgba(255, 255, 255, 0.55); }
+.options { position: absolute; left: 190px; top: 392px; width: 640px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.option { position: relative; display: grid; gap: 9px; padding: 20px 20px 22px 58px; border-radius: 15px; border: 1px solid var(--line); background: linear-gradient(165deg, #363733, #262724 70%); transition: border-color 0.2s linear, box-shadow 0.2s linear; }
+.option::before { content: ''; position: absolute; left: 20px; top: 21px; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--mid); transition: box-shadow 0.2s linear; }
+.option b { font-size: 1.06em; font-weight: 700; }
+.option span { font-family: var(--font-mono); font-size: 0.84em; color: var(--mid); }
+.option[data-on] { border-color: var(--hw-neon); box-shadow: inset 0 0 0 1px var(--hw-neon); }
+.option[data-on]::before { box-shadow: inset 0 0 0 7px var(--hw-neon); }
+.confirm { grid-column: 1 / -1; display: grid; place-items: center; height: 58px; border-radius: 14px; background: linear-gradient(170deg, #dcff4d, var(--hw-neon) 60%); color: var(--hw-ink); font-size: 1.04em; font-weight: 700; transition: transform 0.12s ease-out; }
+.confirm[data-down] { transform: scale(0.975); }
+
+/* ---------------- the phones: two screens of the mobile app, side by side on the table */
+.phones { display: flex; gap: 70px; position: absolute; left: 70px; top: 40px; font-size: 21px; }
+.phones > div { box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.34), 0 0 0 7px #2c2d2a, 0 0 0 8px rgba(244, 245, 240, 0.26); background: #151614; }
+
+/* a phone-sized screen, or a reader who does not want motion: one copy, all of it sharp */
+@media (max-width: 760px), (prefers-reduced-motion: reduce) {
+  .far { display: none; }
+  .near { -webkit-mask-image: none; mask-image: none; }
+}

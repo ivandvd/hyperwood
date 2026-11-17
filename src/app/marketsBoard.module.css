@@ -1,0 +1,55 @@
+/* The Markets screen (MarketsBoard.tsx): the tickers on the left, the picked market and its chart on the right.
+   Ink and hairlines; the picked ticker is Neon. It answers to its own width (whoever shows it makes its box a
+   container named "board"): narrow, the chart stands above the tickers. */
+.board {
+  --line: rgba(244, 245, 240, 0.09);
+  --dim: rgba(244, 245, 240, 0.46);
+  --mid: rgba(244, 245, 240, 0.74);
+  /* (--index: how broad the tickers' column is: whoever shows the screen may set it) */
+  display: grid; grid-template-columns: var(--index, 344px) minmax(0, 1fr); height: 100%; min-height: 0;
+  color: var(--hw-paper); font-family: var(--font-text); text-align: left;
+}
+.label { margin: 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+
+/* ---------------- the tickers */
+.index { display: flex; flex-direction: column; gap: 22px; min-height: 0; padding: 22px 18px 20px 20px; border-right: 1px solid var(--line); }
+.group ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 10px 0 0; padding: 0; list-style: none; }
+.group button {
+  position: relative; display: block; width: 100%; height: 34px; padding: 0 0 0 14px; border: 0; background: none; text-align: left; cursor: pointer;
+  font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.02em; color: var(--mid); transition: color 0.15s linear;
+}
+.group button::before {
+  content: ''; position: absolute; left: 0; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%;
+  background: var(--hw-neon); opacity: 0; transform: scale(0.4); transition: opacity 0.15s linear, transform 0.25s var(--ease-out);
+}
+.group button:hover { color: var(--hw-paper); }
+.group button[aria-pressed='true'] { color: var(--hw-neon); }
+.group button[aria-pressed='true']::before { opacity: 1; transform: none; }
+.group button:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: -2px; border-radius: 4px; }
+
+/* ---------------- the picked market */
+.detail { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0; padding: 20px 22px 14px 28px; }
+.head { display: flex; align-items: baseline; gap: 14px; }
+.head h3 { margin: 0; font-family: var(--font-display); font-size: 46px; font-weight: 600; line-height: 1; letter-spacing: -0.045em; }
+.head p { margin: 0; font-size: 15px; color: var(--mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.head .label { margin-left: auto; white-space: nowrap; }
+.chart { min-height: 0; margin-top: 14px; }
+
+/* ---------------- narrow: the chart above, the tickers under it in more columns */
+@container board (max-width: 860px) {
+  .board { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .detail { grid-row: 1; padding: 20px 18px 12px; }
+  .chart { height: clamp(240px, 52cqw, 380px); }
+  .index { padding: 18px 18px 20px; border-right: 0; border-top: 1px solid var(--line); }
+  .group ul { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@container board (max-width: 560px) {
+  .head h3 { font-size: 34px; }
+  .head p { font-size: 13.5px; }
+  .head .label { display: none; }
+  .group ul { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .group button { height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .group button, .group button::before { transition: none; }
+}

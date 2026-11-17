@@ -1,5 +1,8 @@
-/* The journey: a tall section, and in it the stage that stays on screen. */
-.journey { height: var(--journey-height); position: relative; z-index: 2; }
+/* The journey: a tall section, and in it the stage that stays on screen. After its last picture it holds one
+   screen more (--journey-hold): what follows the journey comes up over the river then. */
+.journey { height: calc(var(--journey-height) + var(--journey-hold)); position: relative; z-index: 2; }
+/* (the length of the hold, for timeline.ts to read) */
+.hold { position: absolute; left: 0; top: 0; width: 0; height: var(--journey-hold); visibility: hidden; pointer-events: none; }
 
 /* The picture is dark wherever something is written: type on the stage is white, the brand's marks Neon.
    (The header takes the same two: header.module.css.) */
@@ -12,6 +15,9 @@
 
 /* (until its first picture is drawn the canvas is left out: the stage's own Ink shows, which is what the first
    picture is) */
+/* While the journey holds, its picture and its words go out into the page's Ink (--dusk: timeline.ts), so the
+   stage can leave unseen under what has come up over it. */
+.stage::after { content: ''; position: absolute; inset: 0; z-index: 4; background: var(--hw-ink); opacity: var(--dusk, 0); pointer-events: none; }
 .light { position: absolute; inset: 0; width: 100%; height: 100%; display: block; visibility: hidden; }
 .journey[data-drawn] .light { visibility: visible; }
 /* Without WebGL nothing is drawn: the stage stays Ink, the hero shows the symbol and the wordmark as they are

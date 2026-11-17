@@ -1,50 +1,58 @@
 /**
- * A preview of the Hyperwood web app: markets, a chart, the order ticket and the account's positions, with
- * sample data (markets.ts). It is a picture of the product that can be touched: a market can be picked, the
- * side switched, an order signed.
+ * The Hyperwood web app, as one window: a bar with its tabs, and under it the Trade screen (markets, a chart,
+ * the order ticket, the account's positions) or the Markets screen (MarketsBoard.tsx: live charts).
+ *
+ * The Trade screen is a designed scene (markets.ts says what its figures are). It can be touched: a market
+ * picked, the side switched, an order signed. Where the page tells its story by the scroll (landing/Film.tsx)
+ * the scene is `scripted`: the page moves it, and it does not answer the pointer.
  *
  * `view` is whose eyes it is seen through. "yours": everything, as the owner sees it. "network": what the
  * papers say stays inside the protected engine (market, direction, size, leverage, price, PnL) is sealed, and
  * what is left is what the network has: an encrypted instruction, commitments and a proof.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { markets, money, percent, series } from './markets'
+import { marketOf, markets, money, percent, series } from './markets'
+import { MarketsBoard } from './MarketsBoard'
+import { book, closed } from './scene'
 import { Sealed } from './Sealed'
 import s from './appPreview.module.css'
 
 export type View = 'yours' | 'network'
-
-/** What the account holds in the preview: the market, the side, how many units and the entry price. */
-const book = [
-  { ticker: 'NVDA', side: 'Long', size: 12, entry: 178.4 },
-  { ticker: 'SPX', side: 'Short', size: 0.2, entry: 6871 },
-] as const
-
-/** The first position, closed at its mark: what the payout sheet shows (margin at five times leverage). */
-const closed = (() => {
-  const p = book[0]
-  const mark = markets.find((m) => m.ticker === p.ticker)!.price
-  const pnl = (mark - p.entry) * p.size
-  return { ...p, mark, pnl, equity: (p.entry * p.size) / 5 + pnl }
-})()
+export type Tab = 'trade' | 'markets'
 
 /** An order's life, as the architecture paper names its stages. */
 const stages = ['Sealed', 'Accepted', 'Matched', 'Proven']
+const tabs = ['Trade', 'Markets', 'Portfolio', 'Trackers']
 
 const W = 640
 const H = 250
 
-/** `live`: the section has been seen, so the chart may draw itself in. `sheet`: a position is being closed,
- *  and the sheet that asks where its proceeds go is up. */
-export function AppPreview({ view, live = true, sheet = false }: { view: View; live?: boolean; sheet?: boolean }) {
+interface Props {
+  view: View
+  /** The chart may draw itself in (the window has been seen). */
+  live?: boolean
+  /** A position is being closed: the sheet that asks where its proceeds go is up. */
+  sheet?: boolean
+  /** Which screen the window shows. The Markets screen is only there for whoever asks for it (`board`). */
+  tab?: Tab
+  board?: boolean
+  /** The Markets screen may fetch its live chart. */
+  charts?: boolean
+  /** The page plays the scene: how far the order has come (-1 not signed, 0 to 3 its stages). */
+  order?: number
+  scripted?: boolean
+}
+
+export function AppPreview({ view, live = true, sheet = false, tab = 'trade', board = false, charts = false, order, scripted = false }: Props) {
   const [picked, setPicked] = useState(0)
   const [side, setSide] = useState<'Long' | 'Short'>('Long')
-  const [stage, setStage] = useState(-1)
+  const [signed, setSigned] = useState(-1)
   const timers = useRef<number[]>([])
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), [])
 
   const market = markets[picked]
   const up = market.change >= 0
+  const stage = order ?? signed
   const chart = useMemo(() => {
     const line = series(market)
     const low = Math.min(...line)
@@ -57,31 +65,32 @@ export function AppPreview({ view, live = true, sheet = false }: { view: View; l
       d += `C${mid},${y(line[i - 1]).toFixed(1)} ${mid},${y(line[i]).toFixed(1)} ${x(i).toFixed(1)},${y(line[i]).toFixed(1)}`
     }
     const marks = [0, 1, 2, 3].map((k) => low + ((high - low) * k) / 3)
-    return { d, area: `${d}L${W},${H}L0,${H}Z`, end: y(line[line.length - 1]), marks, y }
+    return { d, end: y(line[line.length - 1]), marks, y }
   }, [market])
 
   /** Signing walks the order through its stages, then lets it rest. */
   const sign = () => {
     timers.current.forEach((t) => window.clearTimeout(t))
-    setStage(0)
+    setSigned(0)
     timers.current = [
-      window.setTimeout(() => setStage(1), 600),
-      window.setTimeout(() => setStage(2), 1400),
-      window.setTimeout(() => setStage(3), 2400),
-      window.setTimeout(() => setStage(-1), 5600),
+      window.setTimeout(() => setSigned(1), 600),
+      window.setTimeout(() => setSigned(2), 1400),
+      window.setTimeout(() => setSigned(3), 2400),
+      window.setTimeout(() => setSigned(-1), 5600),
     ]
   }
 
   return (
-    <div className={s.app} data-view={view} data-live={live ? '' : undefined} role="group" aria-label="Preview of the Hyperwood web app, with sample data">
+    <div className={s.app} data-view={view} data-tab={tab} data-live={live ? '' : undefined} role="group" aria-label="The Hyperwood web app">
       <header className={s.bar0}>
         <span className={s.logo} aria-hidden="true" />
-        <nav className={s.tabs} aria-label="Preview sections">
-          <span data-on="">Trade</span>
-          <span>Markets</span>
-          <span>Portfolio</span>
-          <span>Trackers</span>
-        </nav>
+        <p className={s.tabs}>
+          {tabs.map((name) => (
+            <span key={name} data-on={name.toLowerCase() === tab ? '' : undefined}>
+              {name}
+            </span>
+          ))}
+        </p>
         <span className={s.pill}>
           <i aria-hidden="true" />
           Private account
@@ -89,7 +98,7 @@ export function AppPreview({ view, live = true, sheet = false }: { view: View; l
         <span className={s.wallet}>0x71C4…9A3f</span>
       </header>
 
-      <aside className={s.list} data-part="list" aria-label="Markets">
+      <aside className={s.list} data-part="list" aria-label="Markets" inert={scripted}>
         <p className={s.label}>Markets</p>
         <ul>
           {markets.map((m, i) => (
@@ -140,16 +149,9 @@ export function AppPreview({ view, live = true, sheet = false }: { view: View; l
         <div className={s.chart} data-part="chart">
           {/* (a new market draws its line in from the left: the key makes it a new picture) */}
           <svg key={`line-${market.ticker}`} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <linearGradient id="app-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="var(--hw-neon)" stopOpacity="0.22" />
-                <stop offset="1" stopColor="var(--hw-neon)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
             {chart.marks.map((v) => (
               <line key={v} x1="0" x2={W} y1={chart.y(v)} y2={chart.y(v)} className={s.grid} />
             ))}
-            <path d={chart.area} fill="url(#app-fill)" />
             <path d={chart.d} className={s.line} />
           </svg>
           <ol className={s.scale} aria-hidden="true">
@@ -184,7 +186,7 @@ export function AppPreview({ view, live = true, sheet = false }: { view: View; l
             </thead>
             <tbody>
               {book.map((p) => {
-                const mark = markets.find((m) => m.ticker === p.ticker)!.price
+                const mark = marketOf(p.ticker).price
                 const pnl = (mark - p.entry) * p.size * (p.side === 'Long' ? 1 : -1)
                 return (
                   <tr key={p.ticker}>
@@ -222,7 +224,7 @@ export function AppPreview({ view, live = true, sheet = false }: { view: View; l
         </div>
       </section>
 
-      <aside className={s.ticket} data-part="ticket" aria-label="Order">
+      <aside className={s.ticket} data-part="ticket" aria-label="Order" inert={scripted}>
         <div className={s.sides}>
           {(['Long', 'Short'] as const).map((name) => (
             <button key={name} type="button" data-on={side === name ? '' : undefined} data-long={name === 'Long' ? '' : undefined} onClick={() => setSide(name)}>
@@ -313,6 +315,12 @@ export function AppPreview({ view, live = true, sheet = false }: { view: View; l
         </div>
         <span className={s.confirm}>Confirm payout</span>
       </div>
+
+      {board && (
+        <div className={s.board} aria-hidden={tab !== 'markets'} inert={tab !== 'markets'}>
+          <MarketsBoard live={charts} />
+        </div>
+      )}
     </div>
   )
 }

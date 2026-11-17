@@ -1,5 +1,5 @@
 /**
- * Every word of the landing page (index.html): the journey, and the sections after it as they are built.
+ * Every word of the landing page (index.html): the journey, and what follows it.
  * The tagline and the line under it are the approved ones, word for word. Everything else follows the
  * architecture paper ("Hyperwood: Architecture and Core Execution") and is a draft for approval.
  * The long read is the Architecture page (content.ts, content.sections.ts).
@@ -40,42 +40,42 @@ export const home = {
   launch: { label: 'Launch App', href: '#app' },
 
   /* ------------------------------------------------------------ after the journey (all of it a draft for approval)
-     What the papers say Hyperwood does, as capabilities: no dates, as the client asked. Figures from the papers
-     are targets and are labelled so. Markets and prices in the previews are examples (app/markets.ts). */
+     What the papers say Hyperwood does, as capabilities: no dates, as the client asked. The speed figures are
+     the papers' targets and are named so. (landing/After.tsx lays it out.) */
 
-  /** The app: one window, and four things said about it as the scroll moves through it. */
-  app: {
-    label: 'The app',
-    beats: [
-      { tag: 'Your screen', line: 'Everything on your screen.', body: 'Markets, a chart, your order and your positions. The whole trade, where you can see it.' },
-      { tag: 'The order', line: 'Long or short.', body: 'Pick a stock or an index. Set the size, the leverage and a limit price. Your wallet signs an encrypted instruction.' },
-      { tag: 'The network', line: 'Nothing on theirs.', body: 'The network orders your instruction and verifies its proof. Market, direction, size, entry and PnL stay sealed.' },
-      { tag: 'The payout', line: 'Cash, or the stock.', body: 'When a position closes, keep the collateral or convert the proceeds into an approved equity tracker.' },
-    ],
-    switchLabel: 'Whose view',
-    views: { yours: 'Your view', network: 'Network view' },
-    caption: 'A preview of the web app, with sample data.',
-  },
+  /** The app, as three things it does. Each is said in a line with a short text, and shown by a short film of
+   *  the app doing it (landing/reel). `film` says what the film shows, for those who cannot see it. */
+  app: [
+    {
+      line: 'Long or short.',
+      body: 'On stocks and indices, with the size, leverage and limit price you set.',
+      film: 'The order ticket: the size is set, the side is chosen, the order is signed. It comes back sealed, accepted, matched and proven.',
+    },
+    {
+      line: 'Private positions.',
+      body: 'Market, direction, size, entry and PnL stay sealed. The network gets a commitment and a proof.',
+      film: 'The positions table: every value turns into a bar. Then what reaches the network: two commitments and a verified proof.',
+    },
+    {
+      line: 'Cash, or the stock.',
+      body: 'When a position closes, keep the collateral or convert it into an equity tracker.',
+      film: 'A position is closed: its profit and equity count up. Then the payout is chosen: the equity tracker, in place of collateral.',
+    },
+  ],
 
   markets: {
-    label: 'Markets',
     line: 'Stocks and indices.',
-    body: 'Each market is a perpetual on a stock price or an equity index, with its own sessions, funding and risk limits.',
-    facts: ['Trading sessions, halts and corporate actions are part of every market.', 'Operators and users list markets through one registry, with a bond in ETH.'],
-    sides: ['Long', 'Short'],
-    caption: 'Example markets with sample prices.',
+    body: 'Perpetuals on stock prices and equity indices, each with its own sessions and risk limits. Listing a market takes a bond in ETH.',
   },
 
   mobile: {
-    label: 'Mobile',
     line: 'In your pocket.',
     body: 'Open, manage and close positions from your phone. Encrypted receipts, a private history and key recovery keep the account yours.',
-    screens: ['Preview of the mobile app: opening a trade', 'Preview of the mobile app: closing a position and choosing the payout'],
-    caption: 'A preview of the mobile app, with sample data.',
+    screens: ['The mobile app: opening a trade', 'The mobile app: closing a position and choosing the payout'],
+    film: 'Two phones side by side: a trade being opened on one, a position being closed and its payout chosen on the other.',
   },
 
   network: {
-    label: 'The network',
     line: 'A Layer 3 with ETH for gas.',
     body: 'A general purpose EVM network with a confidential trading core. It settles to Robinhood Chain, and through it to Ethereum.',
     layers: [
@@ -83,13 +83,15 @@ export const home = {
       ['L2', 'Robinhood Chain', 'Parent rollup contracts and bridge'],
       ['L1', 'Ethereum', 'Base settlement and data availability'],
     ],
-    target: 'Target',
-    targets: [
-      ['250', 'ms', 'Blocks'],
-      ['<1', 's', 'Order feedback'],
-      ['5–12', 's', 'To a verified proof'],
-    ],
-    note: 'These figures are development targets, not measurements.',
+    /** (the papers give these as development targets, not measurements: the column says so once) */
+    targets: {
+      label: 'Targets',
+      list: [
+        ['250', 'ms', 'Blocks'],
+        ['<1', 's', 'Order feedback'],
+        ['5–12', 's', 'To a verified proof'],
+      ],
+    },
     more: { label: 'Read the architecture', href: 'architecture/' },
   },
 
@@ -107,7 +109,7 @@ export const home = {
       'Hyperwood is a proposed network. Nothing on this page describes a live deployment, a guaranteed fill or a guaranteed peg.',
       'Markets provide synthetic price exposure. They do not establish shareholder ownership or issuer permission.',
       'Privacy holds within a defined threat model. Transaction timing and the sender can still be visible.',
-      'Deployment on Robinhood Chain does not establish an affiliation with Robinhood. Markets and prices in the previews are samples.',
+      'Deployment on Robinhood Chain does not establish an affiliation with Robinhood.',
     ],
     rights: '© 2026 Hyperwood',
   },

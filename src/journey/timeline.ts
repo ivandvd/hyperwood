@@ -80,10 +80,12 @@ export interface JourneyParts {
   closing: HTMLElement
   /** Where the gate is drawn. */
   door: HTMLElement
+  /** As tall as the journey holds its last picture (journey.module.css). */
+  hold: HTMLElement
 }
 
 export function startJourney(parts: JourneyParts): () => void {
-  const { journey, stage, canvas, header, intro, lines, hero, sculpture, word, closing, door } = parts
+  const { journey, stage, canvas, header, intro, lines, hero, sculpture, word, closing, door, hold } = parts
   const J = config.journey
   const B = J.beats
   const L = J.lids
@@ -414,12 +416,23 @@ export function startJourney(parts: JourneyParts): () => void {
   let active = true
   let raf = 0
   let drawnS = -1
-  const progress = () => clamp(-journey.getBoundingClientRect().top / Math.max(1, journey.offsetHeight - innerHeight))
+  /** The journey runs over all of its height but the last stretch (`held`, px). Over that stretch its last
+   *  picture stays, and goes out: `duskAim` runs 0 to 1 there. */
+  let held = 0
+  let duskAim = 0
+  let dusk = 0
+  const progress = () => {
+    const run = Math.max(1, journey.offsetHeight - innerHeight - held)
+    const gone = -journey.getBoundingClientRect().top
+    duskAim = held > 0 ? clamp((gone - run) / held) : 0
+    return clamp(gone / run)
+  }
   /** Where the page has put the three boxes, as the shader counts: in screen heights, across from the middle
    *  of the stage and up from its bottom. (Layout offsets: the blocks' transforms do not move them.) */
   const place = { body: [0, 0.59, 0.43], gate: [0.095, 0.9, 0.555], gateX: 0, room: Infinity, free: 1, clear: 0 }
 
   function measure() {
+    held = hold.offsetHeight
     target = progress()
     const sw = Math.max(1, stage.clientWidth)
     const sh = Math.max(1, stage.clientHeight)
@@ -648,6 +661,14 @@ export function startJourney(parts: JourneyParts): () => void {
     current += (target - current) * (reduced.matches ? 1 : 1 - Math.exp(-dt / J.ease))
     if (Math.abs(target - current) < 0.00002) current = target
     const s = current
+    // the light stays while what follows comes up over it, then goes out: the stage is Ink before it leaves
+    if (dusk !== duskAim) {
+      dusk = reduced.matches ? duskAim : dusk + (duskAim - dusk) * (1 - Math.exp(-dt / 70))
+      if (Math.abs(duskAim - dusk) < 0.0005) dusk = duskAim
+      stage.style.setProperty('--dusk', smooth(0.1, 0.66, dusk).toFixed(3))
+      // (the closing words go first: see below)
+      drawnS = -1
+    }
     const follow = 1 - Math.exp(-dt / 95)
     pointer.x += (pointer.aimX - pointer.x) * follow
     pointer.y += (pointer.aimY - pointer.y) * follow
@@ -711,7 +732,9 @@ export function startJourney(parts: JourneyParts): () => void {
       hero.style.transform = heroOut > 0 ? `scale(${(1 + heroOut * 0.025).toFixed(4)})` : ''
       // the closing words come out from the gate (journey.module.css moves them by --in)
       const closingIn = smooth(beats.closing[0], beats.closing[1], s)
-      closing.style.opacity = String(closingIn)
+      // (when the journey holds, its words go out at once, before the river's light: other words come up
+      // over them)
+      closing.style.opacity = String(closingIn * (1 - smooth(0.02, 0.3, dusk)))
       closing.style.setProperty('--in', closingIn.toFixed(4))
       const headerIn = smooth(beats.header[0], beats.header[1], s)
       header.style.opacity = String(headerIn)

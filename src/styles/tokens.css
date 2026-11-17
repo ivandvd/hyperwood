@@ -147,6 +147,9 @@
   /* a hundredth of the stage's height: the small viewport's, where the browser knows it (below) */
   --stage-1: 1vh;
   --journey-height: 740vh;
+  /* after its last picture the journey holds for this much longer: what follows it comes up over the river
+     in that time, and the river's light goes out (journey.module.css, timeline.ts) */
+  --journey-hold: 100vh;
 
   --type-intro: clamp(54px, 9.4vw, 164px);
   --leading-intro: 0.9;
@@ -181,7 +184,7 @@
 }
 /* small-viewport units where the browser has them (phones: the toolbar does not stretch the journey) */
 @supports (height: 1svh) {
-  :root { --journey-height: 740svh; --stage-1: 1svh; }
+  :root { --journey-height: 740svh; --journey-hold: 100svh; --stage-1: 1svh; }
 }
 @media (min-width: 1800px) {
   :root {
