@@ -497,19 +497,20 @@ void main() {
   }
 
   // ---------------- the word: Neon, always the one colour. Light that falls on it shows in the glow around
-  // the letters, never in the letters themselves (the logo carries no effects)
+  // the letters, never in the letters themselves (the logo carries no effects).
+  // Only the glow is drawn here. The letters are the page's own: the wordmark as supplied, drawn by the
+  // browser over this picture at the screen's full sharpness (journey.module.css, .word). Drawn here they
+  // were only as sharp as this picture's pixels, and soft while they came into focus.
   float wordIn = ss( ${beat(T.word)}, s );
   float wordShown = wordIn * ( 1. - ss( 0., .5, leave ) ) * typeReady;
   if ( wordShown > .001 ) {
-    // (it comes into focus as it arrives)
-    vec2 word = texture2D( typeTex, uv, ( 1. - wordIn ) * 4.5 ).rg;
+    float glow = texture2D( typeTex, uv ).g;
     float spot = exp( -dot( ( uv - pointer ) * vec2( aspect, 1. ) / .26, ( uv - pointer ) * vec2( aspect, 1. ) / .26 ) ) * pointerActive;
     // with no pointer, a sheen passes over the letters now and then
     float passing = fract( time * .085 ) * 2.6 - .8;
     float sheen = exp( -pow( ( uv.x + ( uv.y - .5 ) * .35 - passing ) / .045, 2. ) ) * ( 1. - pointerActive ) * step( .001, time );
     float shine = clamp( spot + sheen * .85, 0., 1. );
-    result += cNeon * word.g * ( .1 + .42 * shine ) * wordShown;
-    result = mix( result, cNeon, clamp( word.r, 0., 1. ) * wordShown );
+    result += cNeon * glow * ( .1 + .42 * shine ) * wordShown;
   }
 
   // ---------------- the lids, over everything: Ink behind them until they have shut, the drop after

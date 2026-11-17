@@ -51,7 +51,9 @@
   /* the name is here to be read out: what is seen is the wordmark's own lettering */
   font-size: 1px; line-height: 1; color: transparent; overflow: hidden; white-space: nowrap; user-select: none;
 }
-.journey[data-shader] .sculpture, .journey[data-shader] .word { opacity: 0; }
+/* (where the shader draws: the body is its picture. The wordmark stays the page's own, sharp at any size
+   and on any screen; the shader lays only its glow round it) */
+.journey[data-shader] .sculpture { opacity: 0; }
 
 .heroLine {
   margin: var(--hero-line-gap) var(--edge) 0;

@@ -202,8 +202,9 @@ export function startJourney(parts: JourneyParts): () => void {
     g.uniform1f(u.markReady, 1)
   }
 
-  /** The type the shader lights: the wordmark (red) and a soft copy of it (green), drawn once per size at the
-   *  canvas's own pixels, where the page has laid the word's box. */
+  /** The glow the shader lays round the wordmark: a soft copy of it (green), drawn once per size at the
+   *  canvas's own pixels, where the page has laid the word's box. (The letters themselves are that box: the
+   *  wordmark as supplied, drawn by the browser.) */
   const typeCanvas = document.createElement('canvas')
   const typeContext = typeCanvas.getContext('2d')
   const drawType = () => {
@@ -229,11 +230,9 @@ export function startJourney(parts: JourneyParts): () => void {
     const wx = word.offsetLeft
     const wy = word.offsetTop + (word.offsetHeight - WORDMARK.height * k) / 2
     const shape = new Path2D(WORDMARK.d)
-    ctx.setTransform(sx * k, 0, 0, sy * k, sx * wx, sy * wy)
-    ctx.fillStyle = '#f00'
-    ctx.fill(shape, 'evenodd')
     // its soft copy: only the shadow of a copy drawn off the canvas lands on it
     const off = typeCanvas.width * 2
+    ctx.fillStyle = '#000'
     ctx.setTransform(sx * k, 0, 0, sy * k, sx * wx - off, sy * wy)
     ctx.shadowColor = '#0f0'
     ctx.shadowBlur = J.word.blur * 2 * Math.sqrt(sx * sy)
