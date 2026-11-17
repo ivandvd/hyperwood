@@ -67,6 +67,19 @@
      below them the gate opens out into the flow */
   --closing-line: calc(var(--door-top) + var(--door-height) * var(--closing-level) + var(--type-closing) * 0.36);
 }
+/* The gate and the river are the guide's picture, which the shader lays by this gate's box: so the gate
+   stands where the guide's doorway stands and has its measures (config.journey.picture). The picture is as
+   tall as the screen, or taller where the screen is wide (--art-h); the doorway's top is 30.9 hundredths
+   down, its breadth 0.136 of the picture's height, and the gate's foot 0.218 below its top. */
+.journey:not([data-wave]) {
+  --art-h: max(calc(100 * var(--stage-1)), 62.512vw);
+  --door-left: 49.7%;
+  --door-top: calc(30.9 * var(--stage-1));
+  --door-width: calc(0.136 * var(--art-h));
+  --door-height: calc(1.603 * var(--door-width));
+  --door-gap: calc(0.065 * var(--art-h));
+  --closing-level: 0.4;
+}
 /* the first course (?wave=old) keeps the words where they stood with it: level with the gate's middle, and
    closer to it */
 .journey[data-wave='old'] { --closing-level: 0.5; }
@@ -74,7 +87,7 @@
   .journey[data-wave='old'] { --door-gap: 48px; }
 }
 .door {
-  position: absolute; left: 50%; top: var(--door-top); width: var(--door-width); height: var(--door-height);
+  position: absolute; left: var(--door-left, 50%); top: var(--door-top); width: var(--door-width); height: var(--door-height);
   transform: translateX(-50%); visibility: hidden;
 }
 .journey[data-webgl='off'] .door {
@@ -95,12 +108,17 @@
 }
 .row { display: block; }
 .left {
-  right: calc(50% + var(--door-width) / 2 + var(--door-gap)); text-align: right;
+  right: calc(100% - var(--door-left, 50%) + var(--door-width) / 2 + var(--door-gap)); text-align: right;
   transform: translate3d(calc((1 - var(--in, 1)) * 22px), 0, 0);
 }
 .right {
-  left: calc(50% + var(--door-width) / 2 + var(--door-gap)); text-align: left;
+  left: calc(var(--door-left, 50%) + var(--door-width) / 2 + var(--door-gap)); text-align: left;
   transform: translate3d(calc((1 - var(--in, 1)) * -22px), 0, 0);
+}
+
+/* with the guide's picture the closing words come as the guide has them come: they rise */
+@media (min-aspect-ratio: 1001/1000) and (min-width: 561px) {
+  .journey:not([data-wave]) .left, .journey:not([data-wave]) .right { transform: translate3d(0, calc((1 - var(--in, 1)) * 20px), 0); }
 }
 
 /* too narrow for words beside the gate: the title stands above it, the notes beside it (the same step as
@@ -113,6 +131,12 @@
   .aside.left { transform: translate3d(calc((1 - var(--in, 1)) * 12px), -50%, 0); }
   .aside.right { transform: translate3d(calc((1 - var(--in, 1)) * -12px), -50%, 0); }
   .row { display: inline; }
+  /* with the guide's picture the gate opens out towards its foot: the notes stand beside its upper part,
+     where it is narrow, and closer to it */
+  .journey:not([data-wave]) { --door-gap: calc(0.036 * var(--art-h)); }
+  .journey:not([data-wave]) .aside { top: calc(var(--door-top) + var(--door-width) * 0.1); }
+  .journey:not([data-wave]) .aside.left { transform: translate3d(calc((1 - var(--in, 1)) * 12px), 0, 0); }
+  .journey:not([data-wave]) .aside.right { transform: translate3d(calc((1 - var(--in, 1)) * -12px), 0, 0); }
 }
 
 .note {

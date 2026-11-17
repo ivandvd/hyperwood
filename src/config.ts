@@ -626,6 +626,51 @@ export const config = {
         [-12.62, 11.59, 4.44],
       ] as [number, number, number][],
     },
+    /** The gate and the river as the guide draws them: one painted picture (its doorway, and the river that
+     *  runs out of it). It is laid by the gate's box, takes the screen over from the gate the shader draws,
+     *  is revealed from the gate downward and ripples below the gate, so the river runs. The numbers are the
+     *  guide's own. The page asks for the picture where the guide keeps it (`url`); if it does not come, the
+     *  traced wave above is drawn in its place.
+     *  `size`: the picture, in its own pixels. `arch`: its doorway, in picture heights up from the picture's
+     *  bottom edge: where the arch's round begins, and how large the round is (its top lies at their sum).
+     *  The gate's box (tokens.css) has the same measures, so the gate and the picture's doorway are one.
+     *  `mix`: when the picture takes over, at the gate's foot. `out`: further from the foot it takes over
+     *  later, by this much of the journey for every gate half-width, and by no more than `out[1]`: so the
+     *  light shows under the foot and spreads (0 is the guide's way: all of it at once).
+     *  `arrive`: when the river is revealed, from `front[0]` down to
+     *  `front[1]` (picture heights, up from its bottom edge), `feather` soft. `copy`: when the closing words
+     *  come.
+     *  `light`: how the picture's colours are read as the brand's one light. It is the picture's lightness
+     *  that is read, in a straight line: nothing below `light[0]`, full Neon from `light[1]` (its pale body
+     *  is about 0.79 light, its orange doorway 0.7), and `light[2]` bends the line (1 is straight; more is
+     *  a closer glow, less a fuller one). Keep it near straight: the picture's softness is what makes the
+     *  pour a body of light and lets it come in as a glow that swells. (A steep reading, a smooth step up
+     *  to 0.56, made a flat shape with a hard edge of it: it swallowed the gate and came in all at once.)
+     *  `tone`: a second tone where the picture runs cool (the bands along the river's edges): how much
+     *  deeper, and between which measures of blue over red it comes in. `crown`: the gate's crown is this
+     *  much deeper than its foot and the pour (the guide's doorway is orange above, pale where it pours),
+     *  falling evenly between these two heights of the gate (0 its foot, 1 its top).
+     *  `rim`: the glow about the gate the shader draws before the picture takes over, made like the
+     *  picture's own: how strong at the gate's edge, how far it reaches, and over how much of the gate's
+     *  height above its foot it thins out to nothing (both in gate half-widths). */
+    picture: {
+      url: 'https://assets.uberdesigner.ai/melune/portal-river.webp',
+      size: [2752, 1536] as [number, number],
+      arch: [0.71, 0.068] as [number, number],
+      mix: [0.855, 0.88] as [number, number],
+      out: [0.005, 0.02] as [number, number],
+      arrive: [0.88, 0.96] as [number, number],
+      front: [0.48, -0.2] as [number, number],
+      feather: 0.12,
+      copy: [0.88, 0.96] as [number, number],
+      light: [0.02, 0.68, 1] as [number, number, number],
+      crown: [0.14, 0.3, 0.8] as [number, number, number],
+      tone: [0.1, 0.12, 0.38] as [number, number, number],
+      rim: [0.45, 0.178, 0.6] as [number, number, number],
+      /** How much of the picture's breadth, at either side, is drawn out where the ripple would reach past
+       *  its edge (a wide screen's bottom corners). */
+      margin: 0.03,
+    },
     /** When things come and go, in journey progress. The page and the shader both read these.
      *    note      the scroll note goes
      *    introOut  the opening words go (the lids, above, have nearly shut)

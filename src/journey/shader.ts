@@ -37,6 +37,7 @@ const W = config.journey.wave
 /** The most pieces a course has: the traced wave's. (The first course has fewer; its points beyond its last
  *  lie on its last and give nothing.) */
 const MOST = Math.max(F.pieces, W.pieces)
+const PT = config.journey.picture
 /** A beat as the two ends of a smoothstep. */
 const beat = (b: readonly [number, number]) => `${f(b[0])}, ${f(b[1])}`
 
@@ -64,6 +65,13 @@ uniform vec3 course[${MOST + 1}];
 // and how many pieces it has
 uniform float traced;
 uniform float pieces;
+// the gate's middle, across from the middle of the screen (screen heights)
+uniform float gateX;
+// whether one of the two currents above is drawn (1) or the guide's picture is (0); the picture, and how far
+// it has come in (0 until the page has it)
+uniform float flow;
+uniform float picture;
+uniform sampler2D portalTex;
 uniform vec3 cInk;
 uniform vec3 cNeon;
 uniform vec3 cHot;
@@ -192,8 +200,8 @@ void main() {
   vec2 lying = ( turn( -.05 ) * o ) / cos( turned );
   float markD = mix( 1., ( markField( lying ).y + length( max( abs( lying ) - vec2( 1.2, .6 ), 0. ) ) ) * body.z, markReady );
   // the gate's outline: an arch, its shaft, cut off at the foot
-  vec2 archAt = vec2( 0., gate.y - gate.x );
-  float gateD = max( length( vec2( a.x, max( a.y - archAt.y, 0. ) ) ) - gate.x, gate.z - a.y );
+  vec2 archAt = vec2( gateX, gate.y - gate.x );
+  float gateD = max( length( vec2( a.x - gateX, max( a.y - archAt.y, 0. ) ) ) - gate.x, gate.z - a.y );
 
   // ---------------- the shape of light. A drop; the mark runs out of it (what of the mark lies within "run"
   // of the drop's middle), while the drop itself dwindles. Later the same backwards, and the drop rises and
@@ -221,11 +229,16 @@ void main() {
     shape = mix( gathered, gateD, square );
     flatShown = ss( ${f(T.heroOut[1] - 0.008)}, ${f(T.heroOut[1])}, s );
   }
-  float riverIn = ss( ${f(T.river[0] - 0.01)}, ${f(T.river[0] + 0.015)}, s );
+  float riverIn = ss( ${f(T.river[0] - 0.01)}, ${f(T.river[0] + 0.015)}, s ) * flow;
   // its light on the air around it
   float outline = max( mix( markD, shape, flatShown ), 0. );
-  // (the gate glows more than the mark did: a rim of the deeper green all round it)
-  float halo = exp( -outline / .028 ) * mix( .21, .5, square ) + exp( -outline / .16 ) * mix( .07, .1, square );
+  // (the gate glows more than the mark did: a rim of the deeper green all round it. Where the guide's picture
+  // is to take over, the gate comes to stand as the picture's doorway does: with a close glow and no haze)
+  float tight = square * ( 1. - flow );
+  float halo = exp( -pow( outline / mix( .028, gate.x * ${f(PT.rim[1])}, tight ), mix( 1., 1.5, tight ) ) ) * mix( mix( .21, .5, square ), ${f(PT.rim[0])}, tight )
+    + exp( -outline / .16 ) * mix( .07, .1, square ) * ( 1. - tight );
+  // (and, as the guide's doorway, its glow thins out towards its closed foot: none at the foot's corners)
+  halo *= mix( 1., ss( gate.z, gate.z + gate.x * ${f(PT.rim[2])}, a.y ), tight );
   vec3 result = cInk + cNeon * halo * max( flatShown, bodyShown );
   if ( flatShown > .001 ) {
     // (once the current runs, the gate's lower half softens into it: its edge is as soft as the current's
@@ -234,15 +247,16 @@ void main() {
     float crisp = 1.2 / res.y * mix( 1., 2.2, square );
     float inside = 1. - ss( -crisp, crisp, shape );
     // (only its sides soften: its foot stays whole, under the current)
-    float sides = length( vec2( a.x, max( a.y - archAt.y, 0. ) ) ) - gate.x;
+    float sides = length( vec2( a.x - gateX, max( a.y - archAt.y, 0. ) ) ) - gate.x;
     float soft = mix( crisp, gate.x * .3, melting );
     // (and its foot fades downward into the current, so no corner shows where the current has turned away)
     float fade = mix( crisp, gate.x * .7, riverIn );
     inside = mix( inside, ( 1. - ss( -soft, soft, sides ) ) * ss( gate.z - fade, gate.z + crisp, a.y ), step( .001, riverIn ) );
     // Neon. As the gate it is full Neon at the threshold and a shade deeper under the arch: the brand's own
-    // mix with Ink, nothing paler than Neon
+    // mix with Ink, nothing paler than Neon. (Where the guide's picture is to take over, the fall is the
+    // picture stage's own: see below.)
     float up = clamp( ( a.y - gate.z ) / max( gate.y - gate.z, .001 ), 0., 1. );
-    vec3 door = mix( cInk, cNeon, 1. - .12 * ss( .55, 1., up ) );
+    vec3 door = mix( cInk, cNeon, 1. - mix( ${f(PT.crown[0])} * ss( ${f(PT.crown[1])}, ${f(PT.crown[2])}, up ), .12 * ss( .55, 1., up ), flow ) );
     result = mix( result, mix( cNeon, door, ss( .3, 1., pour ) ), inside * flatShown );
   }
 
@@ -250,7 +264,7 @@ void main() {
   if ( stand > .001 && a.y < gate.z + .012 ) {
     // the floor: 1 away at the gate's foot, nearer and nearer down the screen
     float away = ${f(F.rise)} / max( gate.z + ${f(F.rise)} - a.y, .001 );
-    float side = a.x * away;
+    float side = ( a.x - gateX ) * away;
     float run = 1. - away;
     // (the floor begins a hair above the gate's foot, so no seam shows between the two)
     float below = ss( -.0022, .0022, gate.z + .003 - a.y );
@@ -260,7 +274,7 @@ void main() {
     float fan = max( run, 0. );
     float spill = exp( -pow( side / ( gate.x * ( 1.6 + 7. * fan ) ), 2. ) ) * exp( -fan / .16 ) * ss( 0., .05, fan );
     // (only while the gate stands alone: once the current runs, the current is the light on the floor)
-    result = mix( result, cNeon, spill * .2 * ( 1. - riverIn ) * stand * below );
+    result = mix( result, cNeon, spill * .2 * ( 1. - riverIn ) * stand * below * flow );
   }
 
   // ---------------- the current: out of the gate, and over the floor towards the viewer
@@ -349,6 +363,58 @@ void main() {
       // (it only ever adds light: where it lies over the gate, the gate stays as bright as it was)
       result = mix( result, max( result, mix( cInk, cNeon, clamp( level, 0., 1. ) ) ), amount );
     }
+  }
+
+  // ---------------- the gate and the river, as the guide draws them: one painted picture. It is laid by the gate
+  // (its doorway on the gate, at the gate's size), takes the screen over from the gate drawn above, and is
+  // revealed from the gate downward. Below the gate it ripples, so the river runs. Its colours are read as
+  // the brand's one light: Neon where the picture is light, Ink where it is dark.
+  // (It comes out at the gate's foot: the picture takes over there first, and a little later the further
+  // from the foot a point lies. Each point comes in as softly as the next, so the light shows under the
+  // foot and spreads, and no edge travels. The guide lets the whole of it in at once.)
+  float late = min( length( vec2( a.x - gateX, a.y - gate.z ) ) / gate.x * ${f(PT.out[0])}, ${f(PT.out[1])} );
+  float taken = ss( ${f(PT.mix[0])} + late, ${f(PT.mix[1])} + late, s ) * picture;
+  if ( taken > .001 ) {
+    // where a point of the screen lies in the picture (across, and up from its bottom edge: 0 to 1)
+    float artH = gate.x / ${f(PT.arch[1])};
+    vec2 tex = vec2( .5 + ( a.x - gateX ) / ( artH * ${f(PT.size[0] / PT.size[1])} ), ${f(PT.arch[0] + PT.arch[1])} + ( a.y - gate.y ) / artH );
+    // (the guide's ripple, number for number: none at the gate, more and more down the river)
+    float riverDepth = clamp( ( .48 - tex.y ) / .48, 0., 1. );
+    float riverWeight = ss( 0., .65, riverDepth );
+    float travel = riverDepth * 8.5 - time * .48;
+    float meander = .048 * sin( travel ) + .022 * sin( riverDepth * 15. - time * .31 + 1.4 );
+    float breathing = 1. + riverWeight * .065 * sin( riverDepth * 10. - time * .38 );
+    tex.x = .5 + ( tex.x - .5 ) / breathing + meander * riverWeight;
+    tex.y += .012 * sin( riverDepth * 12. - time * .48 ) * riverWeight;
+    tex.x += .006 * sin( riverDepth * 24. - time * .85 ) * riverWeight;
+    // (On a wide screen the ripple reaches a little past the picture's sides at the bottom corners. The guide
+    // shows black there, which leaves a notch in the river. Here the picture's last few hundredths are drawn
+    // out instead, smoothly: the river runs on off the screen.)
+    float over = abs( tex.x - .5 ) - ${f(0.5 - PT.margin)};
+    if ( over > 0. ) tex.x = .5 + sign( tex.x - .5 ) * ( .5 - ${f(PT.margin)} * exp( -over / ${f(PT.margin)} ) );
+    // (the picture is held as it comes, its top row first: it is read from the top down)
+    vec3 art = texture2D( portalTex, vec2( tex.x, 1. - tex.y ) ).rgb;
+    art *= step( 0., tex.y ) * step( tex.y, 1. );
+    // (one soft front reveals the river, from the gate's foot downward: the guide's)
+    float riverArrival = ss( ${beat(PT.arrive)}, s );
+    float revealFront = mix( ${f(PT.front[0])}, ${f(PT.front[1])}, riverArrival );
+    float artReveal = ss( revealFront - ${f(PT.feather)}, revealFront + ${f(PT.feather)}, tex.y );
+    // How lit a point of the picture is: as light as the picture is there, in a straight line. The picture
+    // is a soft thing: a pale body, and rims that fall away through deep vivid colours into black. Read
+    // straight, its body is full Neon and its rims are a glow that falls away into Ink as softly as the
+    // picture's own. (A steep reading was tried first. It made a flat shape with a hard edge of the pour:
+    // it swallowed the gate, and it came in all at once where the guide's swells.)
+    // (the front dims the picture before it is read, as the guide's does)
+    float lightOf = clamp( ( dot( art, vec3( .3, .59, .11 ) ) * artReveal - ${f(PT.light[0])} ) / ${f(PT.light[1] - PT.light[0])}, 0., 1. );
+    lightOf = pow( lightOf, ${f(PT.light[2])} );
+    // (a second tone, a shade deeper, where the picture runs cool: the bands along the river's edges)
+    lightOf *= 1. - ${f(PT.tone[0])} * ss( ${f(PT.tone[1])}, ${f(PT.tone[2])}, art.b - art.r );
+    // The gate stays a gate. The guide's doorway is orange above and pale below, where its light pours out:
+    // so the gate's crown is a shade deeper than its foot and the pour, in one even fall by height. (The
+    // gate the shader draws before this has the same fall: nothing in the gate changes when the pour comes.
+    // Read off the picture's own orange instead, the fall came out blotched.)
+    lightOf *= 1. - ${f(PT.crown[0])} * ss( ${f(PT.crown[1])}, ${f(PT.crown[2])}, ( a.y - gate.z ) / max( gate.y - gate.z, .001 ) );
+    result = mix( result, mix( cInk, cNeon, lightOf ), taken );
   }
 
   // ---------------- the body: black liquid, Neon on its edges

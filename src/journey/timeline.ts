@@ -89,11 +89,14 @@ export function startJourney(parts: JourneyParts): () => void {
   const B = J.beats
   const L = J.lids
   const reduced = matchMedia('(prefers-reduced-motion: reduce)')
-  /** Which course the current takes: the wave traced from the reference frame or, when the address ends in
-   *  ?wave=old, the first course drawn as it was. */
-  const traced = new URLSearchParams(window.location.search).get('wave') !== 'old'
-  // (the first course keeps the words where they stood with it: journey.module.css)
-  if (!traced) journey.dataset.wave = 'old'
+  /** How the river is drawn. As the guide draws it: one painted picture, laid by the gate (config.journey.
+   *  picture). Or, when the address ends in ?wave=traced or ?wave=old, one of the two earlier currents, which
+   *  the shader draws itself: the wave traced from the reference frame, or the first course. The traced wave
+   *  also stands in if the picture does not come. (journey.module.css gives each its gate and its words.) */
+  const asked = new URLSearchParams(window.location.search).get('wave')
+  const traced = asked !== 'old'
+  let pictured = asked !== 'old' && asked !== 'traced'
+  if (!pictured) journey.dataset.wave = traced ? 'traced' : 'old'
   let disposed = false
 
   /* ------------------------------------------------------------------ WebGL: asked for, never waited for */
@@ -115,6 +118,12 @@ export function startJourney(parts: JourneyParts): () => void {
   let buffer: WebGLBuffer | null = null
   let typeTexture: WebGLTexture | null = null
   let markTexture: WebGLTexture | null = null
+  let portalTexture: WebGLTexture | null = null
+  /** The guide's picture, once it has come and been read; whether the driver has it; and how far it has
+   *  come in. */
+  let pictureSource: TexImageSource | null = null
+  let pictureSent = false
+  let pictureIn = 0
   /** The typeface has arrived: the boxes stand where they will stay. */
   let typeSet = false
   /** The mark's fields: worked out while the opening is up, handed to the driver with the first picture. */
@@ -261,7 +270,7 @@ export function startJourney(parts: JourneyParts): () => void {
     const corner = g.getAttribLocation(program, 'corner')
     g.enableVertexAttribArray(corner)
     g.vertexAttribPointer(corner, 2, g.FLOAT, false, 0, 0)
-    for (const name of ['res', 'time', 'progress', 'pointer', 'pointerActive', 'typeTex', 'typeReady', 'markTex', 'markReady', 'body', 'gate', 'course', 'traced', 'pieces', 'cInk', 'cNeon', 'cHot', 'cLime', 'cMoss', 'cDeep'])
+    for (const name of ['res', 'time', 'progress', 'pointer', 'pointerActive', 'typeTex', 'typeReady', 'markTex', 'markReady', 'body', 'gate', 'course', 'traced', 'pieces', 'gateX', 'flow', 'picture', 'portalTex', 'cInk', 'cNeon', 'cHot', 'cLime', 'cMoss', 'cDeep'])
       u[name] = g.getUniformLocation(program, name)
     const P = J.palette
     g.uniform3fv(u.cInk, rgb(P.ink))
@@ -276,6 +285,9 @@ export function startJourney(parts: JourneyParts): () => void {
     g.uniform1i(u.typeTex, 0)
     markTexture = texture(1)
     g.uniform1i(u.markTex, 1)
+    portalTexture = texture(2)
+    g.uniform1i(u.portalTex, 2)
+    g.uniform1f(u.flow, pictured ? 0 : 1)
     journey.dataset.shader = ''
     ready = true
     state.scene = true
@@ -315,6 +327,65 @@ export function startJourney(parts: JourneyParts): () => void {
     window.setTimeout(buildMark, 0)
   } else still()
 
+  /* ------------------------------------------------------------------ the guide's picture of the gate and the river */
+  /** Without the picture the traced wave is drawn, with its own gate and words. */
+  const fallBack = () => {
+    if (disposed || !pictured) return
+    pictured = false
+    pictureSource = null
+    journey.dataset.wave = 'traced'
+    if (gl && program && ready) {
+      gl.useProgram(program)
+      gl.uniform1f(u.flow, 1)
+    }
+    measure()
+  }
+  if (pictured && gl) {
+    // asked for across origins, as the guide does: the driver may only read a picture that was
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.decoding = 'async'
+    img.onload = () => {
+      if (disposed) return
+      const keep = (source: TexImageSource) => {
+        if (disposed || !pictured) return
+        pictureSource = source
+      }
+      // read off the main thread where the browser can (the hand-over to the driver is then quick)
+      if (typeof createImageBitmap === 'function')
+        createImageBitmap(img).then(
+          (bitmap) => keep(bitmap),
+          () => keep(img),
+        )
+      else keep(img)
+    }
+    img.onerror = fallBack
+    img.src = J.picture.url
+  }
+  /** The picture is handed to the driver while the screen stands still (it takes a few milliseconds), or at
+   *  the latest as the gate begins to gather. */
+  const sendPicture = () => {
+    if (!gl || !portalTexture || !pictureSource || pictureSent) return
+    const g = gl
+    g.activeTexture(g.TEXTURE2)
+    g.bindTexture(g.TEXTURE_2D, portalTexture)
+    // (as it comes, its top row first: the shader reads it from the top down)
+    g.pixelStorei(g.UNPACK_FLIP_Y_WEBGL, false)
+    const began = performance.now()
+    try {
+      g.texImage2D(g.TEXTURE_2D, 0, g.RGBA, g.RGBA, g.UNSIGNED_BYTE, pictureSource)
+      pictureSent = true
+    } catch {
+      // (a picture the page may not read)
+      fallBack()
+    }
+    if (import.meta.env.DEV) performance.measure('hw:picture', { start: began, end: performance.now() })
+    milestone('picture-there')
+    if (typeof ImageBitmap !== 'undefined' && pictureSource instanceof ImageBitmap) pictureSource.close()
+    pictureSource = null
+    if (pictureSent && reduced.matches) pictureIn = 1
+  }
+
   // the boxes are measured again when the typeface has arrived (the line under the word moves them a little)
   document.fonts.ready.then(() => {
     if (disposed) return
@@ -348,7 +419,7 @@ export function startJourney(parts: JourneyParts): () => void {
   const progress = () => clamp(-journey.getBoundingClientRect().top / Math.max(1, journey.offsetHeight - innerHeight))
   /** Where the page has put the three boxes, as the shader counts: in screen heights, across from the middle
    *  of the stage and up from its bottom. (Layout offsets: the blocks' transforms do not move them.) */
-  const place = { body: [0, 0.59, 0.43], gate: [0.095, 0.9, 0.555], room: Infinity, free: 1, clear: 0 }
+  const place = { body: [0, 0.59, 0.43], gate: [0.095, 0.9, 0.555], gateX: 0, room: Infinity, free: 1, clear: 0 }
 
   function measure() {
     target = progress()
@@ -360,6 +431,8 @@ export function startJourney(parts: JourneyParts): () => void {
       sculpture.offsetWidth / 2 / sh,
     ]
     place.gate = [door.offsetWidth / 2 / sh, 1 - door.offsetTop / sh, 1 - (door.offsetTop + door.offsetHeight) / sh]
+    // (the gate's box is hung by its middle: its `left` is its middle line)
+    place.gateX = (door.offsetLeft - sw / 2) / sh
     // How far to the right of the middle the pool at the gate's foot may spread. As far as it likes while the
     // note that stands to the right of the gate ends above the gate's foot. Where that note comes down to
     // the foot (a short screen), only up to the note, so the words never stand on the light: `room` is where
@@ -538,7 +611,9 @@ export function startJourney(parts: JourneyParts): () => void {
     g.uniform1f(u.progress, s)
     g.uniform3f(u.body, place.body[0], place.body[1], place.body[2])
     g.uniform3f(u.gate, place.gate[0], place.gate[1], place.gate[2])
-    if (s > B.stand[0]) {
+    g.uniform1f(u.gateX, place.gateX)
+    g.uniform1f(u.picture, pictured ? pictureIn : 0)
+    if (!pictured && s > B.stand[0]) {
       if (traced) layWave(reduced.matches ? 0 : now / 1000)
       else layCourse(reduced.matches ? 0 : now / 1000)
       g.uniform3fv(u.course, course)
@@ -565,6 +640,9 @@ export function startJourney(parts: JourneyParts): () => void {
       },
       size: () => [canvas.width, canvas.height],
     }
+
+  /** With the guide's picture the closing words come as the guide has them come: with the river. */
+  const pictureBeats = { ...B, closing: J.picture.copy }
 
   function frame(now: number) {
     const dt = Math.min(64, now - last || 16)
@@ -627,7 +705,7 @@ export function startJourney(parts: JourneyParts): () => void {
       })
 
     if (drawnS !== s) {
-      const beats = flat ? { ...B, ...J.stillBeats } : B
+      const beats = flat ? { ...B, ...J.stillBeats } : pictured ? pictureBeats : B
       // (the line leaves in the first half of the beat: the body fills with light in the second)
       const heroOut = smooth(0, 0.5, smooth(beats.heroOut[0], beats.heroOut[1], s))
       hero.style.opacity = String(smooth(beats.word[0], beats.word[1], s) * (1 - heroOut))
@@ -649,6 +727,8 @@ export function startJourney(parts: JourneyParts): () => void {
       if (drawing) {
         // (fields that were not there for the first picture go with the next)
         if (!markSent) sendMark()
+        if (pictureSource && (target === current || s > B.heroOut[0])) sendPicture()
+        if (pictureSent && pictureIn < 1) pictureIn = Math.min(1, pictureIn + dt / 240)
         paint(s, now)
         frames++
         if (frames === 1) milestone('journey-first-frame')
