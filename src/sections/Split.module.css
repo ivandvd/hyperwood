@@ -1,0 +1,91 @@
+/* Section 02: public and confidential. Sizes and colours come from styles/tokens.css. */
+.section { position: relative; background: var(--bg); padding: var(--section-top) var(--gutter) 0; scroll-margin-top: var(--header-h); }
+.srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* the name of the section on the left, the switch between the two readers on the right */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 40px; margin-bottom: 30px; }
+.top > p { margin-bottom: 0; }
+.view { display: flex; align-items: center; gap: 14px; }
+.viewLabel { color: var(--text-3); }
+
+/* Two columns that share their rows, so each public line stays level with the confidential line beside it. */
+.cols { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--col-gap); grid-template-rows: auto auto repeat(4, auto); }
+.col { display: grid; grid-row: span 6; grid-template-rows: subgrid; min-width: 0; }
+.word { font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--size-h2); letter-spacing: var(--track-display); line-height: 1; color: var(--fg); }
+.lead { margin: 28px 0 48px; max-width: 34em; font-size: var(--size-lead); line-height: 1.48; letter-spacing: var(--track-text); color: var(--text-2); }
+.list { list-style: none; display: grid; grid-row: span 4; grid-template-rows: subgrid; }
+.row { position: relative; display: grid; grid-template-columns: var(--idx) 1fr; align-items: center; min-height: calc(var(--row-h) + 18px); }
+.idx { font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); }
+.what { padding: 20px 0; font-size: var(--size-row); font-weight: 500; letter-spacing: -0.026em; line-height: 1.18; color: var(--fg); text-wrap: balance; }
+/* the example under each row, in the mono face: lit where it is public, cipher where it is sealed */
+.value { display: block; margin-top: 9px; font-family: var(--font-mono); font-size: 12px; font-weight: 400; letter-spacing: 0.02em; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--hw-neon); transition: color 0.5s var(--ease-out); }
+.value[data-sealed] { color: var(--text-3); }
+
+/* Public: open rows on hairlines, numbers lit. */
+.open .idx { color: var(--hw-neon); }
+.open .row::before, .open .row:last-child::after { content: ''; position: absolute; left: 0; right: 0; height: 1px; background: var(--hair); transform: scaleX(0); transform-origin: left center; transition: transform 0.9s var(--ease-out); transition-delay: calc(var(--i) * 90ms); }
+.open .row::before { top: 0; }
+.open .row:last-child::after { bottom: 0; transition-delay: 360ms; }
+.cols[data-rows] .open .row::before, .cols[data-rows] .open .row:last-child::after { transform: scaleX(1); }
+
+/* Confidential: sealed records. A slab of ink wipes across the row, then its label appears on top. The slab
+   reaches out to the left by its own padding, so the labels stay in line with the heading above them. */
+.sealed .row { padding: 4px 0; }
+.sealed .idx { color: var(--text-3); transition: color 0.5s var(--ease-out); }
+.slab { grid-column: 1 / -1; align-self: stretch; display: grid; grid-template-columns: var(--idx) 1fr; align-items: center; margin-left: calc(-1 * var(--slab-pad)); padding: 0 var(--slab-pad); border-radius: var(--radius); background: var(--slab); box-shadow: inset 0 0 0 1px var(--slab-line);
+  clip-path: inset(0 100% 0 0 round var(--radius)); transition: clip-path 0.95s var(--ease-out), background 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out); transition-delay: calc(var(--i) * 90ms + 140ms), 0s, 0s; }
+.cols[data-rows] .slab { clip-path: inset(0 0 0 0 round var(--radius)); }
+/* as its owner reads it: the record is open, and it shows */
+.cols[data-view='owner'] .slab { background: #161912; box-shadow: inset 0 0 0 1px rgba(204, 255, 0, 0.3); }
+.cols[data-view='owner'] .sealed .idx { color: var(--hw-neon); }
+
+/* Row labels rise into place (the kit's Rise: 12 px, 600 ms), after their line or slab. */
+.idx, .what { opacity: 0; transform: translateY(12px); transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), color 0.5s var(--ease-out); transition-delay: calc(var(--i) * 90ms + 240ms), calc(var(--i) * 90ms + 240ms), 0s; }
+.sealed .idx, .sealed .what { transition-delay: calc(var(--i) * 90ms + 540ms), calc(var(--i) * 90ms + 540ms), 0s; }
+.cols[data-rows] .idx, .cols[data-rows] .what { opacity: 1; transform: none; }
+
+.example { margin-top: 18px; text-align: right; opacity: 0; transition: opacity 0.6s var(--ease-out) 1.2s; }
+.example[data-in] { opacity: 1; }
+
+/* How it is kept: four short notes. */
+.notes { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: var(--col-gap); row-gap: 44px; margin-top: var(--block-gap); }
+.note { position: relative; padding-top: 22px; opacity: 0; transform: translateY(12px); transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out); transition-delay: calc(var(--i) * 90ms); }
+.note::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--hair); }
+.notes[data-in] .note { opacity: 1; transform: none; }
+.noteNum { display: block; margin-bottom: 26px; font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); color: var(--hw-neon); }
+.noteTitle { font-size: var(--size-h3); font-weight: 500; letter-spacing: -0.028em; line-height: 1.15; color: var(--fg); }
+.noteText { margin-top: 12px; max-width: 31em; font-size: var(--size-note); line-height: 1.54; letter-spacing: var(--track-text); color: var(--text-2); }
+
+/* What the design does not claim: stated as plainly as the rest. */
+.limits { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--col-gap); margin-top: var(--block-gap); padding-top: 22px; border-top: 1px solid var(--hair); }
+.limitsTitle { font-size: var(--size-h3); font-weight: 500; letter-spacing: -0.028em; line-height: 1.15; color: var(--fg); }
+.limitsList { list-style: none; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--col-gap); row-gap: 20px; }
+.limitsList li { font-size: var(--size-note); line-height: 1.54; letter-spacing: var(--track-text); color: var(--text-2); opacity: 0; transform: translateY(12px); transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out); transition-delay: calc(var(--i) * 80ms + 80ms); }
+.limits[data-in] .limitsList li { opacity: 1; transform: none; }
+
+@media (max-width: 1100px) {
+  .notes { grid-template-columns: 1fr 1fr; }
+  .limitsList { grid-template-columns: 1fr; }
+}
+
+/* Phones: one column. Public first, then confidential; the slabs reach evenly towards both edges. */
+@media (max-width: 760px) {
+  .top { flex-direction: column; align-items: flex-start; gap: 18px; margin-bottom: 34px; }
+  .cols, .col, .list { display: block; }
+  .col + .col { margin-top: 76px; }
+  .lead { margin: 24px 0 36px; }
+  .slab { margin: 0 calc(-1 * var(--slab-pad)); }
+  .value { font-size: 11px; }
+  .example { text-align: left; }
+  .notes { grid-template-columns: 1fr; row-gap: 34px; }
+  .noteNum { margin-bottom: 14px; }
+  .limits { grid-template-columns: 1fr; row-gap: 22px; }
+}
+
+/* Reduced motion: everything is simply there. */
+@media (prefers-reduced-motion: reduce) {
+  .idx, .what, .note, .limitsList li { transform: none; transition: opacity 0.2s linear; transition-delay: 0s; }
+  .slab { clip-path: none; transition: none; }
+  .value, .example { transition: none; }
+  .open .row::before, .open .row:last-child::after { transform: none; transition: none; }
+}

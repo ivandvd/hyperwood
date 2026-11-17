@@ -172,6 +172,22 @@ export const config = {
     /** The artwork and the drop the kit morphs it from: the box, the drop centre and radius in artwork units,
      *  and the scale the kit host starts at. These come from the kit morph engine and are not tuning knobs. */
     art: { width: 427.3, height: 191, drop: [225, 106] as [number, number], dropRadius: 62, dropScale: 0.72 },
+    /** How the drop becomes the mark. 'draw': the drop sits in the mark's first lobe and pours out along it,
+     *  so the drop draws the mark from one end to the other. 'morph': the kit's morph, where the whole outline
+     *  changes at once. `?mark=draw` or `?mark=morph` in the address overrides this, to compare the two. */
+    reveal: 'draw' as 'draw' | 'morph',
+    /** For 'draw', the drop the mark starts from: the largest circle that fits in its first lobe (centre and
+     *  radius in artwork units, measured from the master, a hair inside it: not tuning knobs). */
+    start: { centre: [47.9, 122.3] as [number, number], radius: 42.4 },
+    /** For 'draw': seconds the drawing takes, and how far behind the front the liquid stands at its full
+     *  height (`nose`, in artwork units), which is what lights the front like the tip of a stream.
+     *  The liquid runs fastest mid-stream: `wall` is its speed along the outline as a share of that, and
+     *  `reach` is how far from the outline (artwork units) it gets up to full speed. Together they round the
+     *  front into a finger: a lower `wall` or a longer `reach` makes the tip longer and more pointed. */
+    draw: 3.4,
+    nose: 30,
+    wall: 0.3,
+    reach: 15,
     /** Final width of the mark as a share of the viewport width, on wide and on tall screens: a sign-off,
      *  not a second hero. */
     share: 0.2,
@@ -189,8 +205,9 @@ export const config = {
     /** Story progress that starts the morph, and the progress below which scrolling back undoes it. */
     at: 0.9,
     undoAt: 0.87,
-    /** Seconds on the clock, not on the scroll: the drop finishes filling, then morphs on the kit curve.
-     *  The kit plays its morph in 900 ms; here it is given more time so it reads as liquid. */
+    /** Seconds on the clock, not on the scroll: the drop finishes filling (`ignite`), then becomes the mark.
+     *  `morph` is the length of the kit morph when `reveal` is 'morph' (the kit plays it in 900 ms; here it is
+     *  given more time so it reads as liquid). The drawing has its own length, `draw`, above. */
     ignite: 0.8,
     morph: 1.4,
     /** Seconds for the whole way back. */
@@ -204,7 +221,8 @@ export const config = {
     life: 1,
     /** Its liquid volume. A blurred copy of the shape is its height (`blur` in artwork units), so thick
      *  lobes stand proud and the necks lie low; `profile` rounds the rim (lower = rounder), `relief` is the
-     *  height as a share of the mark width, and the volume grows in over the first `by` of the morph.
+     *  height as a share of the mark width, and the volume grows in over the first `by` of the morph
+     *  (`byDraw` of the drawing).
      *  Lighting: a key from `key` (x right, y up, z to the viewer) that shades by `shade`, a deeper `rim`,
      *  a `glint` of tightness `shine`, the `cursor` light strength, and a slow `ripple` of the surface. */
     depth: {
@@ -212,6 +230,7 @@ export const config = {
       profile: 0.6,
       relief: 0.05,
       by: 0.7,
+      byDraw: 0.12,
       key: [-0.5, 0.62, 0.6] as [number, number, number],
       shade: 0.26,
       rim: 0.42,
@@ -271,25 +290,40 @@ export const config = {
     /** Overall strength (the reference's blue reads darker than neon, so ours is pulled back). */
     strength: 0.55,
   },
-  preloader: {
-    /** Canvas size (px); keep in sync with --preloader-sphere in tokens.css. */
-    sphereSize: 50,
-    latBands: 9,
-    lonCount: 16,
-    rotationSpeed: 0.55, // rad/s
-    sphereOutDuration: 0.45,
-    revealDuration: 1.5,
-    revealEase: 'power3.inOut',
-    /** Preloader background, also the colour WebGL paints outside the reveal circle. Keep in sync with CSS. */
-    color: brand.ink,
-    /** Consecutive smooth frames (< 34 ms) required before the exit starts, so the reveal never hitches. */
-    stableFrames: 24,
-    /** …but never wait longer than this many seconds of rendering for it. */
-    stableTimeout: 4,
-    /** Performance check behind the cover: the scene is held at this story progress (the open bands, its
-     *  heaviest moment) for a few frames. If frames there take this many times longer than at rest, the
-     *  pixel ratio drops by `benchStep` and the check repeats, at most `benchRounds` times. */
+  /** The opening (ui/opening.ts, index.html): the cover that is up while the hero gets ready, and when it may come down. */
+  opening: {
+    /** How the mark fills: three movements that add up, each run by the browser as one animation.
+     *  `first` starts with the page's first paint and covers `share` of the mark. index.html starts it, so its
+     *  three numbers are written there as well (.op-a and @keyframes op-first): keep the two the same.
+     *  `scene` starts when the hero's scene exists. `done` starts when the hero is whole and checked, and closes
+     *  whatever is left, so the mark is always full `done.seconds` later, however far the first two have got.
+     *  `ease` is a CSS cubic-bezier. `hold`: the full mark is seen this long (seconds) before the cover goes.
+     *  The first two start briskly and then creep for a long time: on a fast connection only their brisk part
+     *  is seen and the mark is about two thirds full when the hero is ready; on a slow one the mark is still
+     *  moving, slowly, seconds later. */
+    fill: {
+      first: { share: 0.34, seconds: 3.2, ease: [0.12, 0.6, 0.2, 1] as [number, number, number, number] },
+      scene: { share: 0.5, seconds: 1.6, ease: [0.3, 0, 0.1, 1] as [number, number, number, number] },
+      done: { seconds: 0.42, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
+      hold: 0.1,
+    },
+    /** The cover stays at least this long (seconds), so the mark is seen to fill and the page does not flash. */
+    minShow: 0.9,
+    /** Consecutive smooth frames (< 34 ms) of the scene required before the cover comes down, so the hero
+     *  never opens on a hitch… */
+    stableFrames: 10,
+    /** …but never wait longer than this many seconds of drawing for it. */
+    stableTimeout: 2.2,
+    /** The check starts this long (seconds) after the scene's first frame: the first frames carry uploads. */
+    benchAfter: 0.14,
+    /** Performance check behind the cover: after `benchRest` frames at rest the scene is held at this story
+     *  progress (the open bands, its heaviest moment); `benchSkip` frames are let go, `benchSamples` are timed.
+     *  If frames there take `benchSlow` times longer than at rest, the pixel ratio drops by `benchStep` and
+     *  the check repeats, at most `benchRounds` times. */
     benchAt: 0.36,
+    benchRest: 8,
+    benchSkip: 6,
+    benchSamples: 12,
     benchSlow: 1.3,
     benchStep: 0.8,
     benchRounds: 3,
@@ -445,12 +479,20 @@ export const config = {
     /** Split toning (linear RGB): a breath of olive in the shadows, neutral highlights. */
     shadowTint: [0.004, 0.006, 0.0] as [number, number, number],
     highlightTint: [1.0, 1.0, 0.97] as [number, number, number],
+    /** Brand grade, the last step of the picture: `amount` pulls every pixel onto the brand's own gradient, a
+     *  straight mix of Ink and Hyper Neon (how the kit colours its liquid field). 1 = two colours only, nothing
+     *  pale or white; 0 = the earlier filmic look. `contrast` bends the mix: above 1 the frame stays mostly Ink
+     *  and Neon reads as light. `?brand=0` in the address shows the picture without the grade, to compare. */
+    brand: { amount: 1, contrast: 1.45 },
   },
 
   /* ------------------------------------------------------------------ */
   scroll: {
     /** Length of the pinned scroll in viewport heights. */
     lengthScreens: 9.5,
+    /** After the story the scene draws in to a frame of the page: this many more screens of pinned scroll.
+     *  On wide screens one further screen follows, while the first frame of the deck slides over it. */
+    handoffScreens: 0.6,
     /** Soft snap: releasing the scroll inside a zone glides to its resting point (s = seconds). */
     magnetDuration: [0.6, 1.4] as [number, number],
     /** GSAP scrub smoothing in seconds. */
@@ -469,8 +511,156 @@ export const config = {
       [14.4, 0.644],
       [17.4, 0.833],
       [19.0, 1],
-      [23.5, 1],
+      // the drop draws the mark on the clock (about 18.2 s to 21.6 s), then the frame rests
+      [24.6, 1],
     ] as [number, number][],
+  },
+
+  /* ------------------------------------------------------------------ */
+  /** The landing page's journey (journey/): the pinned opening, drawn by one shader. */
+  journey: {
+    /** The drawing buffer's pixel ratio is the screen's, up to this, and never more pixels than `maxPixels`
+     *  (a large screen draws at a lower ratio, so a frame costs about the same everywhere). */
+    maxDpr: 1.5,
+    maxPixels: 3.2e6,
+    /** How closely the journey follows the scroll: the time constant of the easing, ms. */
+    ease: 80,
+    /** Every tone of the picture, between Ink and Hyper Neon. `hot` is the lightest there is: nothing in the
+     *  picture is white or pale. */
+    palette: { ink: '#0a0a0a', neon: '#ccff00', hot: '#ecff6a', lime: '#9fd600', moss: '#3f5c10', deep: '#131b09' },
+    /** The lids, in journey progress and in shares of the screen: when they show, from when to when they
+     *  close, when they part again (`part`), how far apart they stand open and shut (half the gap, from the
+     *  middle), how much they bow down at the sides, and how soft their edge is. The shader and the words both
+     *  read these. */
+    lids: { appear: [0.07, 0.11] as [number, number], from: 0.08, to: 0.26, part: [0.265, 0.34] as [number, number], open: 0.78, shut: -0.15, bow: 0.13, bowPower: 1.6, feather: 0.14 },
+    /** The mark's body in the hero: how thick it is, as a share of a full round (1 is as deep as each stroke
+     *  is wide), and how large the drop is that it comes out of (its radius, as a share of half the mark's
+     *  width). */
+    body: { full: 0.8, drop: 0.26 },
+    /** The floor the current runs over, from the gate towards the viewer, and the current's course on it.
+     *  `rise`: how far above the gate's foot the eye's level lies, in screen heights (less is a flatter floor).
+     *  The course: `straight` out of the gate, then one long bend to the left and back across to the right,
+     *  swinging `reach` to the side as measured at the gate (on a narrow screen, per unit of its width to
+     *  height); `turn` and `quicken` say how soon the bends come; `sway` is how far they drift in time. It
+     *  is walked in `pieces`.
+     *  `breadth`: how broad the current is seen on the screen, in gate widths, at points along the course
+     *  (0 is the gate's foot, about 0.68 the bottom of the screen): as broad as the gate where it leaves, thin
+     *  where it lies far off and flat, broad where it comes towards the viewer. */
+    floor: {
+      rise: 0.2,
+      reach: 0.3,
+      reachNarrow: 0.19,
+      straight: 0.1,
+      turn: 8.61,
+      quicken: 1.413,
+      sway: 0.07,
+      pieces: 36,
+      breadth: [
+        [0, 1],
+        [0.14, 0.5],
+        [0.28, 0.48],
+        [0.41, 0.85],
+        [0.54, 1.2],
+        [0.61, 2.15],
+        [0.72, 3],
+      ] as [number, number][],
+    },
+    /** The course the current takes: the wave of the reference frame, traced. Out of the gate into a pool
+     *  that spreads to the right, away to the left, back across to the right, and round again along the
+     *  bottom of the screen towards the viewer. (`floor` above is the first course, with two sweeps; the
+     *  page still shows it, drawn as it was, when the address ends in ?wave=old.)
+     *  `points`: each is how far right of the gate's middle, how far below its foot, and half the breadth
+     *  the current is seen to have there, all in gate half-widths. The points are not on the course: they
+     *  pull at it, and the course is the smooth curve between them (a cubic B-spline), so it has no kink
+     *  and its breadth never jumps. Keep them few and evenly spread: a point close beside another makes a
+     *  tight turn, and a breadth that goes down and up again makes a neck. The course is cut into `pieces`.
+     *  On a screen narrower than `fullAt` (width to height) the points close up towards the middle.
+     *  `drift`: how far they wander in time.
+     *  `seen`: how far from a piece's middle line the current's outline lies, in the piece's own measure.
+     *  `soft`: how soft that outline is: a share of half the breadth, but never less nor more than the two
+     *  measures after it (screen heights), so the broad sweeps near the eye keep an edge and the dark
+     *  between two sweeps stays dark. `glow`: how strong the light just outside the outline is, and how
+     *  far it reaches (in edge softnesses). */
+    wave: {
+      seen: 0.814,
+      fullAt: 1.58,
+      drift: 0.14,
+      pieces: 64,
+      soft: [0.16, 0.009, 0.018] as [number, number, number],
+      glow: [0.22, 0.9] as [number, number],
+      /** About the gate the current is plain Neon, with no band in it, so the gate and the light that
+       *  pours out of it are one shape: no band within the first of these distances from the middle of
+       *  the gate's foot, the full band beyond the second (gate half-widths). */
+      plain: [2.4, 5] as [number, number],
+      /** The share of the course, from its beginning, that arrives all together: the gate's bell, the
+       *  pool and the turn under the gate. The gate swells into its bell on both sides at once, and the
+       *  current then runs on from there. */
+      together: 0.28,
+      /** Which of the points make the pool beside the gate (first and last): they give way when a note
+       *  stands in their place. The points before them are the gate's own part of the course: it begins
+       *  high inside the gate, as broad as the gate, and grows broader on its way down, so the gate opens
+       *  out into the current like a bell and has no foot once the light pours. (Where the notes beside
+       *  the gate come down to its foot, the bell draws in to the gate's breadth.) */
+      pool: [4, 6] as [number, number],
+      points: [
+        [0, -1.96, 0.92],
+        [0, -1.42, 1.04],
+        [-0.03, -0.89, 1.33],
+        [-0.03, -0.33, 1.6],
+        [0.89, 0.56, 1.13],
+        [3.35, 0.65, 0.68],
+        [0.92, 1.24, 0.8],
+        [-1.07, 0.59, 1.07],
+        [-2.61, 0.44, 0.98],
+        [-4.83, 1.3, 0.74],
+        [-9.93, 2.07, 0.5],
+        [-5.9, 2.34, 0.83],
+        [-3.17, 2.96, 1.27],
+        [-0.36, 3.6, 1.45],
+        [4.03, 4.21, 1.82],
+        [10.19, 5.75, 2.55],
+        [15.82, 8.24, 3.26],
+        [9.48, 10.61, 4.07],
+        [0.65, 8.24, 4.92],
+        [-6.06, 9.75, 4.62],
+        [-12.62, 11.59, 4.44],
+      ] as [number, number, number][],
+    },
+    /** When things come and go, in journey progress. The page and the shader both read these.
+     *    note      the scroll note goes
+     *    introOut  the opening words go (the lids, above, have nearly shut)
+     *    drop      the drop shows in the opening eye       morph    it spreads into the mark
+     *    cool      the mark's light draws back to its edges: the body of black liquid
+     *    word      the wordmark and the line under it      header   the header
+     *    heroOut   the words go, the body fills with light again
+     *    gather    the mark gathers into the gate          stand    the gate stands on its floor
+     *    closing   the closing words                       river    the current runs out */
+    beats: {
+      note: [0.012, 0.06] as [number, number],
+      introOut: [0.215, 0.265] as [number, number],
+      drop: [0.275, 0.31] as [number, number],
+      morph: [0.305, 0.375] as [number, number],
+      cool: [0.375, 0.43] as [number, number],
+      word: [0.4, 0.465] as [number, number],
+      header: [0.365, 0.44] as [number, number],
+      heroOut: [0.585, 0.635] as [number, number],
+      gather: [0.635, 0.785] as [number, number],
+      stand: [0.775, 0.835] as [number, number],
+      closing: [0.825, 0.895] as [number, number],
+      river: [0.855, 0.975] as [number, number],
+    },
+    /** The same without WebGL, where no picture is drawn: the hero comes as the opening words go and stays
+     *  until the closing words take over. */
+    stillBeats: {
+      word: [0.275, 0.34] as [number, number],
+      header: [0.275, 0.34] as [number, number],
+      heroOut: [0.66, 0.76] as [number, number],
+      closing: [0.73, 0.8] as [number, number],
+    },
+    /** The opening words come into focus this long (ms) after the opening lets the page go, over this long. */
+    intro: { delay: 380, focus: 1500 },
+    /** The wordmark in the hero: how soft the copy is that makes its glow (px). */
+    word: { blur: 9 },
   },
 
   performance: {

@@ -1,7 +1,7 @@
 /**
  * `?demo=1`: a scripted take for previews and videos. The scroll is not used: the same timeline is driven
  * from the scene clock (store.time), so every frame is a pure function of time and a capture on a virtual
- * clock is frame-exact. τ = 0 when the hero titles start (the preloader's circle is opening).
+ * clock is frame-exact. τ = 0 when the hero titles start (the opening is uncovering the hero).
  */
 import { config } from '../config'
 

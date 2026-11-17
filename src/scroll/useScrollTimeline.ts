@@ -3,8 +3,13 @@
  *  - a proxy tween 0→1 feeds store.target (the 3D scene reads it every frame);
  *  - the DOM interface is animated on the same timeline, so UI and 3D can never drift apart;
  *  - fully reversible: scrolling back plays the same timeline backwards.
+ *
+ * The story is the first second of the timeline. After it comes the hand-over to the page:
+ *  - `--frame` 0→1: the scene draws in to a frame of the page (a rounded card under the header);
+ *  - `--covered` 0→1 (wide screens): the first frame of the deck slides up over it, and it draws back.
+ * Both are CSS variables on the stage; App.module.css and Interface.module.css turn them into the picture.
  */
-import { useLayoutEffect, type RefObject } from 'react'
+import { useLayoutEffect, useRef, type RefObject } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
@@ -13,17 +18,35 @@ import { store } from '../state/store'
 import { FINAL_IN, HERO_OUT, syncTitles } from '../ui/titles'
 import { content } from '../content'
 import { demo } from './demo'
+import type { DeckMode } from '../deck/track'
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 const PHASES = content.phases
 
-export function useScrollTimeline(stage: RefObject<HTMLElement | null>) {
+export interface StageState {
+  /** The scene has begun to draw in to its frame: the page has taken over from the film. */
+  framed: boolean
+  /** The first frame of the deck lies over the scene completely. */
+  covered: boolean
+}
+
+let started = false
+
+export function useScrollTimeline(stage: RefObject<HTMLElement | null>, mode: DeckMode, onState?: (s: StageState) => void) {
+  const report = useRef(onState)
+  useLayoutEffect(() => {
+    report.current = onState
+  })
+
   useLayoutEffect(() => {
     const el = stage.current
     if (!el) return
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
-    window.scrollTo(0, 0)
+    if (!started) {
+      started = true
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+      window.scrollTo(0, 0)
+    }
 
     const ph = config.phases
     // the story lives in the first `storyEnd` of the scroll; the rest is its resting tail
@@ -38,6 +61,13 @@ export function useScrollTimeline(stage: RefObject<HTMLElement | null>) {
     // one magnet: let go once the closing section has begun and the scroll glides to its resting point
     const magnets = [{ from: finalFrom - 0.04, to: 1.0001, at: 1 }]
 
+    // the hand-over, in screens and as timeline time (the story is 1)
+    const L = config.scroll.lengthScreens
+    const H1 = config.scroll.handoffScreens
+    const H2 = mode === 'stack' ? 1 : 0
+    const total = 1 + (H1 + H2) / L
+    const state: StageState = { framed: false, covered: false }
+
     const ctx = gsap.context(() => {
       const proxy = { p: 0 }
       // ?demo=1: no scrolling, the take drives the same timeline from the scene clock (scroll/demo.ts)
@@ -47,12 +77,14 @@ export function useScrollTimeline(stage: RefObject<HTMLElement | null>) {
         scrollTrigger: demo.on ? undefined : {
           trigger: el,
           start: 'top top',
-          end: () => `+=${window.innerHeight * config.scroll.lengthScreens}`,
+          end: () => `+=${window.innerHeight * (L + H1 + H2)}`,
           pin: true,
           scrub: config.scroll.scrub,
           snap: {
+            // magnets are set in story progress; the trigger also spans the hand-over
             snapTo: (v: number) => {
-              for (const m of magnets) if (v > m.from && v < m.to) return m.at
+              const p = v * total
+              for (const m of magnets) if (p > m.from && p < m.to) return m.at / total
               return v
             },
             duration: { min: config.scroll.magnetDuration[0], max: config.scroll.magnetDuration[1] },
@@ -92,6 +124,19 @@ export function useScrollTimeline(stage: RefObject<HTMLElement | null>) {
       // Section titles and body copy reveal themselves (Focus Reveal / Fade Up, see ui/titles.ts).
       // Closing extras, once the kept droplet has settled
       if (el.querySelector('[data-ui="final"] [data-fade]')) tl.fromTo('[data-ui="final"] [data-fade]', { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.04, stagger: 0.009 }, Math.min(0.955, finalFrom + 0.05))
+
+      // The hand-over: the film becomes a frame of the page, then the page's first frame covers it.
+      tl.fromTo(el, { '--frame': 0 }, { '--frame': 1, duration: H1 / L, ease: 'power2.inOut', immediateRender: false }, 1)
+      if (H2) tl.fromTo(el, { '--covered': 0 }, { '--covered': 1, duration: H2 / L, immediateRender: false }, 1 + H1 / L)
+      tl.eventCallback('onUpdate', () => {
+        const t = tl.time()
+        const framed = t > 1.0004
+        const covered = H2 > 0 && t >= total - 0.0004
+        if (framed === state.framed && covered === state.covered) return
+        state.framed = framed
+        state.covered = covered
+        report.current?.({ ...state })
+      })
       if (demo.on) demo.tl = tl
     }, el)
 
@@ -104,8 +149,11 @@ export function useScrollTimeline(stage: RefObject<HTMLElement | null>) {
       window.removeEventListener('load', onLoad)
       demo.tl = null
       ctx.revert()
+      el.style.removeProperty('--frame')
+      el.style.removeProperty('--covered')
+      report.current?.({ framed: false, covered: false })
     }
-  }, [stage])
+  }, [stage, mode])
 }
 
 /** Smooth return to the hero; the scrubbed timeline plays the whole transformation in reverse. */

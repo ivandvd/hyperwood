@@ -3,13 +3,14 @@
  */
 import { Component, type ReactNode } from 'react'
 
-export class SafeBoundary extends Component<{ name: string; children: ReactNode }, { failed: boolean }> {
+export class SafeBoundary extends Component<{ name: string; children: ReactNode; onFail?: () => void }, { failed: boolean }> {
   state = { failed: false }
   static getDerivedStateFromError() {
     return { failed: true }
   }
   componentDidCatch(error: unknown) {
     console.error(`[hyperwood] ${this.props.name} failed and was skipped:`, error)
+    this.props.onFail?.()
   }
   render() {
     return this.state.failed ? null : this.props.children

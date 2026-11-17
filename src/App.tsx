@@ -1,37 +1,32 @@
-import { useEffect, useRef } from 'react'
-import { Experience } from './scene/Experience'
-import { Interface } from './ui/Interface'
-import { useScrollTimeline } from './scroll/useScrollTimeline'
-import { store } from './state/store'
+import { Suspense, lazy, useState } from 'react'
+import { SiteHeader } from './ui/SiteHeader'
+import { Deck } from './deck/Deck'
+import { Footer } from './deck/Footer'
+import { useDeckMode } from './deck/track'
+import { landing } from './content.landing'
+import type { StageState } from './scroll/useScrollTimeline'
 import styles from './App.module.css'
 
-export default function App() {
-  const stage = useRef<HTMLDivElement>(null)
-  useScrollTimeline(stage)
+/** The hero: the liquid globe that bursts over the valley and ends on the mark. Its code is large (the 3D
+ *  scene), so it loads beside the page, not before it: the opening is on screen meanwhile. */
+const GlobeStage = lazy(() => import('./hero/GlobeStage'))
 
-  useEffect(() => {
-    const move = (e: PointerEvent) => {
-      store.pointer.x = (e.clientX / window.innerWidth) * 2 - 1
-      store.pointer.y = -(e.clientY / window.innerHeight) * 2 + 1
-      store.pointer.active = true
-    }
-    const leave = () => (store.pointer.active = false)
-    window.addEventListener('pointermove', move, { passive: true })
-    document.documentElement.addEventListener('pointerleave', leave)
-    window.addEventListener('blur', leave)
-    return () => {
-      window.removeEventListener('pointermove', move)
-      document.documentElement.removeEventListener('pointerleave', leave)
-      window.removeEventListener('blur', leave)
-    }
-  }, [])
+/** The landing page: the opening, the hero, the deck (four frames that take over from it), the footer. */
+export default function App() {
+  const mode = useDeckMode()
+  /** The hero has handed over to the page: the header gains its bar and links, the scene sits in its frame. */
+  const [state, setState] = useState<StageState>({ framed: false, covered: false })
 
   return (
-    <main>
-      <div className={styles.stage} ref={stage}>
-        <Experience />
-        <Interface />
-      </div>
-    </main>
+    <>
+      <SiteHeader backed={state.framed} nav={landing.nav} more={landing.docs} />
+      <main>
+        <Suspense fallback={<div className={styles.stage} />}>
+          <GlobeStage mode={mode} onState={setState} />
+        </Suspense>
+        <Deck />
+      </main>
+      <Footer nav={landing.nav} more={landing.docs} />
+    </>
   )
 }

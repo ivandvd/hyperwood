@@ -1,5 +1,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* a dark page: the browser draws its own parts (the scrollbar) dark as well. The scrollbar keeps its place
+   whether or not there is anything to scroll, so nothing shifts when the opening lets the page go. */
+html { color-scheme: dark; scrollbar-gutter: stable; }
+/* while the opening is up (ui/opening.ts) the page stays where it is */
+html[data-opening] { overflow: hidden; }
 html, body { background: var(--bg); color: var(--ink); font-family: var(--font-text); -webkit-font-smoothing: antialiased; }
 body { overscroll-behavior: none; }
 
@@ -25,5 +30,20 @@ body { overscroll-behavior: none; }
 .ul-line { display: flow-root; position: relative; }
 .ul-line-inner { display: block; opacity: 0; }
 
+/* where the pointer is over a slab, for the light that slides along its rim: set per element, never inherited */
+@property --lx { syntax: '<length>'; inherits: false; initial-value: -999px; }
+@property --ly { syntax: '<length>'; inherits: false; initial-value: -999px; }
+
 /* the native cursor is hidden only while the custom one runs (fine pointers) */
 html.has-cursor, html.has-cursor * { cursor: none !important; }
+
+/* ---------------- the landing page (index.html marks <html data-page="home">) */
+/* its links to a place on the page glide there (the wheel has its own glide: journey/glide.ts) */
+html[data-page='home'] { scroll-behavior: smooth; }
+html[data-page='home'] body { font-synthesis: none; }
+/* the first thing on the page for a keyboard: past the journey, to the protocol section */
+.skip { position: fixed; left: 20px; top: -100px; z-index: 20; padding: 12px; background: var(--hw-white); color: var(--hw-ink); font-size: 14px; text-decoration: none; }
+.skip:focus { top: 20px; }
+@media (prefers-reduced-motion: reduce) {
+  html[data-page='home'] { scroll-behavior: auto; }
+}

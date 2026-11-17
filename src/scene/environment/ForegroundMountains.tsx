@@ -4,14 +4,15 @@
  * read as two different mountains. The rim of the patch sinks smoothly below the valley floor (no hard
  * edges), and both copies use the shared rock material, palette, fog and dissolve.
  */
-import { use, useEffect, useMemo } from 'react'
+import { use, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { config } from '../../config'
 import { store } from '../../state/store'
 import { createRockMaterial } from './rockMaterial'
 import { FOREGROUND } from './foregroundHeight'
-import { terrainData } from './terrainData'
+import { terrainData, terrainShown } from './terrainData'
+import { warmLit } from '../warm'
 
 function buildGeometry(heights: Float32Array) {
   const n = FOREGROUND.size
@@ -63,6 +64,8 @@ function buildGeometry(heights: Float32Array) {
 
 export function ForegroundMountains() {
   const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
   // heights and erosion map are computed in a worker while the page starts (terrainData.ts)
   const data = use(terrainData())
   const heights = data.heights
@@ -91,12 +94,30 @@ export function ForegroundMountains() {
     [geometry, material, detail],
   )
 
+  // Not drawn until its programs are there (scene/warm.ts), like the valley.
+  const group = useRef<THREE.Group>(null)
+  useLayoutEffect(() => {
+    const g = group.current
+    if (!g) return
+    let alive = true
+    g.visible = false
+    const show = () => {
+      if (!alive) return
+      g.visible = true
+      terrainShown('foreground')
+    }
+    warmLit(gl, g, scene, camera).then(show, show)
+    return () => {
+      alive = false
+    }
+  }, [gl, scene, camera])
+
   useFrame(() => {
     uniforms.uFade.value = store.w.environment
   })
 
   return (
-    <group>
+    <group ref={group}>
       {config.terrain.foreground.map((f, i) => (
         <mesh
           key={i}

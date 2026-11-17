@@ -1,0 +1,111 @@
+/* Frame 3: four tiles. Sizes are in design pixels (var(--u), see deck.module.css). Each tile carries --p,
+   0 to 1, the progress of its picture (Network.tsx), and a step or a stage where the picture moves in steps. */
+
+.tiles { position: relative; display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 34px; }
+.tile { --p: 0; position: relative; display: flex; flex-direction: column; min-height: 330px; padding: calc(18 * var(--u)) calc(20 * var(--u)) calc(20 * var(--u)); border-radius: calc(20 * var(--u)); background: linear-gradient(180deg, rgba(25, 28, 22, 0.82) 0%, rgba(15, 17, 13, 0.88) 100%); box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.09), inset 0 1px 0 rgba(244, 245, 240, 0.07); text-decoration: none; color: var(--fg); }
+.tile:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+.name { display: flex; align-items: center; justify-content: space-between; font-family: var(--font-mono); font-size: max(9.5px, calc(10.5 * var(--u))); letter-spacing: var(--track-mono); line-height: 1; text-transform: uppercase; color: var(--text-2); }
+.name svg { width: calc(15 * var(--u)); height: calc(15 * var(--u)); min-width: 13px; min-height: 13px; color: var(--text-3); transition: transform 0.3s var(--ease-out), color 0.3s var(--ease-out); }
+.tile:hover .name svg { transform: translateX(3px); color: var(--hw-neon); }
+.picture { position: relative; flex: 1; min-height: 168px; margin: calc(12 * var(--u)) 0 calc(16 * var(--u)); }
+.title { font-size: max(16.5px, calc(20.5 * var(--u))); font-weight: 600; letter-spacing: -0.032em; line-height: 1.12; text-wrap: balance; color: var(--fg); }
+.text { margin-top: calc(9 * var(--u)); font-size: max(12.5px, calc(13.5 * var(--u))); letter-spacing: var(--track-text); line-height: 1.45; color: var(--text-2); }
+.more { margin-top: calc(20 * var(--u)); }
+
+/* a wire with a neon run on it, shared by two of the pictures */
+.wire { position: absolute; height: 1px; background: rgba(244, 245, 240, 0.17); }
+.wire span { position: absolute; inset: 0; background: var(--hw-neon); transform-origin: left center; }
+
+/* ---------------------------------------------------------------- Network: three plates */
+.layers { --gap: calc((16 + 38 * var(--p)) * var(--u)); position: absolute; inset: 0; display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; }
+.plates { position: relative; justify-self: center; width: calc(124 * var(--u)); height: calc(124 * var(--u)); margin-top: calc(44 * var(--u)); transform: rotateX(58deg) rotateZ(-45deg); transform-style: preserve-3d; }
+.plates i { --side: #070806; position: absolute; inset: 0; border-radius: 16%; transform: translateZ(calc((var(--z) - 1) * var(--gap))); box-shadow: -1px 1px 0 var(--side), -2px 2px 0 var(--side), -3px 3px 0 var(--side), -4px 4px 0 var(--side), -5px 5px 0 var(--side), -6px 6px 0 var(--side), -7px 7px 0 var(--side); }
+.plates i[data-layer='L3'] { --side: #6f8a00; background: var(--hw-neon); }
+.plates i[data-layer='L2'] { --side: #10120e; background: #343a2d; }
+.plates i[data-layer='L1'] { --side: #060705; background: #1b1e18; }
+.names { display: grid; gap: calc(17 * var(--u)); margin: 0; padding: 0; list-style: none; }
+.names li { display: grid; grid-template-columns: auto 1fr; column-gap: calc(9 * var(--u)); align-items: center; font-size: max(12px, calc(14.5 * var(--u))); font-weight: 600; letter-spacing: -0.015em; line-height: 1.15; color: var(--fg); opacity: calc(0.42 + 0.58 * var(--p)); }
+.names li::before { content: ''; grid-row: span 2; width: calc(9 * var(--u)); height: calc(9 * var(--u)); min-width: 7px; min-height: 7px; border-radius: 3px; }
+.names li[data-layer='L3']::before { background: var(--hw-neon); }
+.names li[data-layer='L2']::before { background: #4a5240; }
+.names li[data-layer='L1']::before { background: #22261e; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.22); }
+.names b { grid-column: 2; font-family: var(--font-mono); font-size: max(9px, calc(9.5 * var(--u))); font-weight: 400; letter-spacing: var(--track-mono); color: var(--text-3); }
+
+/* ---------------------------------------------------------------- Execution: four nodes and a state root */
+.core { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: calc(34 * var(--u)); }
+.nodes { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; padding: 0; list-style: none; }
+.nodes .wire { left: 12.5%; right: 12.5%; top: calc(23 * var(--u)); }
+.nodes .wire span { transform: scaleX(clamp(0, calc((var(--p) * 4.4 - 1) / 3), 1)); }
+.nodes li { position: relative; display: grid; justify-items: center; gap: calc(12 * var(--u)); font-family: var(--font-mono); font-size: max(8.5px, calc(10 * var(--u))); letter-spacing: 0.03em; line-height: 1; text-transform: uppercase; color: var(--text-3); transition: color 0.35s var(--ease-out); }
+.nodes li i { display: grid; place-items: center; width: calc(46 * var(--u)); height: calc(46 * var(--u)); border-radius: calc(13 * var(--u)); background: #11130f; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.22); color: transparent; transition: background 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out), color 0.35s var(--ease-out); }
+.nodes li i svg { width: 46%; height: 46%; stroke-width: 2.6; }
+.tile:is([data-step='1'], [data-step='2'], [data-step='3'], [data-step='4']) [data-node='0'],
+.tile:is([data-step='2'], [data-step='3'], [data-step='4']) [data-node='1'],
+.tile:is([data-step='3'], [data-step='4']) [data-node='2'],
+.tile[data-step='4'] [data-node='3'] { color: var(--fg); }
+.tile:is([data-step='1'], [data-step='2'], [data-step='3'], [data-step='4']) [data-node='0'] i,
+.tile:is([data-step='2'], [data-step='3'], [data-step='4']) [data-node='1'] i,
+.tile:is([data-step='3'], [data-step='4']) [data-node='2'] i,
+.tile[data-step='4'] [data-node='3'] i { background: var(--hw-neon); box-shadow: 0 0 0 4px rgba(204, 255, 0, 0.14); color: var(--hw-ink); }
+.root { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; column-gap: calc(10 * var(--u)); font-family: var(--font-mono); font-size: max(10.5px, calc(12.5 * var(--u))); letter-spacing: 0.01em; line-height: 1; color: var(--text-3); }
+.root b { grid-area: 1 / 2; font-weight: 400; transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out); }
+.root b[data-root='new'] { color: var(--hw-neon); opacity: 0; transform: translateY(6px); }
+.tile[data-step='4'] .root b[data-root='old'] { opacity: 0; transform: translateY(-6px); }
+.tile[data-step='4'] .root b[data-root='new'] { opacity: 1; transform: none; }
+
+/* ---------------------------------------------------------------- Markets: the lifecycle and the bond */
+.life { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; }
+.dots { position: relative; display: flex; justify-content: space-between; margin: 0; padding: 0; list-style: none; }
+.dots .wire { left: calc(5.5 * var(--u)); right: calc(5.5 * var(--u)); top: 50%; }
+.dots .wire span { transform: scaleX(clamp(0, calc(var(--p) * 1.12), 1)); }
+.dots li { position: relative; width: calc(11 * var(--u)); height: calc(11 * var(--u)); min-width: 8px; min-height: 8px; border-radius: 50%; background: #11130f; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.32); transition: background 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out); }
+.dots li[data-dot='0'],
+.tile:is([data-stage='1'], [data-stage='2'], [data-stage='3'], [data-stage='4'], [data-stage='5']) [data-dot='1'],
+.tile:is([data-stage='2'], [data-stage='3'], [data-stage='4'], [data-stage='5']) [data-dot='2'],
+.tile:is([data-stage='3'], [data-stage='4'], [data-stage='5']) [data-dot='3'],
+.tile:is([data-stage='4'], [data-stage='5']) [data-dot='4'],
+.tile[data-stage='5'] [data-dot='5'] { background: var(--hw-neon); box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.15); }
+.stage { display: grid; margin-top: calc(30 * var(--u)); font-size: max(22px, calc(36 * var(--u))); font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: var(--fg); }
+.stage em { grid-area: 1 / 1; font-style: normal; opacity: 0; transform: translateY(8px); transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out); }
+.tile[data-stage='0'] [data-name='0'], .tile[data-stage='1'] [data-name='1'], .tile[data-stage='2'] [data-name='2'], .tile[data-stage='3'] [data-name='3'], .tile[data-stage='4'] [data-name='4'], .tile[data-stage='5'] [data-name='5'] { opacity: 1; transform: none; }
+.bond { display: inline-flex; align-items: center; align-self: flex-start; gap: calc(8 * var(--u)); margin-top: calc(22 * var(--u)); padding: calc(8 * var(--u)) calc(13 * var(--u)) calc(8 * var(--u)) calc(10 * var(--u)); border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.16); font-family: var(--font-mono); font-size: max(9.5px, calc(10.5 * var(--u))); letter-spacing: 0.03em; line-height: 1; text-transform: uppercase; color: var(--text-2); transition: box-shadow 0.4s var(--ease-out), color 0.4s var(--ease-out); }
+/* the lock: hatched while the bond is held, clear and lit when it is released */
+.bond i { width: calc(18 * var(--u)); height: calc(8 * var(--u)); min-height: 6px; border-radius: 2px; background: repeating-linear-gradient(-45deg, rgba(244, 245, 240, 0.5) 0 1.5px, transparent 1.5px 4px); transition: background 0.4s var(--ease-out); }
+.bond span { display: grid; }
+.bond em { grid-area: 1 / 1; font-style: normal; transition: opacity 0.35s var(--ease-out); }
+.bond em[data-bond='free'] { opacity: 0; }
+.tile[data-stage='5'] .bond { box-shadow: inset 0 0 0 1px rgba(204, 255, 0, 0.55); color: var(--hw-neon); }
+.tile[data-stage='5'] .bond i { background: var(--hw-neon); }
+.tile[data-stage='5'] .bond em[data-bond='locked'] { opacity: 0; }
+.tile[data-stage='5'] .bond em[data-bond='free'] { opacity: 1; }
+
+/* ---------------------------------------------------------------- Trackers: a line that follows another */
+.follow { position: absolute; inset: 0; }
+.chart { position: absolute; inset: calc(4 * var(--u)) calc(6 * var(--u)) calc(34 * var(--u)) 0; }
+.chart svg { display: block; width: 100%; height: 100%; overflow: visible; clip-path: inset(-12px calc((1 - var(--p)) * 100%) -12px -12px); }
+.refLine { fill: none; stroke: rgba(244, 245, 240, 0.4); stroke-width: 1.5; stroke-dasharray: 2 4; vector-effect: non-scaling-stroke; }
+.trkLine { fill: none; stroke: var(--hw-neon); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.token { position: absolute; left: 0; top: 80%; width: calc(11 * var(--u)); height: calc(11 * var(--u)); min-width: 9px; min-height: 9px; margin: calc(-5.5 * var(--u)) 0 0 calc(-5.5 * var(--u)); border-radius: 50%; background: var(--hw-neon); box-shadow: 0 0 0 4px rgba(204, 255, 0, 0.16); }
+.keys { position: absolute; left: 0; bottom: 0; display: flex; flex-wrap: wrap; gap: 6px calc(16 * var(--u)); font-family: var(--font-mono); font-size: max(9px, calc(9.5 * var(--u))); letter-spacing: 0.03em; line-height: 1; text-transform: uppercase; color: var(--text-3); }
+.keys span::before { content: ''; display: inline-block; width: calc(14 * var(--u)); height: 2px; margin-right: 7px; vertical-align: middle; }
+.keys span[data-k='trk']::before { background: var(--hw-neon); }
+.keys span[data-k='ref']::before { background: repeating-linear-gradient(90deg, rgba(244, 245, 240, 0.5) 0 2px, transparent 2px 5px); }
+
+/* ---------------------------------------------------------------- stack mode: a row across the card */
+:global(html[data-deck='stack']) .tiles { position: absolute; z-index: 1; left: var(--pad); right: var(--pad); top: calc(var(--pad) + 40 * var(--u)); bottom: calc(var(--pad) + max(204 * var(--u), 176px)); grid-template-columns: repeat(4, 1fr); gap: calc(14 * var(--u)); margin: 0; }
+:global(html[data-deck='stack']) .tile { min-height: 0; }
+:global(html[data-deck='stack']) .picture { min-height: 0; }
+
+:global(html[data-deck='flow']) .tile[data-key='layers'] .picture { min-height: 236px; }
+
+@media (min-width: 620px) {
+  :global(html[data-deck='flow']) .tiles { grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nodes li, .nodes li i, .root b, .dots li, .stage em, .bond, .bond i, .bond em, .name svg { transition: none; }
+}
+
+@media (min-width: 900px) {
+  :global(html[data-deck='flow']) .tiles { grid-column: 1 / -1; grid-template-columns: repeat(4, 1fr); }
+}

@@ -15,6 +15,7 @@ import { PostFX } from './PostFX'
 import { CursorLight } from './cursor/CursorLight'
 import { SafeBoundary } from './SafeBoundary'
 import { demo, demoProgress } from '../scroll/demo'
+import { terrainShown } from './environment/terrainData'
 
 /** Runs first every frame: advances the clock and smooths scroll progress into phase weights. */
 function Director() {
@@ -24,18 +25,22 @@ function Director() {
     store.time += dt
     if (demo.tl) {
       demo.t = demo.start < 0 ? 0 : store.time - demo.start
-      demo.tl.progress(demoProgress(demo.t))
+      // the story is the first second of the timeline; what follows it (the hand-over to the page) is not part of the take
+      demo.tl.time(demoProgress(demo.t))
     }
     // GSAP already scrubs; this extra critically-damped follow removes wheel micro-steps
     const k = 1 - Math.exp(-9 * dt)
     store.scroll += (store.target - store.scroll) * k
     if (Math.abs(store.target - store.scroll) < 1e-5) store.scroll = store.target
-    // (before the reveal the preloader may hold the scene at its heaviest moment to check performance)
+    // (before the hero is uncovered the opening may hold the scene at its heaviest moment to check performance)
     store.progress = store.bench >= 0 ? store.bench : Math.min(1, store.scroll / config.phases.storyEnd)
     store.w = phaseWeights(store.progress)
   }, -100)
   return null
 }
+
+/** The opening waits for the mountains: if the foreground fails and is skipped, it must not wait for ever. */
+const foregroundSkipped = () => terrainShown('foreground')
 
 export function Scene() {
   const [sun, setSun] = useState<THREE.Mesh | null>(null)
@@ -50,7 +55,7 @@ export function Scene() {
       <Suspense fallback={null}>
         <MountainTerrain />
       </Suspense>
-      <SafeBoundary name="ForegroundMountains">
+      <SafeBoundary name="ForegroundMountains" onFail={foregroundSkipped}>
         <Suspense fallback={null}>
           <ForegroundMountains />
         </Suspense>

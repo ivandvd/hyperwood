@@ -1,0 +1,21 @@
+/* The landing page's header. Its colours follow the stage (--on, --on-mark: journey.module.css). */
+.header {
+  position: absolute; inset: var(--header-top) var(--edge) auto; z-index: 4;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: var(--type-nav); font-weight: 500; letter-spacing: -0.01em; color: var(--on);
+  opacity: 0; pointer-events: none; /* timeline.ts takes both over */
+}
+.header a { color: inherit; text-decoration: none; transition: opacity 0.18s var(--ease-out); }
+.header a:hover { opacity: 0.62; }
+.header a:focus-visible { outline: 2px solid var(--on-mark); outline-offset: 6px; border-radius: 2px; }
+.nav { display: flex; gap: var(--nav-gap); }
+
+/* on the row's own centre line (no top: its place in the row puts it there) */
+.brand { position: absolute; left: 50%; transform: translateX(-50%); display: block; }
+/* the master symbol, in Neon on Ink and in Ink on the field */
+.mark {
+  display: block; width: var(--mark-width); aspect-ratio: 428 / 191; background: var(--on-mark);
+  -webkit-mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+}
+.launch span { display: inline-block; margin-left: 2px; }

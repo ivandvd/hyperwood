@@ -1,0 +1,113 @@
+/* Sections 07 to 09, on Paper. */
+
+/* ------------------------------------------------------------ 07: the network
+   Three plates seen from above and to the side, one per layer, in the brand's three colours:
+   Ethereum in Ink at the bottom, Robinhood Chain in White, Hyperwood in Hyper Neon on top. */
+.net { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--col-gap); row-gap: 40px; align-items: start; }
+.iso { --lift: 1; --plate: clamp(180px, 20vw, 350px); --rise: clamp(70px, 8.6vw, 150px); position: sticky; top: calc(var(--header-h) + 28px); height: calc(var(--plate) * 0.78 + var(--rise) * 1.68 + 76px); }
+.isoGround { position: absolute; left: 50%; bottom: 0; width: calc(var(--plate) * 1.7); height: calc(var(--plate) * 0.62); transform: translateX(-50%); background: radial-gradient(closest-side, rgba(10, 10, 10, 0.2), rgba(10, 10, 10, 0)); }
+/* the stage is the plane of the bottom plate; the others stand above it along its normal */
+.isoStage { position: absolute; left: 50%; top: calc(100% - 46px - var(--plate) * 0.385); width: var(--plate); height: var(--plate); margin: calc(var(--plate) / -2) 0 0 calc(var(--plate) / -2); transform: rotateX(57deg) rotateZ(-45deg); transform-style: preserve-3d; }
+.plate { --side: var(--hw-ink); position: absolute; inset: 0; border-radius: 13%; transform: translateZ(calc(var(--z) * var(--rise) * var(--lift))); translate: 0 0 0; transition: translate 0.45s var(--ease-out);
+  /* its edge, and its thickness: sixteen steps towards the viewer's "down" */
+  box-shadow: inset 0 0 0 1.5px var(--hw-ink), -1px 1px 0 var(--side), -2px 2px 0 var(--side), -3px 3px 0 var(--side), -4px 4px 0 var(--side), -5px 5px 0 var(--side), -6px 6px 0 var(--side), -7px 7px 0 var(--side), -8px 8px 0 var(--side), -9px 9px 0 var(--side), -10px 10px 0 var(--side), -11px 11px 0 var(--side), -12px 12px 0 var(--side), -13px 13px 0 var(--side), -14px 14px 0 var(--side), -15px 15px 0 var(--side), -16px 16px 0 var(--side); }
+.plate[data-layer='L3'] { background: var(--hw-neon); color: var(--hw-ink); }
+.plate[data-layer='L2'] { background: var(--hw-white); color: var(--hw-ink); }
+.plate[data-layer='L1'] { background: #1b1e19; color: var(--hw-paper); }
+.plate[data-hot] { translate: 0 0 18px; }
+/* the name runs along the front edge of the plate, where the plate above never covers it */
+.plateName { position: absolute; left: 9%; bottom: 7.5%; display: flex; align-items: baseline; gap: 0.6em; font-size: clamp(14px, 1.56vw, 22.5px); font-weight: 600; letter-spacing: -0.03em; line-height: 1; white-space: nowrap; }
+.plateName b { font-family: var(--font-mono); font-size: 0.56em; font-weight: 400; letter-spacing: var(--track-mono); opacity: 0.72; }
+
+.layers { list-style: none; }
+.layer { position: relative; display: grid; grid-template-columns: 62px 1fr; align-items: center; padding: 22px 0; border-top: 1px solid var(--hair); }
+.layer:last-child { border-bottom: 1px solid var(--hair); }
+.layerTag { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 28px; border-radius: 8px; box-shadow: inset 0 0 0 1.5px var(--hw-ink); font-family: var(--font-mono); font-size: 12px; letter-spacing: var(--track-mono); color: var(--hw-ink); }
+.layerTag[data-layer='L3'] { background: var(--hw-neon); }
+.layerTag[data-layer='L2'] { background: var(--hw-white); }
+.layerTag[data-layer='L1'] { background: var(--hw-ink); color: var(--hw-paper); }
+.layer strong { display: block; width: fit-content; font-size: var(--size-h3); font-weight: 600; letter-spacing: -0.028em; line-height: 1.15; color: var(--fg); background: linear-gradient(var(--hw-neon), var(--hw-neon)) no-repeat 0 100% / 0% 100%; transition: background-size 0.35s var(--ease-out), box-shadow 0.2s var(--ease-out); }
+.layer[data-hot] strong { background-size: 100% 100%; box-shadow: -5px 0 0 var(--hw-neon), 5px 0 0 var(--hw-neon); }
+.layer p { margin-top: 6px; font-size: var(--size-note); line-height: 1.45; letter-spacing: var(--track-text); color: var(--text-2); }
+/* the link down to the next layer sits on the line between the two */
+.settles { position: absolute; left: 62px; top: 100%; z-index: 1; transform: translateY(-50%); padding: 0 12px 0 0; background: var(--bg); color: var(--text-3); white-space: nowrap; }
+
+.facts { list-style: none; margin-top: clamp(28px, 3vw, 44px); }
+.facts li { display: grid; grid-template-columns: 132px 1fr; column-gap: 20px; padding: 15px 0; border-top: 1px solid var(--hair); }
+.facts li:last-child { border-bottom: 1px solid var(--hair); }
+.factName { padding-top: 3px; color: var(--text-3); }
+.facts p { font-size: 14.5px; line-height: 1.45; letter-spacing: -0.012em; color: var(--fg); }
+
+/* ------------------------------------------------------------ 08: four stages on one line
+   --p follows the scroll, 0 to 1. The line fills with it, and each stage's number is marked as the line reaches
+   it (--t is where that stage starts). */
+.stages { --p: 0; position: relative; list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); column-gap: var(--col-gap); row-gap: 30px; padding-top: 28px; }
+.stages::before, .stages::after { content: ''; position: absolute; left: 0; top: 0; height: 2px; }
+.stages::before { right: 0; background: var(--hair); }
+.stages::after { width: 100%; background: var(--accent); transform: scaleX(var(--p)); transform-origin: left center; }
+.stageNum, .phaseNum { --on: clamp(0, calc((var(--p) - var(--t)) * 44), 1); position: relative; z-index: 0; display: inline-block; padding: 3px 8px; border-radius: 6px; font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); color: color-mix(in srgb, var(--hw-ink) calc(var(--on) * 100%), var(--mark)); }
+.stageNum::before, .phaseNum::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--hw-neon); opacity: var(--on); }
+.stageNum { margin: 0 0 20px -8px; }
+.stages strong { display: block; font-size: var(--size-h3); font-weight: 500; letter-spacing: -0.028em; line-height: 1.15; color: var(--fg); }
+.stages p { margin-top: 10px; max-width: 26em; }
+
+/* the target: an Ink panel with the kit's current lines running through its upper part */
+.target { overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--col-gap); row-gap: 22px; align-items: end; min-height: clamp(280px, 29vw, 420px); padding: clamp(24px, 3.4vw, 56px); }
+.lines { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.8; -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 34%, transparent 70%); mask-image: linear-gradient(to bottom, #000 0, #000 34%, transparent 70%); }
+.targetMain, .targetText { position: relative; }
+.targetTag { margin-bottom: 20px; color: var(--hw-neon); }
+.figure { font-size: clamp(44px, 7.2vw, 112px); font-weight: 600; letter-spacing: -0.055em; line-height: 0.92; color: var(--fg); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.figureLabel { margin-top: 16px; color: var(--text-3); }
+
+.blocks { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.blocks li { min-height: clamp(200px, 17vw, 250px); transition: box-shadow 0.3s var(--ease-out); }
+.blocks li:hover { box-shadow: inset 0 0 0 1px var(--text-3); }
+.blockNum { display: block; margin-bottom: clamp(36px, 4.4vw, 64px); font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); color: var(--mark); }
+.blocks p { margin-top: 10px; }
+
+/* ------------------------------------------------------------ 09: seven phases beside the rules the accounting keeps */
+.build { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); column-gap: var(--col-gap); row-gap: 48px; align-items: start; }
+.phases { --p: 0; position: relative; list-style: none; padding-left: 26px; }
+/* the rail: it fills down as the reading line passes each phase */
+.phases::before, .phases::after { content: ''; position: absolute; left: 0; top: 30px; bottom: 0; width: 2px; border-radius: 2px; }
+.phases::before { background: var(--hair); }
+.phases::after { background: var(--accent); transform: scaleY(var(--p)); transform-origin: center top; }
+.phaseHead, .phase { display: grid; grid-template-columns: 54px minmax(0, 0.8fr) minmax(0, 1.2fr); column-gap: 20px; }
+.phaseHead { height: 30px; color: var(--text-3); }
+.phase { padding: 21px 0; border-top: 1px solid var(--hair); align-items: baseline; }
+.phase:last-child { border-bottom: 1px solid var(--hair); }
+.phaseNum { justify-self: start; margin-left: -8px; }
+.phase strong { font-size: 18px; font-weight: 600; letter-spacing: -0.022em; line-height: 1.3; color: var(--fg); }
+.rules { position: sticky; top: calc(var(--header-h) + 24px); padding: clamp(22px, 2.6vw, 38px); }
+.ruleList { margin-top: 24px; }
+.ruleClose { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--slab-line); font-size: 18px; font-weight: 600; letter-spacing: -0.022em; line-height: 1.3; color: var(--hw-neon); }
+
+@media (max-width: 1000px) {
+  .net { grid-template-columns: 1fr; }
+  .iso { position: relative; top: auto; }
+  .stages { grid-template-columns: 1fr 1fr; }
+  .target { grid-template-columns: 1fr; }
+  .blocks { grid-template-columns: 1fr 1fr; }
+  .build { grid-template-columns: 1fr; }
+  .rules { position: static; }
+}
+
+@media (max-width: 760px) {
+  .layer { grid-template-columns: 54px 1fr; }
+  .settles { left: 54px; }
+  .facts li { grid-template-columns: 1fr; row-gap: 8px; }
+  .stages { grid-template-columns: 1fr; }
+  .stageNum { margin-bottom: 12px; }
+  .blocks { grid-template-columns: 1fr; }
+  .blocks li { min-height: 0; }
+  .blockNum { margin-bottom: 16px; }
+  .phases { padding-left: 20px; }
+  .phases::before, .phases::after { top: 0; }
+  .phaseHead { display: none; }
+  .phase { grid-template-columns: 48px 1fr; row-gap: 6px; }
+  .phase p { grid-column: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate, .layer strong { transition: none; }
+}

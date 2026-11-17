@@ -3,13 +3,14 @@
  * on a non-uniform grid (dense near the camera and the valley axis, sparse far away),
  * shaded with a slope/altitude rock–snow shader and fragment-level micro relief.
  */
-import { use, useEffect, useMemo } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { use, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { config } from '../../config'
 import { store } from '../../state/store'
-import { terrainData } from './terrainData'
+import { terrainData, terrainShown } from './terrainData'
 import { createRockMaterial } from './rockMaterial'
+import { warmLit } from '../warm'
 
 function buildTerrainGeometry(pos: Float32Array) {
   const nx = config.terrain.segmentsX + 1
@@ -54,10 +55,32 @@ export function MountainTerrain() {
     [geometry, material],
   )
 
+  // It is not drawn until its programs are there (scene/warm.ts): drawing it at once would stop the screen
+  // while they compile. The opening is still up, and waits.
+  const mesh = useRef<THREE.Mesh>(null)
+  const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
+  useLayoutEffect(() => {
+    const m = mesh.current
+    if (!m) return
+    let alive = true
+    m.visible = false
+    const show = () => {
+      if (!alive) return
+      m.visible = true
+      terrainShown('valley')
+    }
+    warmLit(gl, m, scene, camera).then(show, show)
+    return () => {
+      alive = false
+    }
+  }, [gl, scene, camera])
+
   useFrame(() => {
     // the valley dissolves into darkness during the disassembly
     uniforms.uFade.value = store.w.environment
   })
 
-  return <mesh geometry={geometry} material={material} frustumCulled={false} />
+  return <mesh ref={mesh} geometry={geometry} material={material} frustumCulled={false} />
 }

@@ -14,6 +14,7 @@ import { config } from '../../config'
 import { store } from '../../state/store'
 import { trailState } from '../../state/trail'
 import { WORLD_SCALE, phraseWorldCenter } from '../../choreography/framing'
+import { alsoDrawn, switchedLight } from '../warm'
 
 
 const quadVert = /* glsl */ `
@@ -238,6 +239,11 @@ export function CursorLight() {
     trailState.texture = write.texture
     tmp.lastUv.set(u, v)
   }, -1)
+
+  // three makes a program per set of lights that are on: this one is switched, so it is declared (scene/warm.ts)
+  useEffect(() => (light.current ? switchedLight(light.current) : undefined), [])
+  // the trail is drawn in a scene of its own: its program is compiled ahead with the others
+  useEffect(() => alsoDrawn(sim.scene, sim.camera), [sim])
 
   const orbSize = C.orbSize * WORLD_SCALE
   return (

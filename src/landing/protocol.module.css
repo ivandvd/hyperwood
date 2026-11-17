@@ -1,0 +1,55 @@
+/* The protocol section: Paper, the kit's surface for reading, with Ink type. It lies above the footer and
+   lifts off it like a lid (foot.module.css). */
+.main {
+  --stage-top: var(--hw-ink); --stage-mid: #3d5210; --stage-low: #7fa800; --stage-foot: #a6cf00;
+  position: relative; z-index: 2; overflow: hidden; scroll-margin-top: 20px;
+  padding: var(--main-top) var(--edge) var(--main-bottom);
+  background: var(--hw-paper); color: var(--hw-ink); font-family: var(--font-text);
+}
+
+.label {
+  border-top: 1px solid rgba(10, 10, 10, 0.86); padding-top: 14px;
+  font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); text-transform: uppercase;
+}
+.label::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 9px; border-radius: 50%; background: currentColor; vertical-align: 1px; }
+
+.stages { margin: var(--stages-margin); }
+.stages svg { display: block; width: var(--stages-width); max-width: none; height: auto; transform: translateX(var(--stages-shift)); }
+/* a name under each ring: the ring centres are at 11.3, 30.6, 49.9, 69.2 and 88.5 % of the drawing */
+.names { position: relative; height: 34px; margin-top: 14px; width: var(--stages-width); transform: translateX(var(--stages-shift)); }
+.names span {
+  position: absolute; top: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px;
+  font-size: 14px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap;
+}
+.names span:nth-child(1) { left: 11.32%; }
+.names span:nth-child(2) { left: 30.63%; }
+.names span:nth-child(3) { left: 49.93%; }
+.names span:nth-child(4) { left: 69.24%; }
+.names span:nth-child(5) { left: 88.54%; }
+.names i { font-family: var(--font-mono); font-size: var(--size-micro); font-style: normal; letter-spacing: var(--track-mono); color: var(--hw-slate); }
+
+.grid { display: grid; grid-template-columns: var(--about-columns); gap: var(--about-gap); }
+.title {
+  margin: 0; font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--type-about);
+  line-height: 1.02; letter-spacing: var(--track-display);
+}
+.title span { display: block; }
+.more {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 34px; padding: 13px 20px; border-radius: 999px;
+  background: var(--hw-ink); color: var(--hw-neon); font-size: 14px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none;
+  transition: background 0.18s var(--ease-out), color 0.18s var(--ease-out);
+}
+.more:hover { background: var(--hw-neon); color: var(--hw-ink); }
+.more:focus-visible { outline: 2px solid var(--hw-ink); outline-offset: 4px; }
+.more span { transition: transform 0.18s var(--ease-out); }
+.more:hover span { transform: translateX(3px); }
+
+.features { display: grid; grid-template-columns: 1fr 1fr; gap: var(--features-gap); padding-top: var(--features-top); scroll-margin-top: 60px; }
+.featureTitle { margin: 0 0 12px; font-size: var(--type-feature-title); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; }
+.featureText { margin: 0; max-width: 38ch; font-size: var(--type-feature); line-height: 1.45; letter-spacing: -0.012em; color: rgba(10, 10, 10, 0.74); }
+.fine { grid-column: 1 / -1; margin: 6px 0 0; padding-top: 16px; border-top: 1px solid rgba(10, 10, 10, 0.14); font-size: 12px; line-height: 1.4; color: var(--hw-slate); }
+
+@media (max-width: 760px) {
+  .names span { font-size: 11px; }
+  .names span:nth-child(1), .names span:nth-child(5) { display: none; }
+}

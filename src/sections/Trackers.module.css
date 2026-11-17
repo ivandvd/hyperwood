@@ -1,0 +1,90 @@
+/* Section 05: tracker tokens and portability. */
+.top { display: grid; grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr); column-gap: var(--col-gap); row-gap: 48px; align-items: start; }
+.after { margin-top: 16px; }
+
+/* the follow: a reference, and a token that keeps to it. Drawn once (the kit: charts draw once). */
+.follow { margin: 0; padding: clamp(20px, 2.4vw, 36px); border-radius: var(--radius-l); }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px; }
+.key { display: inline-flex; align-items: center; gap: 10px; color: var(--text-2); }
+.key::before { content: ''; width: 18px; height: 2px; border-radius: 2px; }
+.keyRef::before { background: var(--hw-slate); }
+.keyTrk { color: var(--fg); }
+.keyTrk::before { background: var(--hw-neon); }
+.tagRight { margin-left: auto; color: var(--text-3); }
+.plot { position: relative; height: clamp(220px, 23vw, 330px); margin-top: 22px; }
+.plot svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; }
+.grid, .ref, .trk, .gapLine { fill: none; vector-effect: non-scaling-stroke; }
+.grid { stroke: rgba(244, 245, 240, 0.07); stroke-width: 1; }
+.ref, .trk { stroke-linejoin: round; stroke-linecap: round; }
+.ref { stroke: var(--hw-slate); stroke-width: 2; }
+.trk { stroke: var(--hw-neon); stroke-width: 2; filter: drop-shadow(0 0 6px rgba(204, 255, 0, 0.45)); }
+/* each line is wiped in from the left (the kit's Flow), the tracker a moment behind its reference */
+.draw { clip-path: inset(-20px 100% -20px -20px); transition: clip-path 1.7s var(--ease-out) 0.2s; }
+.drawTrk { transition-delay: 0.5s; }
+.follow[data-in] .draw { clip-path: inset(-20px -20px -20px -20px); }
+/* where it parts from the reference: a short tie between the two lines, and two words */
+.gapLine { stroke: rgba(244, 245, 240, 0.6); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0; transition: opacity 0.5s var(--ease-out) 1.7s; }
+.gapLabel { position: absolute; margin: 10px 0 0; transform: translateX(-50%); padding: 3px 8px; border-radius: 5px; box-shadow: inset 0 0 0 1px var(--hair); background: var(--slab); color: var(--text-2); font-size: 10px; white-space: nowrap; opacity: 0; transition: opacity 0.5s var(--ease-out) 1.8s; }
+.follow[data-in] .gapLine, .follow[data-in] .gapLabel { opacity: 1; }
+.tracking { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--slab-line); max-width: 62em; }
+
+/* the two backing structures */
+.kinds { list-style: none; margin-top: 28px; }
+.kinds li { display: grid; grid-template-columns: var(--idx) 1fr; padding: 19px 0; border-top: 1px solid var(--hair); }
+.kinds li:last-child { border-bottom: 1px solid var(--hair); }
+.kindNum { padding-top: 5px; font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); color: var(--mark); }
+.kinds strong { display: block; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.3; color: var(--fg); }
+.kinds p { margin-top: 6px; max-width: 34em; }
+
+/* the shortfall: a liability that grew by a tenth, a reserve that did not */
+.short { display: grid; grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr); column-gap: var(--col-gap); row-gap: 28px; align-items: center; padding: clamp(20px, 2.4vw, 36px); border-radius: var(--radius-l); }
+.shortText { margin-top: 14px; max-width: 36em; }
+.bar { display: grid; grid-template-columns: 84px 1fr 56px; align-items: center; column-gap: 14px; }
+.bar + .bar { margin-top: 14px; }
+.barLabel { color: var(--text-3); }
+.bar strong { font-size: 15.5px; font-weight: 600; letter-spacing: -0.015em; color: var(--fg); text-align: right; font-variant-numeric: tabular-nums; }
+.rail { position: relative; display: block; height: 38px; }
+.rail i { position: absolute; top: 0; bottom: 0; display: block; border-radius: 6px; }
+/* both start level at $600 (ten elevenths of the rail), then the liability rises to $660 */
+.reserve, .liability { left: 0; width: calc(100% * 600 / 660); background: rgba(244, 245, 240, 0.86); transform: scaleX(0); transform-origin: left center; transition: transform 0.9s var(--ease-out) 0.15s; }
+.liability { background: var(--hw-neon); }
+.short[data-in] .reserve, .short[data-in] .liability { transform: scaleX(1); }
+.gap { left: calc(100% * 600 / 660); width: calc(100% * 60 / 660); border-radius: 0 6px 6px 0; background: repeating-linear-gradient(-45deg, var(--hw-neon) 0 2px, transparent 2px 7px); box-shadow: inset 0 0 0 1px var(--hw-neon); transform: scaleX(0); transform-origin: left center; transition: transform 0.9s var(--ease-out) 1s; }
+.short[data-in] .gap { transform: scaleX(1); }
+.short[data-in] .liability { border-radius: 6px 0 0 6px; transition: transform 0.9s var(--ease-out) 0.15s, border-radius 0.2s linear 1s; }
+.shortLabel { margin-top: 16px; text-align: right; padding-right: 70px; color: var(--hw-neon); opacity: 0; transition: opacity 0.6s var(--ease-out) 1.7s; }
+.short[data-in] .shortLabel { opacity: 1; }
+
+/* the path: sealed first, then in the open */
+.path { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 30px; }
+.stop { display: flex; flex-direction: column; gap: 12px; min-height: clamp(210px, 19vw, 270px); padding: var(--card-pad); border-radius: var(--radius); }
+.stop strong { font-size: var(--size-h3); font-weight: 500; letter-spacing: -0.028em; line-height: 1.15; color: var(--fg); }
+.tag { display: flex; gap: 12px; padding-bottom: clamp(36px, 4.6vw, 70px); }
+.tag b { font-weight: 400; }
+.sealed { background: var(--slab); box-shadow: inset 0 0 0 1px var(--slab-line); }
+.sealed .tag { color: var(--text-3); }
+.open { box-shadow: inset 0 0 0 1px var(--hair); }
+.open .tag { color: var(--hw-neon); }
+/* where confidentiality ends: the first open stop carries the mark */
+.seam { position: absolute; left: -7px; top: 22px; bottom: 22px; width: 2px; border-radius: 2px; background: var(--hw-neon); box-shadow: 0 0 10px rgba(204, 255, 0, 0.5); }
+.pathNote { margin-top: 22px; }
+
+@media (max-width: 1000px) {
+  .top, .short { grid-template-columns: 1fr; }
+  .path { grid-template-columns: 1fr 1fr; }
+  .seam { display: none; }
+}
+
+@media (max-width: 760px) {
+  .path { grid-template-columns: 1fr; }
+  .stop { min-height: 0; }
+  .tag { padding-bottom: 14px; }
+  .tagRight { margin-left: 0; }
+  .bar { grid-template-columns: 70px 1fr 48px; column-gap: 10px; }
+  .shortLabel { padding-right: 58px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draw, .gapLine, .gapLabel, .reserve, .liability, .gap, .shortLabel { transition: none; }
+  .draw { clip-path: none; }
+}

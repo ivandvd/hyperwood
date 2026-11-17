@@ -1,0 +1,21 @@
+/* The Architecture page: its opening, on Ink, in the landing page's own type. */
+.head { position: relative; padding: calc(var(--header-h) + clamp(64px, 9vw, 140px)) var(--gutter) 0; background: var(--bg); }
+.title { font-size: var(--size-display); white-space: normal; }
+.lead { max-width: 37em; margin-top: clamp(30px, 3.4vw, 48px); font-size: clamp(16px, 1.3vw, 19px); line-height: 1.5; letter-spacing: var(--track-text); color: var(--text-2); }
+
+/* the contents: every section, one line each */
+.contents { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: var(--col-gap); margin-top: clamp(48px, 5.6vw, 84px); border-top: 1px solid var(--hair); }
+.contents a { display: flex; align-items: baseline; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--hair); font-size: 15.5px; font-weight: 500; letter-spacing: -0.015em; line-height: 1.3; text-decoration: none; color: var(--fg); transition: color 0.18s var(--ease-out); }
+.contents a b { font-family: var(--font-mono); font-size: var(--size-label); font-weight: 400; letter-spacing: var(--track-mono); color: var(--hw-neon); }
+.contents a:hover { color: var(--hw-neon); }
+.contents a:focus-visible { outline: 1px solid var(--focus); outline-offset: 4px; }
+
+/* the Paper sheet ends the page's reading; the footer follows on Ink */
+.sheet { padding-bottom: var(--section-bottom); border-radius: var(--radius-l); }
+
+@media (max-width: 1000px) {
+  .contents { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .contents { grid-template-columns: 1fr; }
+}

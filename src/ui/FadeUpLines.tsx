@@ -7,7 +7,7 @@
  * it leaves (ui/titles.ts). Lines are re-measured on resize and when fonts load, keeping the current time.
  * Justification survives the split: every line but the last is justified to the column edges.
  */
-import { useLayoutEffect, useRef } from 'react'
+import { createElement, useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { config } from '../config'
 import { registerTitle, type TitleGroup } from './titles'
@@ -17,6 +17,9 @@ interface Props {
   group: TitleGroup
   delay?: number
   className?: string
+  /** The element to render: a paragraph by default, or a heading for section titles. */
+  as?: 'p' | 'h2' | 'h3'
+  id?: string
 }
 
 function el(tag: string, cls: string, text?: string) {
@@ -26,8 +29,8 @@ function el(tag: string, cls: string, text?: string) {
   return n
 }
 
-export function FadeUpLines({ text, group, delay = 0, className }: Props) {
-  const host = useRef<HTMLParagraphElement>(null)
+export function FadeUpLines({ text, group, delay = 0, className, as = 'p', id }: Props) {
+  const host = useRef<HTMLElement>(null)
 
   useLayoutEffect(() => {
     const node = host.current
@@ -130,9 +133,5 @@ export function FadeUpLines({ text, group, delay = 0, className }: Props) {
     }
   }, [text, group, delay])
 
-  return (
-    <p ref={host} className={`ul ${className ?? ''}`}>
-      {text}
-    </p>
-  )
+  return createElement(as, { ref: host, id, className: `ul ${className ?? ''}` }, text)
 }

@@ -1,15 +1,13 @@
 .ui { position: absolute; inset: 0; pointer-events: none; }
 .layer { position: absolute; inset: 0; }
 
-/* sticky header: the horizontal lockup from the brand kit, never retyped */
-.header { position: absolute; top: var(--edge); left: var(--edge); right: var(--edge); display: flex; justify-content: space-between; align-items: center; z-index: 6; }
-.logo { display: block; height: var(--logo-height); width: auto; }
-.label { opacity: 0.82; }
+/* the lower edge of the scene fades to the page colour: the section below starts on exactly the same Ink */
+.ground { position: absolute; left: 0; right: 0; bottom: 0; height: var(--ground); background: linear-gradient(to bottom, var(--shade-0), var(--bg)); opacity: calc(1 - var(--frame, 0)); }
 
 /* sticky phase indicator: a hairline track + "01 Accepted" */
 .phase { position: absolute; left: var(--edge); top: calc(50% + 0.5px); transform: translateY(-50%); display: flex; flex-direction: column; gap: var(--phase-gap); width: var(--phase-width); z-index: 3; }
-/* while the preloader is up its layer is transparent (the cover is drawn in WebGL), so the hero UI and the
-   phase indicator stay hidden and fade in as the circle opens */
+/* while the opening's cover is up (ui/opening.ts) the hero UI and the phase indicator stay hidden; they fade in
+   as the cover sinks */
 .ui [data-ui='hero'], .phase { transition: opacity 0.9s var(--ease-out) 0.25s; }
 .ui[data-loading] [data-ui='hero'], .ui[data-loading] .phase { opacity: 0; transition: none; }
 .track { position: relative; display: block; width: 1px; height: var(--phase-h); background: var(--track); overflow: hidden; }
@@ -27,6 +25,12 @@
 .finalText { position: absolute; left: var(--final-text-left); bottom: var(--final-text-bottom); }
 .finalLine1 { position: absolute; left: var(--edge); bottom: var(--final-line-bottom); }
 .finalLine2 { position: absolute; right: var(--edge); bottom: var(--edge); text-align: right; }
+/* The hand-over (see App.module.css): as the scene draws in to its frame, the closing copy steps inside the
+   frame with it, by the frame's own padding. Then the whole layer draws back and dims with the scene. */
+.finalLine1 { transform: translate(calc(var(--frame, 0) * var(--frame-pad)), calc(var(--frame, 0) * -1 * var(--frame-pad))); }
+.finalLine2 { transform: translate(calc(var(--frame, 0) * -1 * var(--frame-pad)), calc(var(--frame, 0) * -1 * var(--frame-pad))); }
+.finalText { transform: translate(calc(var(--frame, 0) * -1 * var(--frame-pad)), 0); }
+.ui [data-ui='final'] { transform-origin: 50% var(--frame-top); transform: scale(calc(1 - 0.05 * var(--covered, 0))); opacity: calc(1 - 0.75 * var(--covered, 0)); }
 .restart { position: absolute; left: var(--final-text-left); bottom: 212px; pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; color: var(--hw-neon); transition: opacity 0.4s ease; }
 .restart:hover { opacity: 0.7; }
 .restart:focus-visible { outline: 1px solid var(--focus); outline-offset: 6px; }
@@ -44,7 +48,9 @@
 }
 
 @media (max-width: 760px) {
-  .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  /* the closing lines span the screen, so inside the frame the whole layer draws in a little instead */
+  .finalLine1, .finalLine2, .finalText { transform: none; }
+  .ui [data-ui='final'] { transform-origin: 50% 100%; transform: translateY(calc(var(--frame, 0) * -1 * (var(--edge) + 12px))) scale(calc(1 - 0.105 * var(--frame, 0))); }
   .heroTitle { bottom: var(--hero-title-bottom); }
   .finalText { left: auto; right: var(--edge); }
   .restart { left: auto; right: var(--edge); bottom: var(--restart-bottom); }

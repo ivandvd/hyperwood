@@ -1,0 +1,129 @@
+/* Shared building blocks of the sections below the hero. Sizes and colours come from styles/tokens.css. */
+
+/* ---------------------------------------------------------------- surfaces
+   The brand kit gives a page three surfaces: Ink, Paper for reading, and Hyper Neon for the moment to remember.
+   A section stands on Ink unless it carries .paper. A panel inside a Paper section goes back to Ink with .ink:
+   that is how the diagrams read as dark instruments set into a light page. */
+.ink { --bg: var(--hw-ink); --fg: var(--hw-white); --text-2: rgba(244, 245, 240, 0.66); --text-3: rgba(244, 245, 240, 0.48); --hair: rgba(244, 245, 240, 0.14); --slab: #131511; --slab-line: rgba(244, 245, 240, 0.07); --accent: var(--hw-neon); --mark: var(--hw-neon); --focus: rgba(204, 255, 0, 0.7); color: var(--hw-paper); }
+.paper { --bg: var(--hw-paper); --fg: var(--hw-ink); --text-2: rgba(10, 10, 10, 0.72); --text-3: rgba(10, 10, 10, 0.58); --hair: rgba(10, 10, 10, 0.16); --slab: var(--hw-white); --slab-line: var(--hw-line); --accent: var(--hw-ink); --mark: var(--hw-slate); --focus: rgba(10, 10, 10, 0.85); color: var(--hw-ink); }
+
+.section { position: relative; background: var(--bg); padding: var(--section-top) var(--gutter) 0; scroll-margin-top: var(--header-h); }
+
+/* The Paper sheet: it rises over the Ink page with rounded shoulders, and the Ink close rises over it in turn. */
+.sheet { position: relative; z-index: 1; margin-top: calc(-1 * var(--radius-l)); padding-bottom: clamp(230px, 27vw, 410px); border-radius: var(--radius-l) var(--radius-l) 0 0; background: var(--bg); overflow: clip; }
+/* The kit's Open field: a partial contour, Ink on Paper, anchored to the bottom right edge. The Ink close rises
+   over its lower part, so the wave reads as the Ink reaching up into the sheet. */
+.field { position: absolute; right: 0; bottom: 0; width: min(60vw, 900px); aspect-ratio: 1000 / 446.26; transform: translate(24%, 34%); background: var(--hw-ink); -webkit-mask: url('../assets/brand/hyperwood-symbol-neon.svg') no-repeat center / 100% 100%; mask: url('../assets/brand/hyperwood-symbol-neon.svg') no-repeat center / 100% 100%; pointer-events: none; }
+
+/* Head: a number and a name, a statement, a lead paragraph beside it. */
+.head { position: relative; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--col-gap); align-items: end; margin-bottom: var(--block-gap-s); }
+.eyebrow { grid-column: 1 / -1; display: flex; gap: 14px; margin-bottom: 30px; font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); text-transform: uppercase; color: var(--text-2); }
+.eyebrow b { font-weight: 400; color: var(--mark); }
+.title { max-width: 13em; font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--size-h2s); letter-spacing: -0.042em; line-height: 1.03; color: var(--fg); }
+.lead { max-width: 36em; padding-bottom: 0.3em; font-size: var(--size-lead); line-height: 1.5; letter-spacing: var(--track-text); color: var(--text-2); }
+
+/* Reveal, once per visit: the kit's Rise (12 px, 600 ms, its curve). A block sets data-in when it comes into view. */
+.rise { opacity: 0; transform: translateY(12px); transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out); transition-delay: calc(var(--i, 0) * 70ms); }
+[data-in] .rise, .rise[data-in] { opacity: 1; transform: none; }
+
+/* Text. */
+.h3 { font-size: var(--size-h3); font-weight: 600; letter-spacing: -0.028em; line-height: 1.16; color: var(--fg); }
+.kicker { font-size: var(--size-note-title); font-weight: 600; letter-spacing: -0.015em; line-height: 1.3; color: var(--fg); }
+.text { max-width: 34em; font-size: var(--size-lead); line-height: 1.5; letter-spacing: var(--track-text); color: var(--text-2); }
+.small { font-size: var(--size-note); line-height: 1.54; letter-spacing: var(--track-text); color: var(--text-2); }
+.fine { font-size: 13px; line-height: 1.5; letter-spacing: var(--track-text); color: var(--text-3); }
+.mono { font-family: var(--font-mono); font-size: var(--size-label); font-weight: 400; letter-spacing: var(--track-mono); text-transform: uppercase; }
+/* the highlighter: Ink type on Hyper Neon, the kit's pairing for what should be remembered */
+.hl { padding: 0.02em 0.3em 0.06em; margin: 0 -0.06em; border-radius: 0.24em; background: var(--hw-neon); color: var(--hw-ink); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+/* Layout. */
+.two { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--col-gap); row-gap: 48px; align-items: start; }
+.gap { margin-top: var(--block-gap); }
+.gapS { margin-top: var(--block-gap-s); }
+.stack > * + * { margin-top: 18px; }
+
+/* A card: the same slab the confidential rows use. */
+.card { position: relative; padding: var(--card-pad); border-radius: var(--radius); background: var(--slab); box-shadow: inset 0 0 0 1px var(--slab-line); }
+/* A dark instrument set into the page: diagrams, boards and code stand on Ink whatever surrounds them. */
+.device { position: relative; padding: var(--card-pad); border-radius: var(--radius-l); background: var(--hw-ink); box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.07); }
+
+/* Light on a slab: where the pointer is, neon runs along the rim and pools faintly inside, as a reflection would.
+   motion.ts sets --lx and --ly on every .lit element of a container that carries data-lights. */
+.lit { position: relative; }
+.lit::before { content: ''; position: absolute; inset: 0; z-index: 1; padding: 1px; border-radius: inherit; background: radial-gradient(210px circle at var(--lx) var(--ly), rgba(204, 255, 0, 0.85), rgba(204, 255, 0, 0) 72%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; opacity: 0; transition: opacity 0.35s var(--ease-out); pointer-events: none; }
+[data-lights]:hover .lit::before { opacity: 1; }
+
+/* Notes in a row, each under a hairline. */
+.notes { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); column-gap: var(--col-gap); row-gap: 40px; }
+.note { position: relative; padding-top: 22px; }
+.note::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--hair); }
+.note p { margin-top: 10px; max-width: 31em; }
+
+/* A two-column table on hairlines. */
+.table { width: 100%; border-collapse: collapse; }
+.table th { padding: 0 0 14px; text-align: left; font-family: var(--font-mono); font-size: var(--size-label); font-weight: 400; letter-spacing: var(--track-mono); text-transform: uppercase; color: var(--text-3); }
+.table td { padding: 17px 0; border-top: 1px solid var(--hair); vertical-align: top; font-size: var(--size-note); line-height: 1.5; letter-spacing: var(--track-text); color: var(--text-2); }
+.table td:first-child { width: 36%; padding-right: 24px; font-size: 15.5px; font-weight: 500; letter-spacing: -0.015em; color: var(--fg); }
+.table tr:last-child td { border-bottom: 1px solid var(--hair); }
+.table span { display: block; }
+/* a row under the pointer: its name is marked the way a reader marks a line */
+.table td:first-child span { width: fit-content; background: linear-gradient(var(--hw-neon), var(--hw-neon)) no-repeat 0 100% / 0% 100%; transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), background-size 0.35s var(--ease-out), color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out); transition-delay: calc(var(--i, 0) * 70ms), calc(var(--i, 0) * 70ms), 0s, 0s, 0s; }
+@media (hover: hover) {
+  .table tbody tr:hover td:first-child span { background-size: 100% 100%; color: var(--hw-ink); box-shadow: -5px 0 0 var(--hw-neon), 5px 0 0 var(--hw-neon); }
+}
+
+/* Code, set in the mono face on Ink. Names are lit. */
+.code { --slab-line: rgba(244, 245, 240, 0.07); border-radius: var(--radius); background: #0e100c; box-shadow: inset 0 0 0 1px var(--slab-line); overflow: hidden; }
+.code pre { margin: 0; padding: 22px 24px; overflow-x: auto; font-family: var(--font-mono); font-size: var(--size-code); line-height: 1.72; color: rgba(244, 245, 240, 0.78); tab-size: 2; }
+.code pre b { font-weight: 400; color: var(--hw-neon); }
+.code figcaption { padding: 14px 24px 18px; border-top: 1px solid var(--slab-line); font-size: 13px; line-height: 1.5; color: rgba(244, 245, 240, 0.5); }
+
+/* Chips. */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; }
+.chips li { padding: 7px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--hair); font-size: 13.5px; line-height: 20px; letter-spacing: var(--track-text); color: var(--fg); }
+
+/* Claims: the short statements that carry the point, larger than body text. */
+.claims { list-style: none; }
+.claims li { padding: 18px 0; border-top: 1px solid var(--hair); font-size: var(--size-h3); font-weight: 500; letter-spacing: -0.026em; line-height: 1.2; color: var(--fg); text-wrap: balance; }
+.claims li:last-child { border-bottom: 1px solid var(--hair); }
+
+/* A plain list of statements. */
+.list { list-style: none; display: grid; gap: 12px; }
+.list li { position: relative; padding-left: 18px; }
+.list li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 8px; height: 1px; background: var(--accent); }
+
+/* The button, from the kit: a pill, Hyper Neon with Ink type. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 22px; border-radius: 999px; border: 1.5px solid var(--hw-neon); background: var(--hw-neon); color: var(--hw-ink); font-family: var(--font-text); font-size: 15px; font-weight: 700; line-height: 20px; letter-spacing: -0.01em; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background 0.18s var(--ease-out), border-color 0.18s var(--ease-out), transform 0.18s var(--ease-out); }
+.btn:hover { background: #d9ff33; border-color: #d9ff33; }
+.btn:active { transform: scale(0.97); }
+.btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+.btnSmall { min-height: 36px; padding: 7px 16px; font-size: 13.5px; }
+/* the arrow of a button steps forward under the pointer */
+.btn svg { width: 15px; height: 15px; margin-right: -3px; transition: transform 0.3s var(--ease-out); }
+.btn:hover svg { transform: translateX(3px); }
+
+/* A choice between a few options. */
+.seg { display: inline-flex; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--hair); }
+.seg button { min-height: 34px; padding: 6px 17px; border: 0; border-radius: 999px; background: none; color: var(--text-2); font-family: var(--font-text); font-size: 13.5px; font-weight: 600; line-height: 20px; cursor: pointer; transition: background 0.18s var(--ease-out), color 0.18s var(--ease-out); }
+.seg button:hover { color: var(--fg); }
+.seg button[aria-pressed='true'] { background: var(--fg); color: var(--bg); }
+.seg button:focus-visible { outline: 1px solid var(--focus); outline-offset: 2px; }
+
+@media (max-width: 1000px) {
+  .head { grid-template-columns: 1fr; row-gap: 24px; }
+  .two { grid-template-columns: 1fr; }
+  .notes { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 760px) {
+  .notes { grid-template-columns: 1fr; row-gap: 32px; }
+  .eyebrow { margin-bottom: 22px; }
+  .table td:first-child { width: 42%; padding-right: 16px; font-size: 14.5px; }
+  .code pre { padding: 18px 16px; font-size: 11.5px; }
+  .code figcaption { padding: 12px 16px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise { transform: none; transition: opacity 0.2s linear; transition-delay: 0s; }
+  .btn svg, .lit::before { transition: none; }
+}

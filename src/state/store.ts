@@ -24,20 +24,17 @@ export const store = {
   pointer: { x: 0, y: 0, active: false },
   /** Smoothed pointer for camera parallax. */
   pointerSmooth: { x: 0, y: 0 },
-  /** Preloader reveal drawn inside WebGL: 0 = screen fully covered by the preloader colour, 1 = open.
-   *  Starts open (the DOM preloader covers the load); the preloader sets 0 when its exit begins. */
-  reveal: 1,
   /** True while the pointer is over the liquid and it reacts (the custom cursor takes its hover state). */
   pointerOverKey: false,
-  /** Frames the post chain has drawn (the preloader waits for the cover to be on screen before swapping). */
-  postFrames: 0,
-  /** The terrain data has arrived from its worker (the preloader waits for it before the reveal). */
+  /** Both terrains are in the picture (terrainData.ts): the opening waits for it before it uncovers the hero. */
   terrainReady: false,
-  /** While the preloader checks performance it forces the scene to this story progress (-1 = off). */
+  /** While the opening checks performance it forces the scene to this story progress (-1 = off). */
   bench: -1,
-  /** The canvas pixel ratio in use, and the way to change it (set by the canvas; only used before the reveal). */
+  /** The canvas pixel ratio in use, and the way to change it (set by the canvas; only used before the hero shows). */
   dpr: 1,
   setDpr: null as null | ((dpr: number) => void),
+  /** Pauses and resumes the scene's frame loop (set by the canvas; null during a capture run, which steps frames itself). */
+  setFrameloop: null as null | ((mode: 'always' | 'never') => void),
   /** 1 = full quality, 0 = reduced (set by the performance monitor). */
   quality: 1,
 }

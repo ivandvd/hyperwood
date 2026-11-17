@@ -14,6 +14,7 @@ import * as THREE from 'three'
 import { config } from '../../config'
 import { store } from '../../state/store'
 import { WORLD_SCALE } from '../../choreography/framing'
+import { firstDrawnLit, switchedLight } from '../warm'
 
 const vert = /* glsl */ `
 varying vec2 vUv;
@@ -84,6 +85,12 @@ export function Core({ onReady }: { onReady?: (mesh: THREE.Mesh | null) => void 
     }
   }, [onReady, glowMat, haloMat])
 
+  // three makes a program per set of lights that are on: this one is switched, so it is declared (scene/warm.ts)
+  useEffect(() => (light.current ? switchedLight(light.current) : undefined), [])
+  // ...and its glow is first drawn while it is on: declared for the same reason
+  const group = useRef<THREE.Group>(null)
+  useEffect(() => (group.current ? firstDrawnLit(group.current) : undefined), [])
+
   useFrame(({ camera }) => {
     const k = store.w.glow
     const bob = config.sphere.bobAmplitude * Math.sin(store.time * config.sphere.bobSpeed * 2) * WORLD_SCALE
@@ -112,8 +119,9 @@ export function Core({ onReady }: { onReady?: (mesh: THREE.Mesh | null) => void 
   })
 
   return (
-    <group>
-      <pointLight ref={light} color={C.color} intensity={0} distance={C.distance * WORLD_SCALE} decay={C.decay} />
+    <group ref={group}>
+      {/* off until the frame code switches it on (it is dark at rest): programs are compiled for the lights that are on */}
+      <pointLight ref={light} color={C.color} intensity={0} distance={C.distance * WORLD_SCALE} decay={C.decay} visible={false} />
       <mesh ref={glow} material={glowMat} visible={false} renderOrder={3}>
         <icosahedronGeometry args={[R * 0.5, 5]} />
       </mesh>

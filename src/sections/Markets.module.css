@@ -1,0 +1,99 @@
+/* Section 03: equity markets. */
+.top { display: grid; grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr); column-gap: var(--col-gap); row-gap: 48px; align-items: start; }
+.createText { margin-top: 16px; }
+
+/* three steps to list a market */
+.steps { list-style: none; margin-top: 30px; }
+.steps li { display: grid; grid-template-columns: var(--idx) 1fr; padding: 19px 0; border-top: 1px solid var(--hair); }
+.steps li:last-child { border-bottom: 1px solid var(--hair); }
+.stepNum { padding-top: 5px; font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); color: var(--mark); }
+.steps strong { display: block; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.3; color: var(--fg); }
+.steps p { margin-top: 6px; max-width: 34em; }
+
+.defines { margin-top: 34px; }
+.definesTitle { margin-bottom: 14px; color: var(--text-3); }
+
+/* the lifecycle: six marks on a line; the liquid runs to the one the market has reached */
+.life { align-self: start; padding: clamp(22px, 2.6vw, 40px); border-radius: var(--radius-l); background: var(--slab); box-shadow: inset 0 0 0 1px var(--slab-line); }
+.lifeHead { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.count { color: var(--text-3); font-variant-numeric: tabular-nums; }
+.track { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); margin: clamp(34px, 3.6vw, 56px) 0 0; }
+.track::before { content: ''; position: absolute; left: calc(100% / 12); right: calc(100% / 12); top: 13px; height: 2px; border-radius: 2px; background: var(--hair); }
+.flow { position: absolute; left: calc(100% / 12); right: calc(100% / 12); top: 13px; height: 2px; border-radius: 2px; background: var(--hw-neon); box-shadow: 0 0 12px rgba(204, 255, 0, 0.5); transform: scaleX(var(--at)); transform-origin: left center; transition: transform 0.8s var(--ease-out); }
+.stop { position: relative; display: flex; flex-direction: column; align-items: center; padding: 0 2px; border: 0; background: none; font-family: var(--font-mono); cursor: pointer; color: var(--text-3); }
+.stop i { display: block; width: 2px; height: 28px; background: rgba(244, 245, 240, 0.28); transform: scaleY(0.5); transition: transform 0.4s var(--ease-out), background 0.4s var(--ease-out); }
+.stop[data-past] i { background: var(--hw-neon); }
+.stop[aria-selected='true'] i { background: var(--hw-neon); transform: none; }
+.stopNum, .stopName { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: var(--track-mono); text-transform: uppercase; transition: color 0.3s var(--ease-out); }
+.stopNum { display: none; margin-top: 12px; }
+.stopName { margin-top: 12px; text-align: center; line-height: 1.35; }
+.stop[data-past] .stopName { color: var(--text-2); }
+.stop:hover .stopName, .stop[aria-selected='true'] .stopName, .stop[aria-selected='true'] .stopNum { color: var(--fg); }
+.stop:focus-visible { outline: 1px solid var(--focus); outline-offset: 6px; }
+
+/* the bond under the line: hatched while it is held, open once the market is retired */
+.bond { position: relative; display: flex; align-items: center; height: 30px; margin: 22px calc(100% / 12) 0; padding: 0 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(204, 255, 0, 0.34); overflow: hidden; transition: box-shadow 0.6s var(--ease-out); }
+.bondFill { position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, rgba(204, 255, 0, 0.26) 0 1.5px, transparent 1.5px 7px); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out); transform-origin: right center; }
+.bondLabel { position: relative; padding: 2px 8px; margin-left: -8px; border-radius: 4px; background: var(--slab); color: var(--hw-neon); font-size: 10.5px; }
+.bond[data-free] { box-shadow: inset 0 0 0 1px var(--hair); }
+.bond[data-free] .bondFill { opacity: 0; transform: scaleX(0); }
+.bond[data-free] .bondLabel { color: var(--text-2); }
+
+.stage { min-height: 9.4em; margin-top: clamp(28px, 3vw, 44px); }
+.stageIn { animation: stageIn 0.45s var(--ease-out) both; }
+@keyframes stageIn {
+  from { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+}
+.stageName { margin-bottom: 12px; font-size: clamp(30px, 3.4vw, 50px); font-weight: 600; letter-spacing: -0.045em; line-height: 1; color: var(--fg); }
+.lifeNote { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--slab-line); }
+
+/* four capital accounts: four slabs with space between them, because they never mix */
+.accounts { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 30px; }
+.accounts li { min-height: clamp(190px, 17vw, 250px); padding: var(--card-pad); border-radius: var(--radius); background: var(--slab); box-shadow: inset 0 0 0 1px var(--slab-line); }
+.accountNum { display: block; margin-bottom: clamp(44px, 5.4vw, 84px); font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); color: var(--mark); }
+.accounts strong { display: block; font-size: var(--size-h3); font-weight: 500; letter-spacing: -0.028em; line-height: 1.15; color: var(--fg); }
+.accounts p { margin-top: 10px; }
+.accountsNote { margin-top: 22px; }
+
+.rules { margin-top: 24px; }
+.rulesText { margin-top: 30px; }
+.rulesMore { margin-top: 16px; max-width: 36em; }
+
+/* the clock: one rail that never breaks, one that does */
+.clock { margin: 0; display: grid; gap: 30px; }
+.clockRow { position: relative; display: grid; gap: 12px; }
+.clockName { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.clockLabel { color: var(--fg); }
+.clockTag { color: var(--text-3); text-align: right; }
+.rail { position: relative; display: block; height: 30px; border-radius: 6px; background: repeating-linear-gradient(-45deg, rgba(244, 245, 240, 0.09) 0 1.5px, transparent 1.5px 7px); box-shadow: inset 0 0 0 1px var(--slab-line); overflow: hidden; }
+.on { position: absolute; top: 0; bottom: 0; display: block; background: var(--hw-neon); transform: scaleX(0); transform-origin: left center; transition: transform 0.7s var(--ease-out); transition-delay: calc(var(--i, 0) * 110ms + 300ms); }
+[data-in] .on { transform: scaleX(1); }
+.clockRow:first-child .on { transition-duration: 1.3s; }
+.marks { position: relative; display: block; height: 14px; color: var(--text-3); font-size: 10px; }
+.marks b { position: absolute; top: 0; font-weight: 400; transform: translateX(-50%); white-space: nowrap; }
+.marks b:first-child { color: var(--hw-neon); }
+.clockNote { padding-top: 16px; border-top: 1px solid var(--slab-line); color: var(--text-3); }
+
+@media (max-width: 1000px) {
+  .top { grid-template-columns: 1fr; }
+  .accounts { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 760px) {
+  .track { margin-top: 30px; }
+  .stopName { display: none; }
+  .stopNum { display: block; }
+  .bond { margin-left: 0; margin-right: 0; }
+  .accounts { grid-template-columns: 1fr; }
+  .accounts li { min-height: 0; }
+  .accountNum { margin-bottom: 18px; }
+  .stage { min-height: 10.6em; }
+  .clockName { flex-direction: column; gap: 4px; }
+  .clockTag { text-align: left; }
+  .marks { font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow, .bondFill, .on { transition: none; }
+  .stageIn { animation: none; }
+}

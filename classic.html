@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" data-opening>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <title>Hyperwood: the earlier landing page</title>
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="Equity perps. Private positions. Go long or short on stocks and indices. Zero-knowledge proofs verify settlement onchain." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <!--
+      The opening. It is here, and not in the scripts, so that the page is Ink and the mark is already filling
+      from the very first paint, before any script or stylesheet has arrived.
+      Everything that moves is moved by transform or opacity alone, which the browser animates on its own
+      thread: the page can be as busy as it likes starting the 3D scene and nothing here waits for it.
+      What it waits for, and how the hero is then uncovered: src/ui/opening.ts.
+      (Colours are written out because the tokens arrive later: Ink #0a0a0a, Hyper Neon #ccff00, Paper #f4f5f0.)
+    -->
+    <style>
+      /* (the scrollbar keeps its place from the start, as in global.css: the mark must not shift when the stylesheet lands) */
+      html { background: #0a0a0a; color-scheme: dark; scrollbar-gutter: stable; }
+      html[data-opening] { overflow: hidden; }
+      body { margin: 0; }
+
+      .op { position: fixed; inset: 0; z-index: 8; overflow: hidden; }
+      .op[data-state='gone'] { display: none; }
+
+      /* The cover: Ink, with a wave for its top edge (the wave is added by opening.ts and stands above the
+         screen until it is needed). To uncover the hero the whole cover sinks, the wave as its lit edge. */
+      .op-cover { --crest: 72px; position: absolute; left: 0; right: 0; top: calc(-1 * var(--crest)); height: calc(100% + var(--crest) + 2px); transform: translate3d(0, 0, 0); transition: transform 1.2s cubic-bezier(0.66, 0, 0.3, 1) 0.14s; will-change: transform; }
+      .op[data-state='open'] .op-cover { transform: translate3d(0, calc(100% + 4px), 0); }
+      .op-ink { position: absolute; left: 0; right: 0; top: calc(var(--crest) - 1px); bottom: 0; background: #0a0a0a; }
+      .op-crest { position: absolute; left: 0; top: 0; width: 200%; height: var(--crest); display: block; will-change: transform; }
+      .op[data-state='open'] .op-crest { animation: op-run 7s linear infinite; }
+      .op-crest path { fill: none; stroke: #ccff00; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+      .op-crest path:first-child { fill: #0a0a0a; stroke: none; }
+      .op-crest .op-halo { stroke-width: 28; stroke-opacity: 0.06; }
+      .op-crest .op-glow { stroke-width: 9; stroke-opacity: 0.15; }
+      @keyframes op-run { to { transform: translate3d(-50%, 0, 0); } }
+
+      /* The mark. Its shape is a mask (the master, src/assets/brand/hyperwood-symbol-neon.svg), and under the
+         mask it is Hyper Neon from the start. What is seen filling is the part not yet filled drawing back:
+         one dim block, moved by three movements that add up.
+           .op-a  the first, started here with the first paint;
+           .op-b  the second, started by opening.ts when the hero's scene exists;
+           .op-c  the last: it closes whatever is left once the hero is ready.
+         (The first movement's numbers are repeated in src/config.ts, opening.fill.first: keep them the same.) */
+      .op-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 22px; transition: opacity 0.3s linear 0.04s, transform 0.6s cubic-bezier(0.5, 0, 0.9, 0.4); }
+      .op[data-state='open'] .op-center { opacity: 0; transform: translate3d(0, 16px, 0); }
+      .op-mark { position: relative; width: clamp(150px, 15vw, 232px); aspect-ratio: 428 / 191; overflow: hidden; background: #ccff00; -webkit-mask: var(--op-mark) center / 100% 100% no-repeat; mask: var(--op-mark) center / 100% 100% no-repeat; }
+      .op-a, .op-b, .op-c { position: absolute; inset: 0; will-change: transform; }
+      .op-c { transform-origin: 100% 50%; }
+      .op-a { animation: op-first 3.2s cubic-bezier(0.12, 0.6, 0.2, 1) both; }
+      .op-rest { position: absolute; inset: -2px -3% -2px -2px; background: #212221; }
+      @keyframes op-first { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(34%, 0, 0); } }
+
+      /* The same in numbers: one column of figures behind a window one figure high. opening.ts moves it a
+         row at a time, and shows it once its typeface is there. */
+      .op-count { display: flex; gap: 5px; height: 16px; margin: 0 0 0 -1ch; font: 400 11px/16px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: rgba(244, 245, 240, 0.48); opacity: 0; transition: opacity 0.35s linear; }
+      .op[data-type] .op-count { opacity: 1; }
+      .op-win { display: block; width: 3ch; height: 16px; overflow: hidden; text-align: right; color: #f4f5f0; }
+      .op-strip { display: block; white-space: pre; will-change: transform; }
+
+      /* Reduced motion: nothing runs, fills or sinks. The mark is simply there, and the cover fades. */
+      @media (prefers-reduced-motion: reduce) {
+        .op-a { animation: none; }
+        .op-c, .op-count, .op-crest { display: none; }
+        .op-cover { transition: opacity 0.3s linear; }
+        .op[data-state='open'] .op-cover { transform: none; opacity: 0; }
+        .op-center { transition: opacity 0.2s linear; }
+        .op[data-state='open'] .op-center { transform: none; }
+      }
+
+      .op { --op-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 428 191'%3E%3Cpath fill-rule='evenodd' d='M151.51 -0.13C156.63 -0.8 162.04 -0.24 166.99 1.48C171.95 3.21 176.39 6.16 179.79 10.11C183.19 14.05 185.63 18.89 187.01 23.95C188.38 29.01 188.65 34.25 188.34 39.51C188.02 44.77 187.12 50.05 186.16 55.22C185.2 60.39 184.16 65.49 183.31 70.64C182.46 75.79 181.77 81.06 181.66 86.37C181.54 91.68 182.06 96.95 183.84 101.74C185.62 106.53 188.89 110.89 193.13 114.08C197.36 117.27 202.49 119.2 207.64 119.25C212.8 119.28 217.96 117.61 222.14 114.72C226.32 111.83 229.17 107.67 231.39 103.02C233.62 98.38 235.42 93.29 237.91 88.59C240.41 83.9 243.46 79.57 247.27 76.18C251.09 72.8 255.79 70.44 260.83 69.13C265.88 67.82 271.23 67.54 276.31 68.23C281.39 68.93 286.26 70.57 290.88 72.9C295.5 75.23 299.86 78.25 303.92 81.72C307.99 85.18 311.74 89.08 315.17 93.17C318.6 97.27 321.74 101.56 324.84 105.85C327.94 110.14 331 114.42 334.26 118.52C337.52 122.61 341 126.5 344.88 130.01C348.75 133.51 352.99 136.63 357.65 139.18C362.32 141.74 367.41 143.72 372.58 144.48C377.75 145.24 383.13 144.68 387.91 142.53C392.69 140.38 396.66 136.81 398.14 132.28C399.62 127.75 398.25 122.09 395.46 117.3C392.66 112.51 388.6 108.67 384.5 105.4C380.4 102.13 376.07 99.35 371.76 96.31C367.46 93.28 363.15 89.95 359.57 86.07C355.99 82.19 353.18 77.62 351.67 72.63C350.17 67.64 349.92 62.33 351.3 57.39C352.68 52.46 355.81 47.9 359.81 44.36C363.81 40.83 368.61 38.41 373.53 37.4C378.45 36.38 383.56 36.64 388.55 37.88C393.54 39.13 398.39 41.37 402.79 44.31C407.18 47.26 411.08 50.91 414.28 55.01C417.47 59.11 420.01 63.68 421.96 68.52C423.92 73.36 425.28 78.47 426.12 83.67C426.95 88.87 427.26 94.15 427.1 99.34C426.94 104.53 426.31 109.65 425.23 114.67C424.16 119.68 422.64 124.59 420.71 129.35C418.79 134.13 416.45 138.76 413.73 143.22C411.01 147.68 407.91 151.96 404.47 155.96C401.02 159.95 397.23 163.66 393.12 166.94C389.01 170.23 384.59 173.11 379.9 175.45C375.21 177.8 370.26 179.62 365.2 180.89C360.14 182.15 354.97 182.85 349.84 182.95C344.7 183.04 339.6 182.53 334.68 181.37C329.76 180.21 325.03 178.38 320.47 176.05C315.91 173.72 311.51 170.88 307.26 167.7C303.01 164.51 298.9 160.97 294.9 157.25C290.91 153.52 287.04 149.6 283.06 145.99C279.08 142.38 275.01 139.07 270.61 136.56C266.21 134.04 261.48 132.32 256.25 131.89C251.03 131.46 245.45 132.41 240.72 134.93C235.98 137.46 232.41 141.26 229.84 145.53C227.26 149.81 225.41 154.61 223.16 159.39C220.92 164.16 218.36 168.91 215.37 173.22C212.38 177.52 208.95 181.37 204.96 184.34C200.97 187.32 196.37 189.4 191.17 190.2C185.96 191 180.3 190.59 175.2 188.94C170.09 187.3 165.69 184.35 162.4 180.45C159.12 176.55 156.82 171.79 155.44 166.81C154.06 161.84 153.58 156.63 153.67 151.34C153.75 146.06 154.41 140.73 155.25 135.46C156.1 130.2 157.11 124.98 157.71 119.76C158.32 114.55 158.49 109.3 157.83 104.16C157.18 99.03 155.74 94.03 153.26 89.44C150.78 84.85 147.21 80.63 142.88 77.57C138.54 74.51 133.37 72.75 128.06 72.63C122.75 72.52 117.42 73.93 113.19 76.69C108.96 79.44 106.04 83.63 103.89 88.38C101.74 93.13 100.31 98.34 99.06 103.41C97.81 108.48 96.78 113.54 95.6 118.49C94.41 123.45 93.07 128.3 91.21 132.97C89.35 137.65 86.95 142.15 83.7 146.37C80.46 150.59 76.47 154.51 72.19 157.76C67.9 161.01 63.36 163.57 58.61 165.35C53.85 167.13 48.84 168.13 43.64 168.32C38.44 168.5 33.1 167.87 28.01 166.44C22.93 165.02 18.1 162.79 13.93 159.78C9.76 156.77 6.26 152.97 3.8 148.41C1.35 143.86 -0.1 138.61 -0.55 133.3C-0.99 127.98 -0.4 122.65 1.09 117.7C2.59 112.75 4.95 108.09 7.85 103.75C10.74 99.4 14.16 95.38 17.96 91.71C21.75 88.04 25.9 84.72 30.27 81.8C34.64 78.88 39.22 76.35 43.86 74.25C48.5 72.15 53.22 70.48 58.15 69.26C63.08 68.03 68.3 67.4 73.61 66.85C78.93 66.3 84.26 65.69 89.07 63.95C93.87 62.22 98.09 59.13 101.6 55.3C105.11 51.46 107.84 46.97 110.02 42.41C112.2 37.86 114 33.15 116.33 28.56C118.65 23.97 121.61 19.47 125.11 15.44C128.61 11.41 132.65 7.85 137.09 5.13C141.53 2.41 146.38 0.53 151.51 -0.13Z'/%3E%3C/svg%3E"); }
+    </style>
+  </head>
+  <body>
+    <div id="opening" class="op" role="status" aria-label="Loading" data-state="loading">
+      <div class="op-cover" aria-hidden="true"><div class="op-ink"></div></div>
+      <div class="op-center" aria-hidden="true">
+        <div class="op-mark"><div class="op-c"><div class="op-b"><div class="op-a"><div class="op-rest"></div></div></div></div></div>
+        <p class="op-count"><span class="op-win"><span class="op-strip">0</span></span><span>%</span></p>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/classic.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+/* Fixed for the whole page; above the opening, below the custom cursor. */
+/* it arrives a moment after the opening (which is in the page itself): faded in, not switched on */
+@keyframes headerIn { from { opacity: 0; } }
+.header { animation: headerIn 0.5s var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) { .header { animation: none; } }
+.header { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; align-items: center; gap: 28px; height: var(--header-h); padding: 0 var(--edge); pointer-events: none; }
+/* the bar: Ink, with a hairline under it, only once the hero starts to leave */
+.header::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--bg); box-shadow: 0 1px 0 var(--slab-line); opacity: 0; transition: opacity 0.4s var(--ease-out); }
+.header[data-backed]::before { opacity: 1; }
+.home { display: block; padding: 0; border: 0; background: none; pointer-events: auto; cursor: pointer; }
+.home:focus-visible { outline: 1px solid var(--focus); outline-offset: 8px; }
+.logo { display: block; height: var(--logo-height); width: auto; }
+.label { opacity: 0.82; }
+
+/* how far down the page you are, as a neon hairline on the bar's lower edge */
+.progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--hw-neon); transform: scaleX(0); transform-origin: left center; opacity: 0; transition: opacity 0.4s var(--ease-out); }
+.header[data-backed] .progress { opacity: 1; }
+
+/* section links and the call to action: there with the bar */
+.nav { display: flex; gap: 26px; margin-left: auto; }
+.nav a { position: relative; padding: 6px 0; font-size: 13.5px; font-weight: 500; letter-spacing: -0.01em; text-decoration: none; color: var(--text-2); transition: color 0.18s var(--ease-out); }
+.nav a:hover, .nav a[aria-current] { color: var(--white); }
+.nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--hw-neon); transform: scaleX(0); transform-origin: left center; transition: transform 0.4s var(--ease-out); }
+.nav a[aria-current]::after { transform: scaleX(1); }
+.nav a:focus-visible { outline: 1px solid var(--focus); outline-offset: 6px; }
+/* the link to the other page stands a little apart from the links into this one */
+.more { margin-left: 4px; padding-left: 26px !important; }
+.more::before { content: ''; position: absolute; left: 0; top: 50%; width: 1px; height: 14px; margin-top: -7px; background: var(--hair); }
+.more::after { left: 26px !important; }
+a.home { text-decoration: none; }
+.nav, .cta { opacity: 0; transform: translateY(-6px); transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out), background 0.18s var(--ease-out), border-color 0.18s var(--ease-out); }
+.header[data-backed] .nav, .header[data-backed] .cta { opacity: 1; transform: none; pointer-events: auto; }
+
+@media (max-width: 1000px) {
+  .nav { display: none; }
+  .cta { margin-left: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav, .cta { transform: none; }
+}

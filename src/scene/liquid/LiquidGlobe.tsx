@@ -16,13 +16,14 @@ import { buildLayout } from '../../choreography/layout'
 import {
   computePose, exitProgress, globalQuat, holdProgress, ringSpinSpeed, sphereCenter, type FrameInput,
 } from '../../choreography/choreography'
-import { WORLD_SCALE, keptFinalRadius, phraseWorldCenter } from '../../choreography/framing'
+import { WORLD_SCALE, keptFinalOffset, keptFinalRadius, phraseWorldCenter } from '../../choreography/framing'
 import { mark, stepMark } from '../../state/mark'
 import { Mark } from './Mark'
 import { type Q4, type V3, q4, smoothstep, v3 } from '../../utils/math'
 import { BITS, REACH, TILE, createBinMaterial, createLiquidMaterial } from './liquidMaterial'
 import { meanOuterRadius } from './liquidField'
 import { Core } from './Core'
+import { alsoDrawn } from '../warm'
 
 const _size = new THREE.Vector2()
 const _clear = new THREE.Color()
@@ -80,6 +81,9 @@ export function LiquidGlobe({ onCore }: { onCore?: (mesh: THREE.Mesh | null) => 
     })
     return { data, texture, screen, quads, support, binScene, target }
   }, [N, bin])
+
+  // the tiles are drawn in a scene of their own, with the main camera: compiled ahead with the others (scene/warm.ts)
+  useEffect(() => alsoDrawn(gpu.binScene), [gpu])
 
   useEffect(() => {
     // dev-only handle for inspecting the bins from the console
@@ -259,13 +263,15 @@ export function LiquidGlobe({ onCore }: { onCore?: (mesh: THREE.Mesh | null) => 
           hz *= 1 - wob * 0.5
         }
 
-        // the last droplet settles into the drop the mark is morphed from: still, round, on its slot
+        // the last droplet settles into the drop the mark starts from: still, round, in its place
+        // (the slot is the centre of the finished mark; a drawn mark starts from its first lobe, to the left)
         const settle = kept ? smoothstep(MK.settle[0], MK.settle[1], f.p) : 0
         if (settle > 0) {
           const slot = layout.letters[key.letter].slot
           const r = keptFinalRadius(aspect) / WORLD_SCALE
-          wx += (slot[0] * WORLD_SCALE - wx) * settle
-          wy += (slot[1] * WORLD_SCALE - wy) * settle
+          const off = keptFinalOffset(aspect)
+          wx += (slot[0] * WORLD_SCALE + off[0] - wx) * settle
+          wy += (slot[1] * WORLD_SCALE + off[1] - wy) * settle
           wz += (slot[2] * WORLD_SCALE - wz) * settle
           hx += (r - hx) * settle
           hy += (r - hy) * settle

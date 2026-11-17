@@ -10,7 +10,7 @@
 
   --ink: var(--hw-paper);
   --white: var(--hw-white);
-  /* = config.preloader.color: if the canvas ever drops a frame, the page underneath is Ink */
+  /* if the canvas ever drops a frame, the page underneath is Ink */
   --bg: var(--hw-ink);
   --shade: rgba(10, 10, 10, 0.62);
   --shade-0: rgba(10, 10, 10, 0);
@@ -26,8 +26,6 @@
   --size-text: 14px;
   --size-label: 11px;
   --size-micro: 10px;
-  --size-counter: 92px;
-  --size-counter-pct: 26px;
   --logo-height: 21px;
   --weight-display: 600;
   --track-display: -0.045em;
@@ -50,13 +48,57 @@
   --final-text-left: min(calc(75% + 7px), calc(100% - var(--edge) - var(--body-width)));
   /* where the phase indicator sits on tall screens: above the hero title and the first closing line */
   --phase-bottom: calc(max(var(--edge) + 1.44 * var(--size-display) + var(--title-gap), var(--final-line-bottom) + 0.72 * var(--size-display)) + 26px);
-  --preloader-sphere: 50px;
 
   /* cursor (Default 24 / 8 px, Hover 32 / 12 px) */
   --cursor-ring: 24px;
   --cursor-dot: 8px;
   --cursor-ring-hover: 32px;
   --cursor-dot-hover: 12px;
+
+  /* sections below the hero */
+  --size-h2: clamp(40px, 5.2vw, 76px);
+  --size-row: clamp(18px, 1.72vw, 25px);
+  --size-lead: clamp(15px, 1.12vw, 17px);
+  --size-note-title: 16px;
+  --size-note: 14.5px;
+  /* The surface a section stands on. Ink is the default; kit.module.css switches a section to Paper
+     (.paper) or a panel back to Ink (.ink) by redefining exactly these. */
+  --fg: var(--hw-white);
+  --text-2: rgba(244, 245, 240, 0.66);
+  --text-3: rgba(244, 245, 240, 0.48);
+  --hair: rgba(244, 245, 240, 0.14);
+  --slab: #131511;
+  --slab-line: rgba(244, 245, 240, 0.07);
+  /* lit type and marks: Hyper Neon on Ink, Ink on Paper (neon type does not read on Paper) */
+  --accent: var(--hw-neon);
+  --mark: var(--hw-neon);
+  --radius: 16px;
+  --radius-l: clamp(20px, 2.2vw, 32px);
+  /* the sections keep the hero's edge up to a 1920 px screen; beyond that they stay this wide, centred */
+  --page-max: 1864px;
+  --gutter: max(var(--edge), calc((100% - var(--page-max)) / 2));
+  --size-poster: clamp(42px, 7.6vw, 122px);
+  --idx: 46px;
+  --row-h: 96px;
+  --slab-pad: 24px;
+  --col-gap: clamp(32px, 4.4vw, 72px);
+  --section-top: clamp(104px, 11vw, 176px);
+  --section-bottom: clamp(104px, 11vw, 176px);
+  --block-gap: clamp(72px, 7.6vw, 124px);
+  --block-gap-s: clamp(44px, 4.6vw, 72px);
+  --size-h2s: clamp(33px, 4.4vw, 66px);
+  --size-h3: clamp(19px, 1.7vw, 25px);
+  --size-code: 12.5px;
+  --size-big: clamp(40px, 5.4vw, 80px);
+  --card-pad: clamp(20px, 2.2vw, 32px);
+  --neon-soft: rgba(204, 255, 0, 0.14);
+  --header-h: calc(2 * var(--edge) + var(--logo-height));
+  /* the frames of the deck (and the frame the hero's scene draws in to): where a card starts under the
+     header, and the padding inside it */
+  --frame-top: var(--header-h);
+  --frame-pad: clamp(18px, 2.36vw, 34px);
+  /* the Ink backing of the header once the hero has passed, and the fade that lands the scene on Ink */
+  --ground: 88px;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-cursor: cubic-bezier(0.22, 1, 0.36, 1);
@@ -81,8 +123,6 @@
   :root {
     --edge: 20px;
     --size-display: min(44px, (100vw - 2 * var(--edge)) / 9.6);
-    --size-counter: 64px;
-    --size-counter-pct: 20px;
     /* the hero title sits one line above the edge, so the scroll hint has its own line under it */
     --hero-title-bottom: calc(var(--edge) + 30px);
     --text-bottom: calc(var(--hero-title-bottom) + 1.44 * var(--size-display) + var(--title-gap) + 26px);
@@ -94,5 +134,144 @@
     --top-shade: 190px;
     --hero-shade: 380px;
     --phase-bottom: var(--text-bottom);
+    --idx: 34px;
+    --row-h: 74px;
+    --slab-pad: 12px;
+  }
+}
+
+/* ------------------------------------------------------------------------------------------------------------
+   The landing page: the journey, the protocol section, the footer (px from the 1440 x 900 design).
+   One phone step (760 px and under) and one wide step (1800 px and over). */
+:root {
+  /* a hundredth of the stage's height: the small viewport's, where the browser knows it (below) */
+  --stage-1: 1vh;
+  --journey-height: 740vh;
+
+  --type-intro: clamp(54px, 9.4vw, 164px);
+  --leading-intro: 0.9;
+  --type-closing: clamp(30px, min(4.6vw, calc(8 * var(--stage-1))), 84px);
+  --leading-closing: 0.98;
+  --type-about: clamp(40px, 5.4vw, 85px);
+  --type-nav: 15px;
+  --type-hero-line: 14px;
+  --type-aside: 13px;
+  --type-footer: 13px;
+  --type-feature-title: 20px;
+  --type-feature: 14px;
+
+  --header-top: 28px;
+  --nav-gap: 24px;
+  --mark-width: 52px;
+  /* the hero: the mark's body, the wordmark under it, the line under that */
+  --sculpture-width: min(calc(86 * var(--stage-1)), 86vw);
+  --hero-word-width: min(calc(62 * var(--stage-1)), 60vw);
+  --hero-word-gap: calc(9 * var(--stage-1));
+  --hero-line-gap: calc(3.4 * var(--stage-1));
+  --hero-drop: calc(2 * var(--stage-1));
+  /* the gate: where it stands and how large, and how far the words keep from it */
+  --door-top: calc(30.5 * var(--stage-1));
+  --door-height: calc(26.5 * var(--stage-1));
+  --door-width: calc(13.5 * var(--stage-1));
+  --door-gap: calc(6 * var(--stage-1));
+  /* how far down the gate the line between a sentence and its note lies (0 its top, 1 its foot) */
+  --closing-level: 0.34;
+  /* the gate without WebGL: Neon at its foot, a shade deeper under its arch (Neon with a little Ink) */
+  --door-foot: #ccff00;
+  --door-crown: #b5e201;
+  --aside-gap: 20px;
+  --aside-width: 200px;
+  --title-top: calc(12.5 * var(--stage-1));
+  --note-bottom: 30px;
+  --main-top: 26px;
+  --main-bottom: 90px;
+  --stages-width: 100%;
+  --stages-shift: 0%;
+  --stages-margin: 55px 0 60px;
+  --about-columns: 1.2fr 1fr;
+  --about-gap: 8vw;
+  --features-top: 130px;
+  --features-gap: 42px 36px;
+  --footer-top: 28px;
+  --cautions-top: 120px;
+  --footer-gap: 90px;
+  --wordmark-bleed: 8px;
+  --wordmark-sink: 4px;
+  /* the footer wordmark: hot Neon at the top of the letters, moss at their foot, and how soft the foot is */
+  --word-top: #ecff6a;
+  --word-low: #9fd600;
+  --word-foot: #4a6a12;
+  --word-blur: 12px;
+}
+/* small-viewport units where the browser has them (phones: the toolbar does not stretch the journey) */
+@supports (height: 1svh) {
+  :root { --journey-height: 740svh; --stage-1: 1svh; }
+}
+@media (min-width: 1800px) {
+  :root {
+    --type-feature: 17px;
+    --type-feature-title: 24px;
+    --type-aside: 15px;
+    --aside-width: 230px;
+    --type-nav: 16px;
+  }
+}
+@media (max-width: 760px) {
+  :root {
+    --journey-height: 670vh;
+    --header-top: 20px;
+    --type-nav: 12.5px;
+    --nav-gap: 12px;
+    --mark-width: 34px;
+    --type-intro: clamp(46px, 14.4vw, 110px);
+    --type-aside: 11px;
+    --type-hero-line: 12px;
+    --main-top: 20px;
+    --main-bottom: 60px;
+    --stages-width: 170%;
+    --stages-shift: -20%;
+    --stages-margin: 40px 0 44px;
+    --about-columns: 1fr;
+    --about-gap: 40px;
+    --type-about: 46px;
+    --features-top: 0px;
+    --features-gap: 32px 22px;
+    --type-feature: 13px;
+    --type-feature-title: 17px;
+    --footer-top: 22px;
+    --cautions-top: 60px;
+    --footer-gap: 50px;
+    --type-footer: 11px;
+    --word-blur: 6px;
+  }
+}
+@supports (height: 1svh) {
+  @media (max-width: 760px) {
+    :root { --journey-height: 670svh; }
+  }
+}
+/* a short, wide screen (a phone on its side): the gate stands lower, clear of the header, and the closing type
+   is smaller */
+@media (max-height: 520px) and (min-aspect-ratio: 1/1) {
+  :root {
+    --type-closing: clamp(22px, calc(8 * var(--stage-1)), 54px);
+    --door-top: calc(27 * var(--stage-1));
+    --door-height: calc(29 * var(--stage-1));
+    --door-width: calc(15 * var(--stage-1));
+    --door-gap: 28px;
+    --aside-gap: 10px;
+    --type-aside: 11px;
+  }
+}
+/* a screen too narrow for words on either side of the gate (a phone, a tablet held upright): the title stands
+   above the gate, the gate lower, the notes beside it */
+@media (max-aspect-ratio: 1/1), (max-width: 560px) {
+  :root {
+    --type-closing: clamp(30px, 8.6vw, 64px);
+    /* (never higher than the title's two lines end) */
+    --door-top: max(calc(30.5 * var(--stage-1)), calc(var(--title-top) + 2 * var(--type-closing) + 28px));
+    --door-height: calc(26.5 * var(--stage-1));
+    --door-width: min(calc(13.5 * var(--stage-1)), 32vw);
+    --door-gap: 12px;
   }
 }

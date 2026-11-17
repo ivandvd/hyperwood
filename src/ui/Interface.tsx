@@ -2,28 +2,24 @@
  * Interface: a minimal Swiss layout over the scene (1440 × 900 design).
  * H1 titles: Focus Reveal; body copy: line-by-line Fade Up. Both play/reverse with their section (ui/titles.ts).
  * Other reveals/hides are driven by the scroll timeline (useScrollTimeline).
- *  - header (lockup + label) and the phase indicator are sticky across the whole experience;
- *  - hero layer and closing layer cross-fade with the 3D transformation.
+ *  - the phase indicator is sticky across the whole experience (the site header lives in ui/SiteHeader);
+ *  - hero layer and closing layer cross-fade with the 3D transformation;
+ *  - `data-loading` keeps the hero's words out of sight until the opening lets the hero show (ui/opening.ts).
  */
 import { restartExperience } from '../scroll/useScrollTimeline'
 import { FocusReveal } from './FocusReveal'
 import { FadeUpLines } from './FadeUpLines'
-import { Preloader } from './Preloader'
 import { Cursor } from './Cursor'
 import { config } from '../config'
 import { content } from '../content'
-import lockup from '../assets/brand/hyperwood-horizontal-white.svg'
 import styles from './Interface.module.css'
 
 export function Interface() {
   const C = content
   return (
     <div className={styles.ui} data-loading="">
-      {/* sticky header */}
-      <header className={styles.header}>
-        <img className={styles.logo} src={lockup} alt={C.brand} />
-        {C.extras.label && <span className={`t-label ${styles.label}`}>{C.label}</span>}
-      </header>
+      {/* the lower edge of the scene lands on Ink, so the page below joins it without a seam */}
+      <div className={styles.ground} />
 
       {/* sticky phase indicator */}
       {C.extras.phase && (
@@ -69,7 +65,6 @@ export function Interface() {
           <FocusReveal text={C.final.line2} group="final" delay={config.titles.secondLineDelay} />
         </h2>
       </div>
-      <Preloader />
       <Cursor />
     </div>
   )

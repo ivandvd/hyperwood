@@ -4,6 +4,7 @@
  */
 import { config } from '../config'
 import { lerp, smoothstep } from '../utils/math'
+import { markReveal, markStart } from '../brand/reveal'
 
 export const WORLD_SCALE = config.sphere.worldScale
 
@@ -43,10 +44,20 @@ export function markScreenShare(aspect: number): number {
   return lerp(share, shareTall, smoothstep(tallBlend[0], tallBlend[1], aspect))
 }
 
-/** World radius the last droplet settles to: on screen it is then exactly the drop the mark is morphed from. */
+/** World radius the last droplet settles to: on screen it is then exactly the drop the mark starts from. */
 export function keptFinalRadius(aspect: number, fov = config.camera.final.fov): number {
-  const A = config.mark.art
   // the drop’s radius as a share of the viewport width, then that share of what the final camera sees
-  const share = (markScreenShare(aspect) * A.dropRadius * A.dropScale) / A.width
+  const share = (markScreenShare(aspect) * markStart().radius) / config.mark.art.width
   return share * 2 * Math.tan((fov * Math.PI) / 360) * aspect * finalCameraDistance(aspect, fov)
+}
+
+/** Where the last droplet settles, seen from the centre of the finished mark, in world units (x right, y up).
+ *  Drawn mark: the droplet is its first lobe, so it waits to the left and the mark is drawn out to the right,
+ *  ending centred on the slot. Morphed mark: the kit places the drop itself, so there is no offset. */
+export function keptFinalOffset(aspect: number, fov = config.camera.final.fov): [number, number] {
+  if (markReveal !== 'draw') return [0, 0]
+  const A = config.mark.art
+  const from = markStart()
+  const k = keptFinalRadius(aspect, fov) / from.radius
+  return [(from.centre[0] - A.width / 2) * k, -(from.centre[1] - A.height / 2) * k]
 }

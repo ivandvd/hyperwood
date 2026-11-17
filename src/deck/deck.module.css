@@ -1,0 +1,66 @@
+/* The deck: the frames below the hero. track.ts explains how they move; this file lays one out.
+   A frame is designed at 1384 by 795 (the card on a 1440 by 900 screen). `--u` is one pixel of that design:
+   in stack mode the whole frame scales with the card, the way the hero's scene scales with the screen. */
+
+.deck { position: relative; z-index: 2; }
+
+.track { position: relative; pointer-events: none; }
+/* While the opening is up (index.html marks the page) the frames are not drawn. For that first moment the page
+   is still short, the hero has not taken its scroll, and the frames sit right under the screen: the browser
+   would paint all four, to no purpose, exactly while the opening needs the screen for itself. */
+:global(html[data-opening]) .track { visibility: hidden; }
+.screen { position: relative; }
+
+.card { position: relative; margin: 0 var(--edge) var(--edge); border-radius: var(--radius-l); overflow: hidden; isolation: isolate; pointer-events: auto; transform-origin: 50% 0;
+  /* Ink, with a breath of the hero's aurora in the upper right */
+  background: radial-gradient(86% 72% at 84% -10%, rgba(204, 255, 0, 0.105), rgba(204, 255, 0, 0) 64%), linear-gradient(180deg, #10120e 0%, #0b0c0a 100%); }
+.card::after { content: ''; position: absolute; inset: 0; z-index: 6; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.085), inset 0 1px 0 rgba(244, 245, 240, 0.05); pointer-events: none; }
+.dim { position: absolute; inset: 0; z-index: 5; background: var(--hw-ink); opacity: 0; pointer-events: none; }
+
+.inner { --u: 1px; --pad: 22px; position: relative; display: flex; flex-direction: column; padding: var(--pad); }
+
+/* The hero's sky, carried into every frame: faint curtains of neon in the upper part of the card, falling away
+   into Ink. The curtains are noise stretched tall (an SVG filter, drawn once); they drift very slowly. */
+.sky { position: absolute; z-index: -1; inset: 0 0 auto; height: 70%; overflow: hidden; pointer-events: none; -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.5) 44%, rgba(0, 0, 0, 0) 100%); mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.5) 44%, rgba(0, 0, 0, 0) 100%); }
+.sky::before { content: ''; position: absolute; inset: -6% -14% 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='520' preserveAspectRatio='none'%3E%3Cfilter id='a' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0058 0.0008' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 1 0 0 0 0 0 2.7 0 0 0 -1.08'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23a)'/%3E%3C/svg%3E") center / 100% 100% no-repeat; opacity: 0.2; filter: blur(9px); animation: skyDrift 38s ease-in-out infinite alternate; will-change: transform; }
+@keyframes skyDrift {
+  from { transform: translate3d(-5%, 0, 0); }
+  to { transform: translate3d(5%, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky::before { animation: none; }
+}
+
+/* ---------------------------------------------------------------- the words */
+.copy { position: relative; display: flex; flex-direction: column; }
+.label { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: var(--size-label); font-weight: 400; letter-spacing: var(--track-mono); line-height: 1; text-transform: uppercase; color: var(--text-2); }
+.label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--hw-neon); }
+.title { --title-gap: calc(20 * var(--u)); margin-top: 26px; font-size: min(44px, calc((100vw - 2 * var(--edge) - 2 * var(--pad)) / 10.2)); }
+.words { margin-top: 26px; }
+.lead { font-size: 15.5px; line-height: 1.5; letter-spacing: var(--track-text); color: var(--text-2); }
+.fine { margin-top: 12px; font-size: 13px; line-height: 1.5; letter-spacing: var(--track-text); color: var(--text-3); }
+
+/* ---------------------------------------------------------------- stack mode */
+:global(html[data-deck='stack']) .track { height: calc((2 + var(--dwell)) * 100vh); margin-top: -100vh; }
+:global(html[data-deck='stack']) .track[data-last] { height: calc((1 + var(--dwell)) * 100vh); }
+:global(html[data-deck='stack']) .screen { position: sticky; top: 0; height: 100vh; }
+:global(html[data-deck='stack']) .card { position: absolute; inset: var(--frame-top) var(--edge) var(--edge); margin: 0; container-type: size; }
+:global(html[data-deck='stack']) .inner { --u: min(1.2px, 0.07225cqw, 0.1258cqh); --pad: calc(34 * var(--u)); position: absolute; inset: 0; display: block; padding: 0; }
+:global(html[data-deck='stack']) .copy { position: absolute; z-index: 2; left: var(--pad); top: var(--pad); bottom: var(--pad); pointer-events: none; }
+:global(html[data-deck='stack']) .words { order: 2; margin-top: auto; width: calc(352 * var(--u)); pointer-events: auto; }
+:global(html[data-deck='stack']) .title { order: 3; margin-top: calc(34 * var(--u)); font-size: min(92px, calc(90 * var(--u))); }
+/* the paragraph apart from the title, at the lower right */
+:global(html[data-deck='stack']) .apart .copy { right: var(--pad); }
+:global(html[data-deck='stack']) .apart .words { position: absolute; right: 0; bottom: 0; width: max(calc(352 * var(--u)), 300px); margin: 0; }
+:global(html[data-deck='stack']) .apart .title { margin-top: auto; }
+:global(html[data-deck='stack']) .lead { font-size: max(13px, calc(15.5 * var(--u))); }
+:global(html[data-deck='stack']) .fine { margin-top: calc(12 * var(--u)); font-size: max(11.5px, calc(12.5 * var(--u))); }
+
+/* ---------------------------------------------------------------- flow mode on a wide screen
+   (reduced motion, or a window too low or too upright to stack): the words on the left, the picture beside
+   them, each card as tall as it needs. */
+@media (min-width: 900px) {
+  :global(html[data-deck='flow']) .card { margin-bottom: 16px; }
+  :global(html[data-deck='flow']) .inner { --pad: 34px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 500px); column-gap: clamp(32px, 5vw, 80px); align-items: center; }
+  :global(html[data-deck='flow']) .title { font-size: clamp(40px, 5vw, 72px); }
+}

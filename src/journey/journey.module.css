@@ -1,0 +1,128 @@
+/* The journey: a tall section, and in it the stage that stays on screen. It lies above the footer, which
+   waits underneath (landing/foot.module.css). */
+.journey { height: var(--journey-height); position: relative; z-index: 2; }
+
+/* The picture is dark wherever something is written: type on the stage is white, the brand's marks Neon.
+   (The header takes the same two: header.module.css.) */
+.stage {
+  --on: var(--hw-white);
+  --on-mark: var(--hw-neon);
+  height: 100vh; height: 100svh; position: sticky; top: 0; overflow: hidden; isolation: isolate;
+  background: var(--hw-ink); color: var(--hw-white);
+}
+
+/* (until its first picture is drawn the canvas is left out: the stage's own Ink shows, which is what the first
+   picture is) */
+.light { position: absolute; inset: 0; width: 100%; height: 100%; display: block; visibility: hidden; }
+.journey[data-drawn] .light { visibility: visible; }
+/* Without WebGL nothing is drawn: the stage stays Ink, the hero shows the symbol and the wordmark as they are
+   supplied, and the gate is a plain shape of light (below). The words and their timing are the same. */
+.journey[data-webgl='off'] .light { display: none; }
+
+/* timeline.ts writes opacity, blur and scale on the block, and colour, stroke, blur and scale on each line */
+.intro {
+  position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--type-intro); line-height: var(--leading-intro);
+  letter-spacing: var(--track-display); text-align: center; pointer-events: none; color: var(--on);
+  opacity: 0; /* until the opening lets the page go */
+}
+.intro > span { display: block; will-change: filter, transform, opacity; paint-order: stroke fill; }
+
+.hero, .closing {
+  position: absolute; inset: 0;
+  opacity: 0; pointer-events: none; will-change: opacity, transform, filter;
+}
+
+/* The hero: the mark's body, the wordmark under it and the line under that, together in the middle.
+   The shader draws the first two where these boxes stand (timeline.ts measures them); what the boxes show
+   themselves, the symbol and the wordmark as they are supplied, is the picture without WebGL. */
+.hero { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: var(--hero-drop); }
+.sculpture, .word { flex: none; background: var(--on-mark); }
+.sculpture {
+  width: var(--sculpture-width); aspect-ratio: 428 / 191;
+  -webkit-mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+}
+.word {
+  width: var(--hero-word-width); aspect-ratio: 1000 / 154.96; margin: var(--hero-word-gap) 0 0;
+  -webkit-mask: url('../assets/brand/hyperwood-wordmark-neon.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/brand/hyperwood-wordmark-neon.svg') center / 100% 100% no-repeat;
+  /* the name is here to be read out: what is seen is the wordmark's own lettering */
+  font-size: 1px; line-height: 1; color: transparent; overflow: hidden; white-space: nowrap; user-select: none;
+}
+.journey[data-shader] .sculpture, .journey[data-shader] .word { opacity: 0; }
+
+.heroLine {
+  margin: var(--hero-line-gap) var(--edge) 0;
+  font-size: var(--type-hero-line); line-height: 1.35; text-align: center; color: var(--on);
+}
+.sentence { display: inline-block; white-space: nowrap; }
+
+/* The closing: the gate, and the title's two sentences on either side of it, each with its note under it.
+   The shader draws the gate where .door stands. --in (timeline.ts) runs 0 to 1 as the words arrive: they
+   come out from the gate. */
+.closing {
+  --side-width: calc(50% - var(--door-width) / 2 - var(--door-gap) - var(--edge));
+  /* the line between a sentence and its note. The two together stand beside the gate's upper, straight part:
+     below them the gate opens out into the flow */
+  --closing-line: calc(var(--door-top) + var(--door-height) * var(--closing-level) + var(--type-closing) * 0.36);
+}
+/* the first course (?wave=old) keeps the words where they stood with it: level with the gate's middle, and
+   closer to it */
+.journey[data-wave='old'] { --closing-level: 0.5; }
+@media (min-aspect-ratio: 1001/1000) and (min-width: 561px) and (min-height: 521px) {
+  .journey[data-wave='old'] { --door-gap: 48px; }
+}
+.door {
+  position: absolute; left: 50%; top: var(--door-top); width: var(--door-width); height: var(--door-height);
+  transform: translateX(-50%); visibility: hidden;
+}
+.journey[data-webgl='off'] .door {
+  visibility: visible; border-radius: 999px 999px 0 0;
+  background: linear-gradient(to top, var(--door-foot), var(--hw-neon) 55%, var(--door-crown));
+  box-shadow: 0 0 60px color-mix(in srgb, var(--hw-neon) 34%, transparent);
+}
+.title {
+  margin: 0; font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--type-closing);
+  line-height: var(--leading-closing); letter-spacing: var(--track-display); color: var(--on);
+}
+.half, .aside { position: absolute; width: var(--side-width); }
+.half { bottom: calc(100% - var(--closing-line)); }
+.part { display: block; white-space: nowrap; }
+.aside {
+  top: calc(var(--closing-line) + var(--aside-gap)); margin: 0;
+  font-size: var(--type-aside); line-height: 1.3; color: var(--on); opacity: 0.68;
+}
+.row { display: block; }
+.left {
+  right: calc(50% + var(--door-width) / 2 + var(--door-gap)); text-align: right;
+  transform: translate3d(calc((1 - var(--in, 1)) * 22px), 0, 0);
+}
+.right {
+  left: calc(50% + var(--door-width) / 2 + var(--door-gap)); text-align: left;
+  transform: translate3d(calc((1 - var(--in, 1)) * -22px), 0, 0);
+}
+
+/* too narrow for words beside the gate: the title stands above it, the notes beside it (the same step as
+   the gate's own, in tokens.css) */
+@media (max-aspect-ratio: 1/1), (max-width: 560px) {
+  .title { position: absolute; left: var(--edge); right: var(--edge); top: var(--title-top); text-align: center; }
+  .half { position: static; display: block; width: auto; text-align: center; transform: translate3d(0, calc((1 - var(--in, 1)) * 14px), 0); }
+  .part { display: inline; }
+  .aside { top: calc(var(--door-top) + var(--door-height) * 0.5); }
+  .aside.left { transform: translate3d(calc((1 - var(--in, 1)) * 12px), -50%, 0); }
+  .aside.right { transform: translate3d(calc((1 - var(--in, 1)) * -12px), -50%, 0); }
+  .row { display: inline; }
+}
+
+.note {
+  position: absolute; bottom: var(--note-bottom); width: 100%; text-align: center;
+  font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); text-transform: uppercase; color: color-mix(in srgb, var(--on) 52%, transparent);
+  opacity: 0; /* until the opening lets the page go */
+}
+.note span { display: block; margin-top: 10px; font-size: 18px; animation: bob 2s infinite; }
+@keyframes bob { 50% { transform: translateY(5px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .note span { animation: none; }
+}
