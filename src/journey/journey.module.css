@@ -26,7 +26,8 @@
   letter-spacing: var(--track-display); text-align: center; pointer-events: none; color: var(--on);
   opacity: 0; /* until the opening lets the page go */
 }
-.intro > span { display: block; will-change: filter, transform, opacity; paint-order: stroke fill; }
+/* (each line of the tagline stays one line: the type is sized so the longer one fits, tokens.css) */
+.intro > span { display: block; white-space: nowrap; will-change: filter, transform, opacity; paint-order: stroke fill; }
 
 .hero, .closing {
   position: absolute; inset: 0;
@@ -137,16 +138,4 @@
   .journey:not([data-wave]) .aside { top: calc(var(--door-top) + var(--door-width) * 0.1); }
   .journey:not([data-wave]) .aside.left { transform: translate3d(calc((1 - var(--in, 1)) * 12px), 0, 0); }
   .journey:not([data-wave]) .aside.right { transform: translate3d(calc((1 - var(--in, 1)) * -12px), 0, 0); }
-}
-
-.note {
-  position: absolute; bottom: var(--note-bottom); width: 100%; text-align: center;
-  font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono); text-transform: uppercase; color: color-mix(in srgb, var(--on) 52%, transparent);
-  opacity: 0; /* until the opening lets the page go */
-}
-.note span { display: block; margin-top: 10px; font-size: 18px; animation: bob 2s infinite; }
-@keyframes bob { 50% { transform: translateY(5px); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .note span { animation: none; }
 }

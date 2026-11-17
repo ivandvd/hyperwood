@@ -10,9 +10,8 @@ export const home = {
   /** What a screen reader is told the journey is. */
   label: 'Equity perps. Private positions.',
 
-  /** The opening words, one line each: the tagline. The lids close over them. */
-  intro: ['Equity perps.', 'Private', 'positions.'],
-  note: 'Scroll to seal the order',
+  /** The opening words, one line each: the tagline, in its two lines. The lids close over them. */
+  intro: ['Equity perps.', 'Private positions.'],
 
   /** Under the word in the hero: the approved line. */
   heroLine: 'Go long or short on stocks and indices. Zero-knowledge proofs verify settlement onchain.',

@@ -672,7 +672,6 @@ export const config = {
       margin: 0.03,
     },
     /** When things come and go, in journey progress. The page and the shader both read these.
-     *    note      the scroll note goes
      *    introOut  the opening words go (the lids, above, have nearly shut)
      *    drop      the drop shows in the opening eye       morph    it spreads into the mark
      *    cool      the mark's light draws back to its edges: the body of black liquid
@@ -681,7 +680,6 @@ export const config = {
      *    gather    the mark gathers into the gate          stand    the gate stands on its floor
      *    closing   the closing words                       river    the current runs out */
     beats: {
-      note: [0.012, 0.06] as [number, number],
       introOut: [0.215, 0.265] as [number, number],
       drop: [0.275, 0.31] as [number, number],
       morph: [0.305, 0.375] as [number, number],
@@ -702,8 +700,10 @@ export const config = {
       heroOut: [0.66, 0.76] as [number, number],
       closing: [0.73, 0.8] as [number, number],
     },
-    /** The opening words come into focus this long (ms) after the opening lets the page go, over this long. */
-    intro: { delay: 380, focus: 1500 },
+    /** The opening words come into focus this long (ms) after the opening lets the page go, over this long.
+     *  (The opening's mark fades in about a third of a second: the words begin under it, so the screen is
+     *  never empty between the two.) */
+    intro: { delay: 160, focus: 1500 },
     /** The wordmark in the hero: how soft the copy is that makes its glow (px). */
     word: { blur: 9 },
   },

@@ -7,7 +7,9 @@
  *
  *  - the mark fills in three movements that add up (config.opening.fill). The first is under way when this
  *    runs. The second starts when what the page opens on exists. The last closes whatever is left once that is
- *    whole, and then the cover sinks: a wave runs down the screen as its lit edge and the page is there above it;
+ *    whole, and then the cover goes. On the landing page it fades with the mark, and the page's words come
+ *    into focus where the mark stood. On the earlier page (classic.html) it sinks: a wave runs down the
+ *    screen as its lit edge. That page asks for the wave with `data-crest` on its cover;
  *  - a small figure says the same in numbers.
  *
  * Nothing here moves anything frame by frame. Each movement is handed to the browser whole, as an animation of
@@ -58,7 +60,8 @@ function bezier([x1, y1, x2, y2]: Curve) {
   }
 }
 
-/** The wave that tops the cover: one screen long, repeated once so it can run sideways without a seam. */
+/** The wave that tops a cover that sinks (classic.html): one screen long, repeated once so it can run
+ *  sideways without a seam. */
 function crest() {
   const NS = 'http://www.w3.org/2000/svg'
   const W = 2000
@@ -107,7 +110,9 @@ export function startOpening(source: OpeningSource) {
   /** The page's own clock, the one its animations run on (ms). */
   const clock = () => (document.timeline?.currentTime as number | null) ?? performance.now()
 
-  if (!reduced) find('.op-cover')?.prepend(crest())
+  // (the wave only where the page's cover asks for it: the landing page's cover fades and has none)
+  const cover = find('.op-cover')
+  if (!reduced && cover?.hasAttribute('data-crest')) cover.prepend(crest())
   if (strip) strip.textContent = Array.from({ length: 101 }, (_, i) => i).join('\n')
   // the figure is shown once its typeface is there, so it never changes shape in view
   const type = () => el.setAttribute('data-type', '')

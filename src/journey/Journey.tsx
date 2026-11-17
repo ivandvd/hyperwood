@@ -23,7 +23,6 @@ export function Journey() {
   const word = useRef<HTMLHeadingElement>(null)
   const closing = useRef<HTMLDivElement>(null)
   const door = useRef<HTMLSpanElement>(null)
-  const note = useRef<HTMLDivElement>(null)
 
   useEffect(
     () =>
@@ -39,7 +38,6 @@ export function Journey() {
         word: word.current!,
         closing: closing.current!,
         door: door.current!,
-        note: note.current!,
       }),
     [],
   )
@@ -84,9 +82,6 @@ export function Journey() {
               ))}
             </p>
           ))}
-        </div>
-        <div ref={note} className={s.note}>
-          {home.note} <span aria-hidden="true">↓</span>
         </div>
       </div>
     </section>

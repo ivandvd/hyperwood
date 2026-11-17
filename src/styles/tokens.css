@@ -182,7 +182,6 @@
   --aside-gap: 20px;
   --aside-width: 200px;
   --title-top: calc(12.5 * var(--stage-1));
-  --note-bottom: 30px;
   --main-top: 26px;
   --main-bottom: 90px;
   --stages-width: 100%;
@@ -223,7 +222,8 @@
     --type-nav: 12.5px;
     --nav-gap: 12px;
     --mark-width: 34px;
-    --type-intro: clamp(46px, 14.4vw, 110px);
+    /* (the tagline's longer line, "Private positions.", is 7.5 of these wide: 87 hundredths of the screen) */
+    --type-intro: clamp(34px, 11.6vw, 110px);
     --type-aside: 11px;
     --type-hero-line: 12px;
     --main-top: 20px;

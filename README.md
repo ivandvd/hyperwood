@@ -41,11 +41,11 @@ npx tsx scripts/liquid-shape.ts   # how round and even the hero's fused pieces a
 
 ### The opening
 
-What is on screen while the page gets ready, and how the page is uncovered. It is the same on the landing page and on the earlier one; only what it waits for differs.
+What is on screen while the page gets ready, and how the page is uncovered. The mark and its figure are the same on the landing page and on the earlier one; what it waits for differs, and how the cover goes.
 
 - **It is in the page itself.** Its elements and styles are in `index.html`, so the page is Ink and the Hyperwood mark is already filling with the first paint, before any script or stylesheet has arrived. (The production build links its stylesheets at the end of the body for the same reason: `vite.config.ts`.)
 - **The mark fills from the left, in three movements that add up** (`config.opening.fill`). The first starts with the first paint. The second starts when the hero's scene exists. The last starts when the hero is whole and checked, and closes whatever is left, so the mark is always full a moment later. A small figure says the same in numbers. It is the kit's Flow reveal: a left-to-right wipe that follows the shape.
-- **Then the Ink sinks.** A wave runs down the screen as the cover's lit edge and the hero is there above it. The same lit edge seals the order in the first frame below.
+- **Then the cover goes.** On the landing page the mark and the Ink fade, and the tagline comes into focus where the mark stood (`journey.intro`): nothing travels over the screen. Until 2026-11-17 the Ink sank and a wave ran down the screen as its lit edge; that was taken out at the client's word. The earlier page (`classic.html`) still has it: its cover asks for the wave with `data-crest`, and its own styles sink it.
 - **Nothing in it is moved frame by frame.** Each movement is handed to the browser whole, as an animation of transform (`src/ui/opening.ts`), and the browser runs those on its own thread. While the page is busy starting the 3D scene, and it is for a tenth of a second at a time, the mark keeps filling evenly. The figure is one column of numbers stepped the same way.
 - **It decides when the page may show.** On the landing page: the journey's program is compiled, the mark's fields are worked out and the typeface has arrived (`journeyOpening` in `src/journey/timeline.ts`), and never later than 4 s. On the earlier page: both mountains are in the picture, a short check has held the story's heaviest moment behind the cover and, on a slow machine, stepped the drawing down a size so scrolling stays smooth, and frames are even (`config.opening`).
 - On the test machine the landing page is uncovered about 0.9 s after it is requested (production build, local server) and the cover has gone 1.5 s later. The earlier page takes about 1.8 s. The page cannot be scrolled until then.
@@ -58,7 +58,7 @@ The top of the page is one pinned stage, held for about six and a half screens o
 
 | What happens | Beat |
 |---|---|
-| "Equity perps. Private positions." comes into focus on Ink as the opening's wave passes | on load |
+| "Equity perps." and "Private positions.", the tagline in its two lines, come into focus on Ink as the opening's mark fades. Each line stays one line on every screen: the type is sized so the longer one fits (`--type-intro`). Nothing else is on the screen | on load |
 | Two bowed lids of Hyper Neon close over the words. Each line blurs, swells and takes the lids' colour exactly where a lid covers it | `lids` |
 | The lids part. In the opening eye stands a drop of light | `lids.part`, `drop` |
 | The drop runs out into the Hyperwood mark, flat and in Neon. This is the kit's own morph: a drop becomes the mark | `morph` |

@@ -3,7 +3,7 @@
  * section has been scrolled (0 to 1, eased a little towards the scroll). From it, every frame, the shader's
  * picture (shader.ts) and the HTML laid over it:
  *
- *   the scroll note goes; the lids close over the opening words, and part; in the opening eye a drop of light
+ *   the lids close over the opening words, and part; in the opening eye a drop of light
  *   spreads into the mark; the mark cools into a body of black liquid, the wordmark and the header come; the
  *   body fills with light again and gathers into a gate; the closing words come out from the gate, and the
  *   current runs out of it.
@@ -80,11 +80,10 @@ export interface JourneyParts {
   closing: HTMLElement
   /** Where the gate is drawn. */
   door: HTMLElement
-  note: HTMLElement
 }
 
 export function startJourney(parts: JourneyParts): () => void {
-  const { journey, stage, canvas, header, intro, lines, hero, sculpture, word, closing, door, note } = parts
+  const { journey, stage, canvas, header, intro, lines, hero, sculpture, word, closing, door } = parts
   const J = config.journey
   const B = J.beats
   const L = J.lids
@@ -720,7 +719,6 @@ export function startJourney(parts: JourneyParts): () => void {
       header.style.pointerEvents = headerIn > 0.6 ? 'auto' : 'none'
       header.inert = headerIn < 0.6
     }
-    note.style.opacity = String((1 - smooth(B.note[0], B.note[1], s)) * reveal)
 
     if (ready && active && gl && program) {
       if (!drawing && mayBegin(now)) begin()
