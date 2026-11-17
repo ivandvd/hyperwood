@@ -92,7 +92,13 @@ How it is made:
 
 ### After the journey
 
-Nothing yet. Until 2026-11-17 a light section on the protocol scrolled up over the journey (an order's five stages as dotted rings, "Sealed orders. Proven settlement.", four things the protocol does) and a footer waited under it with the cautions and the wordmark at full width. The client had both removed, to start over on what should follow the hero: they are in the repository's history (`src/landing/` as of commit cc7f90c).
+The sections after the journey are being built one at a time, on Ink like the stage above them.
+
+**The app** (`src/landing/Product.tsx`, `src/app/`). A preview of the web app under "You see the trade. The network sees a proof.": markets, a chart, the order ticket and the account's positions, drawn in HTML with sample data (`app/markets.ts`: well-known tickers as examples, as the client asked; the papers name no market, and the prices are sample figures, not quotes). A market can be picked, the side switched and an order signed, which walks it through the paper's stages. A switch shows the same account as the network has it: what the papers say stays inside the protected engine (market, direction, size, leverage, price, PnL) becomes bars, the chart an encrypted instruction, and what is left is a commitment, a state root and a proof. Falling prices are the quieter tone, not red. The caption says it is a preview with sample data. How it joins the hero: the section lies over the last part of the stage by a soft edge, so the river fades into its Ink without a line (`.section::before`), and the window's top hairline is Neon, as if the river's light caught it. "Launch App" goes to this section until the client names a destination. The words are a draft for approval.
+
+Still to come, in the order proposed to the client: what Hyperwood does (the Development Plan's Stage 1 scope as capabilities, with no dates), the markets, the mobile app, the network, and a footer with the cautions.
+
+Until 2026-11-17 a light section on the protocol scrolled up over the journey (an order's five stages as dotted rings, "Sealed orders. Proven settlement.", four things the protocol does) and a footer waited under it with the cautions and the wordmark at full width. The client had both removed, to start over on what should follow the hero: they are in the repository's history (`src/landing/` as of commit cc7f90c).
 
 What the client has asked of the new sections:
 

@@ -1,6 +1,5 @@
 /**
- * Every word of the landing page (index.html). For now that is the journey: the sections after it are being
- * planned afresh.
+ * Every word of the landing page (index.html): the journey, and the sections after it as they are built.
  * The tagline and the line under it are the approved ones, word for word. Everything else follows the
  * architecture paper ("Hyperwood: Architecture and Core Execution") and is a draft for approval.
  * The long read is the Architecture page (content.ts, content.sections.ts).
@@ -31,7 +30,19 @@ export const home = {
   ],
 
   nav: [
+    { label: 'App', href: '#app' },
     { label: 'Architecture', href: 'architecture/' },
   ],
-  launch: { label: 'Launch App', href: '#' },
+  /** (no app is live: until the client names a destination the button shows the preview) */
+  launch: { label: 'Launch App', href: '#app' },
+
+  /* ------------------------------------------------------------ after the journey: the app (a draft) */
+  app: {
+    eyebrow: 'The app',
+    title: ['You see the trade.', 'The network sees a proof.'],
+    lead: 'Pick a stock or an index, go long or short, and sign. Market, direction, size, entry and PnL stay inside the protected engine.',
+    switchLabel: 'Whose view',
+    views: { yours: 'Your view', network: 'Network view' },
+    caption: 'A preview of the web app, with sample data.',
+  },
 }

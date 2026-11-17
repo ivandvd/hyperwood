@@ -1,0 +1,61 @@
+/* The app section: Ink, like the stage above it. It lies over the journey's last screen by a soft edge, so the
+   river runs into it without a line, and the river's light falls on the window from above. */
+.section {
+  position: relative; z-index: 3; padding: clamp(64px, 11vh, 130px) var(--edge) clamp(80px, 13vh, 150px);
+  background: var(--hw-ink); color: var(--hw-paper); font-family: var(--font-text);
+  /* (the glow behind the window is wider than the page: it is cut at the page's sides, not scrolled to) */
+  overflow-x: clip;
+}
+/* (the river fades into this page's Ink over the last part of the stage) */
+.section::before {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 18vh; height: 18svh; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(10, 10, 10, 0), var(--hw-ink));
+}
+
+.head {
+  position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 22px 40px;
+  max-width: 1180px; margin: 0 auto 44px;
+}
+.eyebrow {
+  grid-column: 1 / -1; margin: 0; font-family: var(--font-mono); font-size: var(--size-label); letter-spacing: var(--track-mono);
+  text-transform: uppercase; color: rgba(244, 245, 240, 0.5);
+}
+.eyebrow::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 9px; border-radius: 50%; background: var(--hw-neon); vertical-align: 1px; }
+.title { margin: 0; font-family: var(--font-display); font-weight: var(--weight-display); font-size: clamp(32px, 4.5vw, 66px); line-height: 1; letter-spacing: var(--track-display); }
+.title span { display: block; text-wrap: balance; }
+.title span + span { color: rgba(244, 245, 240, 0.44); }
+.lead { max-width: 47ch; margin: 20px 0 0; font-size: 16px; line-height: 1.5; letter-spacing: var(--track-text); color: rgba(244, 245, 240, 0.66); }
+
+/* whose view: the owner's, or the network's */
+.switch { display: inline-grid; grid-auto-flow: column; gap: 2px; padding: 4px; border: 1px solid rgba(244, 245, 240, 0.14); border-radius: 999px; background: rgba(244, 245, 240, 0.04); }
+.switch button {
+  padding: 10px 18px; border: 0; border-radius: 999px; background: none; color: rgba(244, 245, 240, 0.62);
+  font: 600 13px/1 var(--font-text); letter-spacing: -0.01em; cursor: pointer; transition: background 0.2s linear, color 0.2s linear;
+}
+.switch button:hover { color: var(--hw-paper); }
+.switch button[aria-pressed='true'] { background: var(--hw-paper); color: var(--hw-ink); }
+.switch button[aria-pressed='true'][data-view='network'] { background: var(--hw-neon); }
+.switch button:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 3px; }
+
+/* the window: a hairline that is Neon along its top, where the river's light catches it */
+.frame {
+  position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 1px; border-radius: 19px;
+  background: linear-gradient(to bottom, rgba(204, 255, 0, 0.6), rgba(244, 245, 240, 0.12) 20%, rgba(244, 245, 240, 0.07));
+  box-shadow: 0 -34px 90px -46px rgba(204, 255, 0, 0.4), 0 50px 120px -50px #000;
+}
+/* (what is left of the river's light lies behind the window's top: nothing of it on the section's own edge,
+   where it would show as a line under the river) */
+.frame::before {
+  content: ''; position: absolute; z-index: -1; left: -8%; right: -8%; top: -150px; height: 420px; pointer-events: none;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(204, 255, 0, 0.1), rgba(204, 255, 0, 0) 70%);
+}
+.caption {
+  position: relative; z-index: 1; max-width: 1180px; margin: 16px auto 0; font-family: var(--font-mono); font-size: var(--size-micro);
+  letter-spacing: var(--track-mono); text-transform: uppercase; color: rgba(244, 245, 240, 0.4);
+}
+
+@media (max-width: 760px) {
+  .head { grid-template-columns: minmax(0, 1fr); margin-bottom: 30px; }
+  .lead { font-size: 15px; }
+  .switch { justify-self: start; }
+}
