@@ -141,7 +141,7 @@
 }
 
 /* ------------------------------------------------------------------------------------------------------------
-   The landing page: the journey, the protocol section, the footer (px from the 1440 x 900 design).
+   The landing page: the journey (px from the 1440 x 900 design).
    One phone step (760 px and under) and one wide step (1800 px and over). */
 :root {
   /* a hundredth of the stage's height: the small viewport's, where the browser knows it (below) */
@@ -152,13 +152,9 @@
   --leading-intro: 0.9;
   --type-closing: clamp(30px, min(4.6vw, calc(8 * var(--stage-1))), 84px);
   --leading-closing: 0.98;
-  --type-about: clamp(40px, 5.4vw, 85px);
   --type-nav: 15px;
   --type-hero-line: 14px;
   --type-aside: 13px;
-  --type-footer: 13px;
-  --type-feature-title: 20px;
-  --type-feature: 14px;
 
   --header-top: 28px;
   --nav-gap: 24px;
@@ -182,25 +178,6 @@
   --aside-gap: 20px;
   --aside-width: 200px;
   --title-top: calc(12.5 * var(--stage-1));
-  --main-top: 26px;
-  --main-bottom: 90px;
-  --stages-width: 100%;
-  --stages-shift: 0%;
-  --stages-margin: 55px 0 60px;
-  --about-columns: 1.2fr 1fr;
-  --about-gap: 8vw;
-  --features-top: 130px;
-  --features-gap: 42px 36px;
-  --footer-top: 28px;
-  --cautions-top: 120px;
-  --footer-gap: 90px;
-  --wordmark-bleed: 8px;
-  --wordmark-sink: 4px;
-  /* the footer wordmark: hot Neon at the top of the letters, moss at their foot, and how soft the foot is */
-  --word-top: #ecff6a;
-  --word-low: #9fd600;
-  --word-foot: #4a6a12;
-  --word-blur: 12px;
 }
 /* small-viewport units where the browser has them (phones: the toolbar does not stretch the journey) */
 @supports (height: 1svh) {
@@ -208,8 +185,6 @@
 }
 @media (min-width: 1800px) {
   :root {
-    --type-feature: 17px;
-    --type-feature-title: 24px;
     --type-aside: 15px;
     --aside-width: 230px;
     --type-nav: 16px;
@@ -226,23 +201,6 @@
     --type-intro: clamp(34px, 11.6vw, 110px);
     --type-aside: 11px;
     --type-hero-line: 12px;
-    --main-top: 20px;
-    --main-bottom: 60px;
-    --stages-width: 170%;
-    --stages-shift: -20%;
-    --stages-margin: 40px 0 44px;
-    --about-columns: 1fr;
-    --about-gap: 40px;
-    --type-about: 46px;
-    --features-top: 0px;
-    --features-gap: 32px 22px;
-    --type-feature: 13px;
-    --type-feature-title: 17px;
-    --footer-top: 22px;
-    --cautions-top: 60px;
-    --footer-gap: 50px;
-    --type-footer: 11px;
-    --word-blur: 6px;
   }
 }
 @supports (height: 1svh) {

@@ -2,7 +2,7 @@
 
 The Hyperwood site. Three pages:
 
-- **The landing page** (`index.html`): an opening, then a pinned scroll journey drawn by one shader, a light section on the protocol, and the footer.
+- **The landing page** (`index.html`): an opening, then a pinned scroll journey drawn by one shader. For now the page ends there: the sections after the journey are being planned afresh (see "After the journey" below).
 - **The Architecture page** (`architecture/index.html`): the long read. Eight sections that follow the architecture paper ("Hyperwood: Architecture and Core Execution") page by page.
 - **The earlier landing page** (`classic.html`): the globe hero and the four frames, kept as they were until the new landing page is approved. Not linked from anywhere.
 
@@ -29,8 +29,7 @@ npx tsx scripts/liquid-shape.ts   # how round and even the hero's fused pieces a
 |---|---|
 | The opening (the loading screen and how the page is uncovered) | its elements and styles in `index.html`, what it waits for in `src/ui/opening.ts`, timings under `opening` in `src/config.ts` |
 | The journey: the pinned opening of the landing page | `src/journey/`: `shader.ts` (the picture), `timeline.ts` (what moves when), `markField.ts` (the mark as a body), `Journey.tsx`, `Header.tsx`, `glide.ts` (the wheel) |
-| The protocol section and the footer | `src/landing/` |
-| Every word of the landing page | `src/content.home.ts` (the footer's cautions, which every page shows: `src/content.cautions.ts`) |
+| Every word of the landing page | `src/content.home.ts` (the cautions the papers insist on, which the Architecture page shows: `src/content.cautions.ts`) |
 | Every number of the journey: palette, beats, lids, the body, the floor | `journey` in `src/config.ts`; type sizes and where things stand at the end of `src/styles/tokens.css` |
 | The Architecture page | `src/pages/Architecture.tsx`, sections in `src/sections/`, words in `src/content.ts` (section 01) and `src/content.sections.ts` (02 to 08) |
 | The earlier landing page | `classic.html`, `src/classic.tsx`, `src/App.tsx`, `src/hero/`, `src/scene/`, `src/deck/` (see "The earlier landing page" below) |
@@ -91,13 +90,18 @@ How it is made:
 - **Without WebGL** nothing is drawn: the stage stays Ink, the hero shows the symbol and the wordmark as they are supplied, the gate is a plain shape of light, and the words keep a closer timing so the stage is never empty (`journey.stillBeats`). **Reduced motion:** no ambient movement, no easing, no glide; the scroll still tells the story.
 - **Screens.** Checked in a desktop browser at 1440 by 900, 1920 by 1080 and 1280 by 720, and emulated at 820 by 1180, 390 by 844, 360 by 640, and a phone on its side (844 by 390, 667 by 375). Not yet on a real phone.
 
-### The protocol section
+### After the journey
 
-A light page (Paper, the kit's surface for reading) that scrolls up over the journey (`src/landing/Protocol.tsx`): an order's five stages as dotted rings, "Sealed orders. Proven settlement.", four things the protocol does, the way to the Architecture page, and the caution about privacy.
+Nothing yet. Until 2026-11-17 a light section on the protocol scrolled up over the journey (an order's five stages as dotted rings, "Sealed orders. Proven settlement.", four things the protocol does) and a footer waited under it with the cautions and the wordmark at full width. The client had both removed, to start over on what should follow the hero: they are in the repository's history (`src/landing/` as of commit cc7f90c).
 
-### The footer
+What the client has asked of the new sections:
 
-It waits under the page, fixed to the bottom, and is uncovered as the protocol section scrolls off it (`src/landing/Foot.tsx`). It carries the cautions the paper insists on, and the wordmark at full width: crisp at the top of the letters and softening towards the baseline.
+- They must stay connected with the hero, so the design does not drift between the two.
+- A preview of the web app, and of the mobile app.
+- The seven-month plan shown as a plan, without "pending" labels.
+- References they like: bulk.trade (large claims beside crops of the product) and Aster (a dark page led by the product, market cards, the app in a hand).
+
+The papers to build from, given on 2026-11-17: *A Trader Guide*, *Development Plan*, *Architecture and Core Execution* and its *Reference Index*. All four say Hyperwood is a proposed network and that its speed figures are targets, not measurements: the page must say the same.
 
 ## The earlier landing page
 

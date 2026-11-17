@@ -41,9 +41,6 @@ html.has-cursor, html.has-cursor * { cursor: none !important; }
 /* its links to a place on the page glide there (the wheel has its own glide: journey/glide.ts) */
 html[data-page='home'] { scroll-behavior: smooth; }
 html[data-page='home'] body { font-synthesis: none; }
-/* the first thing on the page for a keyboard: past the journey, to the protocol section */
-.skip { position: fixed; left: 20px; top: -100px; z-index: 20; padding: 12px; background: var(--hw-white); color: var(--hw-ink); font-size: 14px; text-decoration: none; }
-.skip:focus { top: 20px; }
 @media (prefers-reduced-motion: reduce) {
   html[data-page='home'] { scroll-behavior: auto; }
 }

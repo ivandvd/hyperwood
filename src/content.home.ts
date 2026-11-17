@@ -1,5 +1,6 @@
 /**
- * Every word of the landing page (index.html): the journey, the protocol section and the footer.
+ * Every word of the landing page (index.html). For now that is the journey: the sections after it are being
+ * planned afresh.
  * The tagline and the line under it are the approved ones, word for word. Everything else follows the
  * architecture paper ("Hyperwood: Architecture and Core Execution") and is a draft for approval.
  * The long read is the Architecture page (content.ts, content.sections.ts).
@@ -30,40 +31,7 @@ export const home = {
   ],
 
   nav: [
-    { label: 'Protocol', href: '#protocol' },
     { label: 'Architecture', href: 'architecture/' },
   ],
   launch: { label: 'Launch App', href: '#' },
-
-  /* ------------------------------------------------------------ the protocol section */
-  section: 'The Hyperwood protocol',
-  /** An order's life, as the paper names it. */
-  stages: ['Sealed', 'Accepted', 'Matched', 'Proven', 'Settled'],
-  title: ['Sealed orders.', 'Proven settlement.'],
-  features: [
-    {
-      title: 'Sealed orders',
-      body: 'The network orders and verifies every instruction without reading it. Market, direction, size, leverage, collateral, entry price and PnL stay with you.',
-    },
-    {
-      title: 'Nothing moves without a proof',
-      body: 'Orders are matched inside a protected engine. TradingCore accepts a state update only through a verified transition, checked by a public contract.',
-    },
-    {
-      title: 'Close into cash or into the stock',
-      body: 'One closing instruction settles in collateral, or converts the available equity into an approved equity tracker token, backed before it is minted.',
-    },
-    {
-      title: 'A Layer 3 on Robinhood Chain',
-      body: 'A proposed general purpose EVM Layer 3. Its rollup contracts and bridge deploy on Robinhood Chain, an Arbitrum Layer 2 that uses Ethereum for settlement and data availability.',
-    },
-  ],
-  more: { label: 'Read the architecture', href: 'architecture/' },
-  fine: 'Privacy holds within a defined threat model. It is not a claim of absolute anonymity.',
-
-  /* ------------------------------------------------------------ the footer */
-  footer: {
-    left: ['Equity perps.', 'Private positions.'],
-    right: ['© 2026 Hyperwood', 'All rights reserved'],
-  },
 }

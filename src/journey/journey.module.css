@@ -1,5 +1,4 @@
-/* The journey: a tall section, and in it the stage that stays on screen. It lies above the footer, which
-   waits underneath (landing/foot.module.css). */
+/* The journey: a tall section, and in it the stage that stays on screen. */
 .journey { height: var(--journey-height); position: relative; z-index: 2; }
 
 /* The picture is dark wherever something is written: type on the stage is white, the brand's marks Neon.
