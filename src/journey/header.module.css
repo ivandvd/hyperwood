@@ -1,9 +1,18 @@
-/* The landing page's header. Its colours follow the stage (--on, --on-mark: journey.module.css). */
+/* The landing page's header. It comes in with the hero (timeline.ts) and then stays at the top of the screen
+   for the rest of the page, over the sections below the journey: it lies on the page itself, above them,
+   and a soft fall of Ink behind it keeps it clear of what scrolls under it. White type, the mark in Neon. */
 .header {
-  position: absolute; inset: var(--header-top) var(--edge) auto; z-index: 4;
+  --on: var(--hw-white);
+  --on-mark: var(--hw-neon);
+  position: fixed; inset: var(--header-top) var(--edge) auto; z-index: 10;
   display: flex; justify-content: space-between; align-items: center;
-  font-size: var(--type-nav); font-weight: 500; letter-spacing: -0.01em; color: var(--on);
+  font-family: var(--font-text); font-size: var(--type-nav); font-weight: 500; letter-spacing: -0.01em; color: var(--on);
   opacity: 0; pointer-events: none; /* timeline.ts takes both over */
+}
+.header::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  inset: calc(-1 * var(--header-top)) calc(-1 * var(--edge)) -44px;
+  background: linear-gradient(to bottom, rgba(10, 10, 10, 0.96), rgba(10, 10, 10, 0.92) 52%, rgba(10, 10, 10, 0.55) 76%, rgba(10, 10, 10, 0));
 }
 .header a { color: inherit; text-decoration: none; transition: opacity 0.18s var(--ease-out); }
 .header a:hover { opacity: 0.62; }
@@ -12,10 +21,15 @@
 
 /* on the row's own centre line (no top: its place in the row puts it there) */
 .brand { position: absolute; left: 50%; transform: translateX(-50%); display: block; }
-/* the master symbol, in Neon on Ink and in Ink on the field */
+/* the master symbol, in Neon */
 .mark {
   display: block; width: var(--mark-width); aspect-ratio: 428 / 191; background: var(--on-mark);
   -webkit-mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
   mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
 }
 .launch span { display: inline-block; margin-left: 2px; }
+
+/* a phone: the first link and the last, the mark, the call to action */
+@media (max-width: 760px) {
+  .nav a:not(:first-child):not(:last-child) { display: none; }
+}

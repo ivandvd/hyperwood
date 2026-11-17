@@ -92,22 +92,17 @@ How it is made:
 
 ### After the journey
 
-The sections after the journey are being built one at a time, on Ink like the stage above them.
+Everything below the journey stands on the same Ink and is told the same way as the hero: one thing a screen, large type, few words, the product as the picture. (A first version, built on 2026-11-17 as a stack of sections with cards, chips and tile grids, was thrown out the same day. If a new section is ever needed, do not reach for a card grid: find the one picture.)
 
-**The app** (`src/landing/Product.tsx`, `src/app/`). A preview of the web app under "You see the trade. The network sees a proof.": markets, a chart, the order ticket and the account's positions, drawn in HTML with sample data (`app/markets.ts`: well-known tickers as examples, as the client asked; the papers name no market, and the prices are sample figures, not quotes). A market can be picked, the side switched and an order signed, which walks it through the paper's stages. A switch shows the same account as the network has it: what the papers say stays inside the protected engine (market, direction, size, leverage, price, PnL) becomes bars, the chart an encrypted instruction, and what is left is a commitment, a state root and a proof. Falling prices are the quieter tone, not red. The caption says it is a preview with sample data. How it joins the hero: the section lies over the last part of the stage by a soft edge, so the river fades into its Ink without a line (`.section::before`), and the window's top hairline is Neon, as if the river's light caught it. "Launch App" goes to this section until the client names a destination. The words are a draft for approval.
+- **The app, as one sequence** (`src/landing/Sequence.tsx`, `src/app/`). The app's window is real HTML with sample data (`app/markets.ts`: 36 well-known tickers as examples, as the client asked; the papers name no market, and the prices are sample figures). It first lies under the river's last light like a slab on the floor; scrolling raises it to face the reader, and from there the scroll is a camera over the one window. It stops four times and says one thing at each: "Everything on your screen." "Long or short." (the order ticket, close up) "Nothing on theirs." (the window seals: what the papers say stays inside the protected engine becomes bars, the chart an encrypted instruction, and a commitment, a state root and a proof are left) "Cash, or the stock." (a position closes and the payout sheet comes up). The stops are worked out from where the window's parts lie (`data-part`), so they hold on any screen; when things happen is `SAY`, `SEALED` and `SHEET` at the top of the file. Nothing moves by itself. Below 961 px, or under reduced motion, there is no camera: the window stands in the page with a switch between the two views and the four things are said under one another.
+- **Markets** (`Markets.tsx`). The statement runs on into its own examples: "Stocks and indices." and then the tickers in the same large type, dim. One is lit at a time and a single line under the block reads it out. The light moves on by itself, slowly, until the reader points at a ticker.
+- **Mobile** (`Mobile.tsx`). Two screens of the mobile app as two large phones turned a little away: a trade being opened, a position being closed with its payout chosen.
+- **The network** (`Network.tsx`). The gate of the journey three times, one inside the other: Hyperwood, lit, inside Robinhood Chain, inside Ethereum. Under it the papers' speed figures, very large, each labelled a target, because the papers say they are targets and not measurements.
+- **The footer** (`Footer.tsx`). The tagline, the way around the page, and the cautions the papers insist on.
 
-Still to come, in the order proposed to the client: what Hyperwood does (the Development Plan's Stage 1 scope as capabilities, with no dates), the markets, the mobile app, the network, and a footer with the cautions.
+How it joins the hero: the sequence lies over the last part of the journey's stage by a soft edge, so the river fades into its Ink without a line; the window's top hairline is Neon, as if the river's light caught it; and the header now stays at the top of the screen for the whole page (it is rendered on the page itself: `Journey.tsx`, `header.module.css`). "Launch App" goes to the app's sequence until the client names a destination. All the words here are a draft for approval. The Development Plan's dates are left out on purpose: the client wants its scope shown as what Hyperwood does, not as a schedule.
 
-Until 2026-11-17 a light section on the protocol scrolled up over the journey (an order's five stages as dotted rings, "Sealed orders. Proven settlement.", four things the protocol does) and a footer waited under it with the cautions and the wordmark at full width. The client had both removed, to start over on what should follow the hero: they are in the repository's history (`src/landing/` as of commit cc7f90c).
-
-What the client has asked of the new sections:
-
-- They must stay connected with the hero, so the design does not drift between the two.
-- A preview of the web app, and of the mobile app.
-- The seven-month plan shown as a plan, without "pending" labels.
-- References they like: bulk.trade (large claims beside crops of the product) and Aster (a dark page led by the product, market cards, the app in a hand).
-
-The papers to build from, given on 2026-11-17: *A Trader Guide*, *Development Plan*, *Architecture and Core Execution* and its *Reference Index*. All four say Hyperwood is a proposed network and that its speed figures are targets, not measurements: the page must say the same.
+The papers to build from, given on 2026-11-17: *A Trader Guide*, *Development Plan*, *Architecture and Core Execution* and its *Reference Index*. All four say Hyperwood is a proposed network. (Until 2026-11-17 a light section on the protocol and a footer stood here; they are in the repository's history, `src/landing/` as of commit cc7f90c.)
 
 ## The earlier landing page
 

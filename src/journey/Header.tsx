@@ -1,6 +1,6 @@
 /**
- * The header of the landing page: two links, the mark in the middle, the call to action. It belongs to the
- * journey's stage, comes in with the hero and stays inert until it is mostly there (timeline.ts).
+ * The header of the landing page: links, the mark in the middle, the call to action. It comes in with the
+ * hero and stays inert until it is mostly there (timeline.ts); then it stays at the top of the screen.
  */
 import type { Ref } from 'react'
 import { BRAND, home } from '../content.home'

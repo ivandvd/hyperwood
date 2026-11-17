@@ -1,0 +1,48 @@
+/* The footer: Ink like the page, a hairline above it, the tagline large, the cautions small. */
+.footer {
+  position: relative; z-index: 3; padding: clamp(96px, 16vh, 200px) var(--edge) 32px;
+  background: var(--hw-ink); color: var(--hw-paper); font-family: var(--font-text);
+}
+
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: start; gap: 32px 56px; }
+.tagline { margin: 0; font-family: var(--font-display); font-weight: var(--weight-display); font-size: clamp(40px, 6.3vw, 108px); line-height: 0.94; letter-spacing: -0.05em; }
+.tagline span { display: block; }
+.tagline span + span { color: rgba(244, 245, 240, 0.44); }
+.links { display: grid; gap: 12px; padding-top: 8px; font-size: 14px; }
+.links a, .launch { color: var(--hw-paper); text-decoration: none; }
+.links a { opacity: 0.72; transition: opacity 0.18s linear; }
+.links a:hover { opacity: 1; }
+.links a:focus-visible, .launch:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 4px; border-radius: 2px; }
+.launch {
+  display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px; border-radius: 999px;
+  background: var(--hw-neon); color: var(--hw-ink); font-size: 14px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap;
+  transition: filter 0.18s linear;
+}
+.launch:hover { filter: brightness(1.08); }
+
+.notes {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin: clamp(56px, 9vh, 96px) 0 0; padding: 24px 0 0; list-style: none;
+  border-top: 1px solid rgba(244, 245, 240, 0.12);
+}
+.notes li { font-size: 12px; line-height: 1.55; color: rgba(244, 245, 240, 0.5); }
+
+.bottom {
+  display: flex; justify-content: space-between; align-items: center; margin-top: 48px;
+  font-family: var(--font-mono); font-size: var(--size-micro); letter-spacing: var(--track-mono); text-transform: uppercase; color: rgba(244, 245, 240, 0.4);
+}
+.mark {
+  display: block; width: 44px; aspect-ratio: 428 / 191; background: var(--hw-neon);
+  -webkit-mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+}
+
+@media (max-width: 900px) {
+  .top { grid-template-columns: minmax(0, 1fr) auto; }
+  .tagline { grid-column: 1 / -1; }
+  .notes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .top { grid-template-columns: minmax(0, 1fr); }
+  .launch { justify-self: start; }
+  .notes { grid-template-columns: minmax(0, 1fr); }
+}

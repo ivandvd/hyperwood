@@ -1,0 +1,14 @@
+/* Sealed: the owner's value, and the bar the network gets in its place (Sealed.tsx). */
+.sealed { position: relative; display: inline-block; }
+.clear { display: inline-block; transition: opacity 0.35s linear, filter 0.35s linear; }
+.bar {
+  position: absolute; left: 0; right: 0; top: 50%; height: 0.72em; min-height: 7px; border-radius: 3px;
+  background: color-mix(in srgb, var(--hw-neon) 40%, #171912);
+  opacity: 0; transform: translateY(-50%) scaleX(0); transform-origin: 0 50%;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s linear;
+}
+[data-view='network'] .clear { opacity: 0; filter: blur(4px); }
+[data-view='network'] .bar { opacity: 1; transform: translateY(-50%) scaleX(1); }
+@media (prefers-reduced-motion: reduce) {
+  .clear, .bar { transition: none; }
+}

@@ -1,7 +1,7 @@
 /**
  * The markets the app previews show. They are well-known tickers used as examples, as the client asked: the
  * papers name no market (Stage 1 starts with three to five equity references). Prices and changes are sample
- * figures for the previews, not quotes.
+ * figures for the previews, not quotes. There are 36, so the wall of markets fills every row at 6, 4 and 3 a row.
  */
 export interface Market {
   ticker: string
@@ -37,6 +37,14 @@ export const markets: Market[] = [
   { ticker: 'KO', name: 'Coca-Cola', kind: 'stock', price: 68.45, change: 0.22 },
   { ticker: 'DIS', name: 'Walt Disney', kind: 'stock', price: 111.2, change: -0.44 },
   { ticker: 'INTC', name: 'Intel', kind: 'stock', price: 36.8, change: 0.95 },
+  { ticker: 'UNH', name: 'UnitedHealth', kind: 'stock', price: 362.4, change: -0.83 },
+  { ticker: 'HD', name: 'Home Depot', kind: 'stock', price: 388.15, change: 0.36 },
+  { ticker: 'BAC', name: 'Bank of America', kind: 'stock', price: 52.3, change: 0.58 },
+  { ticker: 'ADBE', name: 'Adobe', kind: 'stock', price: 341.6, change: -0.27 },
+  { ticker: 'UBER', name: 'Uber', kind: 'stock', price: 96.75, change: 1.42 },
+  { ticker: 'GS', name: 'Goldman Sachs', kind: 'stock', price: 782.9, change: 0.64 },
+  { ticker: 'IBM', name: 'IBM', kind: 'stock', price: 304.2, change: 0.52 },
+  { ticker: 'PEP', name: 'PepsiCo', kind: 'stock', price: 148.65, change: -0.31 },
   { ticker: 'SPX', name: 'S&P 500', kind: 'index', price: 6842.5, change: 0.41 },
   { ticker: 'NDX', name: 'Nasdaq 100', kind: 'index', price: 25310.8, change: 0.73 },
   { ticker: 'DJI', name: 'Dow Jones', kind: 'index', price: 47215.3, change: 0.18 },

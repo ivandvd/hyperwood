@@ -7,6 +7,7 @@
  * page's layout puts them, and the shader draws the mark's body, the wordmark and the gate where they stand.
  */
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { BRAND, home } from '../content.home'
 import { startJourney } from './timeline'
 import { Header } from './Header'
@@ -47,7 +48,8 @@ export function Journey() {
     <section ref={journey} id="top" className={s.journey} aria-label={home.label}>
       <div ref={stage} className={s.stage}>
         <canvas ref={canvas} className={s.light} aria-hidden="true" />
-        <Header ref={header} />
+        {/* (the header lies on the page itself, so it can stay over the sections after the journey) */}
+        {createPortal(<Header ref={header} />, document.body)}
         <p ref={intro} className={s.intro}>
           {home.intro.map((line) => (
             <span key={line}>{line} </span>

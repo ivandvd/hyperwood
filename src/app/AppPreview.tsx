@@ -7,8 +7,9 @@
  * papers say stays inside the protected engine (market, direction, size, leverage, price, PnL) is sealed, and
  * what is left is what the network has: an encrypted instruction, commitments and a proof.
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { markets, money, percent, series } from './markets'
+import { Sealed } from './Sealed'
 import s from './appPreview.module.css'
 
 export type View = 'yours' | 'network'
@@ -19,23 +20,23 @@ const book = [
   { ticker: 'SPX', side: 'Short', size: 0.2, entry: 6871 },
 ] as const
 
+/** The first position, closed at its mark: what the payout sheet shows (margin at five times leverage). */
+const closed = (() => {
+  const p = book[0]
+  const mark = markets.find((m) => m.ticker === p.ticker)!.price
+  const pnl = (mark - p.entry) * p.size
+  return { ...p, mark, pnl, equity: (p.entry * p.size) / 5 + pnl }
+})()
+
 /** An order's life, as the architecture paper names its stages. */
 const stages = ['Sealed', 'Accepted', 'Matched', 'Proven']
-
-/** A value that is the owner's alone: shown in their view, a bar in the network's. */
-function Sealed({ children }: { children: ReactNode }) {
-  return (
-    <span className={s.sealed}>
-      <span className={s.clear}>{children}</span>
-      <span className={s.bar} aria-hidden="true" />
-    </span>
-  )
-}
 
 const W = 640
 const H = 250
 
-export function AppPreview({ view }: { view: View }) {
+/** `live`: the section has been seen, so the chart may draw itself in. `sheet`: a position is being closed,
+ *  and the sheet that asks where its proceeds go is up. */
+export function AppPreview({ view, live = true, sheet = false }: { view: View; live?: boolean; sheet?: boolean }) {
   const [picked, setPicked] = useState(0)
   const [side, setSide] = useState<'Long' | 'Short'>('Long')
   const [stage, setStage] = useState(-1)
@@ -72,7 +73,7 @@ export function AppPreview({ view }: { view: View }) {
   }
 
   return (
-    <div className={s.app} data-view={view} role="group" aria-label="Preview of the Hyperwood web app, with sample data">
+    <div className={s.app} data-view={view} data-live={live ? '' : undefined} role="group" aria-label="Preview of the Hyperwood web app, with sample data">
       <header className={s.bar0}>
         <span className={s.logo} aria-hidden="true" />
         <nav className={s.tabs} aria-label="Preview sections">
@@ -88,7 +89,7 @@ export function AppPreview({ view }: { view: View }) {
         <span className={s.wallet}>0x71C4…9A3f</span>
       </header>
 
-      <aside className={s.list} aria-label="Markets">
+      <aside className={s.list} data-part="list" aria-label="Markets">
         <p className={s.label}>Markets</p>
         <ul>
           {markets.map((m, i) => (
@@ -136,8 +137,9 @@ export function AppPreview({ view }: { view: View }) {
           </div>
         </div>
 
-        <div className={s.chart}>
-          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+        <div className={s.chart} data-part="chart">
+          {/* (a new market draws its line in from the left: the key makes it a new picture) */}
+          <svg key={`line-${market.ticker}`} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
             <defs>
               <linearGradient id="app-fill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stopColor="var(--hw-neon)" stopOpacity="0.22" />
@@ -157,7 +159,7 @@ export function AppPreview({ view }: { view: View }) {
               </li>
             ))}
           </ol>
-          <span className={s.last} style={{ top: `${(chart.end / H) * 100}%` }}>
+          <span key={`last-${market.ticker}`} className={s.last} style={{ top: `${(chart.end / H) * 100}%` }}>
             {money(market.price)}
           </span>
           <div className={s.veil} aria-hidden={view === 'yours'}>
@@ -167,7 +169,7 @@ export function AppPreview({ view }: { view: View }) {
           </div>
         </div>
 
-        <div className={s.book}>
+        <div className={s.book} data-part="book">
           <p className={s.label}>Positions</p>
           <table>
             <thead>
@@ -220,7 +222,7 @@ export function AppPreview({ view }: { view: View }) {
         </div>
       </section>
 
-      <aside className={s.ticket} aria-label="Order">
+      <aside className={s.ticket} data-part="ticket" aria-label="Order">
         <div className={s.sides}>
           {(['Long', 'Short'] as const).map((name) => (
             <button key={name} type="button" data-on={side === name ? '' : undefined} data-long={name === 'Long' ? '' : undefined} onClick={() => setSide(name)}>
@@ -278,6 +280,39 @@ export function AppPreview({ view }: { view: View }) {
           </p>
         </div>
       </aside>
+
+      {/* closing a position: where its proceeds go (the figures follow the first position in the book) */}
+      <div className={s.sheet} data-part="sheet" data-on={sheet ? '' : undefined} aria-hidden={!sheet}>
+        <p className={s.sheetHead}>
+          <b>Close position</b>
+          <span>
+            {closed.ticker}-PERP · {closed.side} · {closed.size} units
+          </span>
+        </p>
+        <p className={s.sheetRow}>
+          <span>Realized PnL</span>
+          <b className={s.change} data-up="">
+            +${money(closed.pnl)}
+          </b>
+        </p>
+        <p className={s.sheetSum}>
+          <span>Available equity</span>
+          <strong>${money(closed.equity)}</strong>
+        </p>
+        <div className={s.payouts}>
+          <div>
+            <b>Keep collateral</b>
+            <span>${money(closed.equity)} to your private balance</span>
+          </div>
+          <div data-on="">
+            <b>Convert to {closed.ticker} tracker</b>
+            <span>
+              {(closed.equity / closed.mark).toFixed(2)} units at {money(closed.mark)}
+            </span>
+          </div>
+        </div>
+        <span className={s.confirm}>Confirm payout</span>
+      </div>
     </div>
   )
 }
