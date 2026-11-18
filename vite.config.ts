@@ -42,6 +42,7 @@ export default defineConfig({
         main: resolve(import.meta.dirname, 'index.html'),
         architecture: resolve(import.meta.dirname, 'architecture/index.html'),
         classic: resolve(import.meta.dirname, 'classic.html'),
+        film: resolve(import.meta.dirname, 'film.html'),
       },
     },
   },

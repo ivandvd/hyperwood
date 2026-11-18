@@ -1,0 +1,18 @@
+/* The strip of films (FilmStrip.tsx). Whoever uses it says where its box stands and how large it is; the box
+   has to be positioned (it is, unless said otherwise). How its upper and lower edges melt: edges.module.css. */
+:where(.strip) { position: relative; }
+.strip { overflow: hidden; pointer-events: none; }
+
+/* a frame of the strip: here, waiting below, or gone above (the move takes as long as MOVE in FilmStrip.tsx) */
+.frame { position: absolute; inset: 0; transition: transform 760ms cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
+.frame[data-place='here'] { transform: translate3d(0, 0, 0); }
+.frame[data-place='above'] { transform: translate3d(0, -100%, 0); }
+.frame[data-place='below'] { transform: translate3d(0, 100%, 0); transition: none; }
+/* The film fills its frame. Where the frame is wider than the film, the film loses height at the foot (where
+   the passing hats are), so the bulb never rises into the smeared edge. */
+.picture { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; background: var(--hw-ink); }
+
+/* reduced motion: the strip stands still (FilmStrip.tsx does not start it) */
+@media (prefers-reduced-motion: reduce) {
+  .frame { transition: none; }
+}

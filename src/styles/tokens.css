@@ -168,6 +168,13 @@
   --hero-word-gap: calc(9 * var(--stage-1));
   --hero-line-gap: calc(3.4 * var(--stage-1));
   --hero-drop: calc(2 * var(--stage-1));
+  /* the hero as a room: the box the films stand in (its height, and its width to its height; never wider than
+     the screen between its edges) and how far down the screen it stands. (The films' words take their size
+     from the room left under the box: journey.module.css, .says.) */
+  --room-height: calc(64 * var(--stage-1));
+  --room-shape: 1.5;
+  --room-width: min(calc(var(--room-height) * var(--room-shape)), calc(100vw - 2 * var(--edge)));
+  --room-top: calc(11 * var(--stage-1));
   /* the gate: where it stands and how large, and how far the words keep from it */
   --door-top: calc(30.5 * var(--stage-1));
   --door-height: calc(26.5 * var(--stage-1));
@@ -234,5 +241,10 @@
     --door-height: calc(26.5 * var(--stage-1));
     --door-width: min(calc(13.5 * var(--stage-1)), 32vw);
     --door-gap: 12px;
+    /* the room is taller than it is wide, a slice of each film, and on a phone it runs from edge to edge */
+    --room-height: calc(60 * var(--stage-1));
+    --room-shape: 0.78;
+    --room-width: min(100vw, calc(var(--room-height) * var(--room-shape)));
+    --room-top: calc(13 * var(--stage-1));
   }
 }

@@ -5,12 +5,20 @@
  * already filling from the very first paint, before this file has arrived. What is here decides how far the
  * mark goes and when the cover comes down:
  *
- *  - the mark fills in three movements that add up (config.opening.fill). The first is under way when this
- *    runs. The second starts when what the page opens on exists. The last closes whatever is left once that is
- *    whole, and then the cover goes. On the landing page it fades with the mark, and the page's words come
- *    into focus where the mark stood. On the earlier page (classic.html) it sinks: a wave runs down the
- *    screen as its lit edge. That page asks for the wave with `data-crest` on its cover;
- *  - a small figure says the same in numbers.
+ *  - the mark fills in movements the browser runs by itself (config.opening.fill). The first is under way
+ *    when this runs: brisk, then creeping for as long as the page takes to arrive. How the mark then comes
+ *    full is the page's choice (`finish`):
+ *      'run' (the landing page): when what the page opens on is whole, the first movement is stopped where
+ *      it stands and one movement runs on from there to the full mark, leaving at the speed the first had and
+ *      easing out. So the mark fills in one sweep. (Until 2026-11-18 it filled as the earlier page's does,
+ *      below: on a quick load the first movement had crept to a tenth or a fifth of the mark when the last
+ *      closed all the rest in under half a second. It read as a stall and then a rush.)
+ *      'close' (the earlier page, classic.html): a second movement starts when what the page opens on
+ *      exists, and a last one closes whatever is left once that is whole; the three add up.
+ *    Then the cover goes. On the landing page it fades with the mark, and the page's words come into focus
+ *    where the mark stood. On the earlier page it sinks: a wave runs down the screen as its lit edge. That
+ *    page asks for the wave with `data-crest` on its cover;
+ *  - on the earlier page a small figure says the same in numbers (the landing page has none).
  *
  * Nothing here moves anything frame by frame. Each movement is handed to the browser whole, as an animation of
  * transform, and the browser runs those on its own thread: while the page is busy starting up the mark keeps
@@ -94,7 +102,13 @@ function crest() {
 /** Height of one figure of the counter, px (index.html, .op-win). */
 const ROW = 16
 
-export function startOpening(source: OpeningSource) {
+export interface OpeningWay {
+  /** How the mark comes full once the page is whole: in one run from where it stands, or by a last movement
+   *  that closes whatever is left (see the head of this file). */
+  finish?: 'run' | 'close'
+}
+
+export function startOpening(source: OpeningSource, { finish = 'close' }: OpeningWay = {}) {
   const el = document.getElementById('opening')
   if (!el) return
   const O = config.opening
@@ -113,14 +127,18 @@ export function startOpening(source: OpeningSource) {
   // (the wave only where the page's cover asks for it: the landing page's cover fades and has none)
   const cover = find('.op-cover')
   if (!reduced && cover?.hasAttribute('data-crest')) cover.prepend(crest())
-  if (strip) strip.textContent = Array.from({ length: 101 }, (_, i) => i).join('\n')
-  // the figure is shown once its typeface is there, so it never changes shape in view
-  const type = () => el.setAttribute('data-type', '')
-  if (document.fonts?.load) document.fonts.load("400 11px 'IBM Plex Mono'").then(type, type)
-  else type()
+  if (strip) {
+    strip.textContent = Array.from({ length: 101 }, (_, i) => i).join('\n')
+    // the figure is shown once its typeface is there, so it never changes shape in view
+    const type = () => el.setAttribute('data-type', '')
+    if (document.fonts?.load) document.fonts.load("400 11px 'IBM Plex Mono'").then(type, type)
+    else type()
+  }
 
   /* ------------------------------------------------------------------ how far the mark is filled */
-  const eFirst = bezier(F.first.ease)
+  /** The first movement, as the page's own styles have started it. */
+  const A = finish === 'run' ? O.flow.first : F.first
+  const eFirst = bezier(A.ease)
   const eScene = bezier(F.scene.ease)
   const eDone = bezier(F.done.ease)
   /** When each movement began, on the page's clock (-1: not yet). */
@@ -129,7 +147,7 @@ export function startOpening(source: OpeningSource) {
   let tDone = -1
   /** The share of the mark that is filled at `t`: what the three movements make together. */
   const filled = (t: number) => {
-    const a = F.first.share * eFirst((t - tFirst) / (F.first.seconds * 1000))
+    const a = A.share * eFirst((t - tFirst) / (A.seconds * 1000))
     const b = tScene < 0 ? 0 : F.scene.share * eScene((t - tScene) / (F.scene.seconds * 1000))
     const c = tDone < 0 ? 0 : eDone((t - tDone) / (F.done.seconds * 1000))
     return 1 - (1 - a - b) * (1 - c)
@@ -142,7 +160,7 @@ export function startOpening(source: OpeningSource) {
   const count = () => {
     if (!strip || !moves) return
     const now = clock()
-    const end = Math.max(tFirst + F.first.seconds * 1000, tScene < 0 ? 0 : tScene + F.scene.seconds * 1000, tDone < 0 ? 0 : tDone + F.done.seconds * 1000)
+    const end = Math.max(tFirst + A.seconds * 1000, tScene < 0 ? 0 : tScene + F.scene.seconds * 1000, tDone < 0 ? 0 : tDone + F.done.seconds * 1000)
     const at = (n: number) => `translate3d(0, ${-n * ROW}px, 0)`
     const figure = (t: number) => Math.min(100, Math.floor(100 * filled(t) + 1e-4))
     let n = figure(now)
@@ -182,6 +200,33 @@ export function startOpening(source: OpeningSource) {
   }
   count()
 
+  /**
+   * The mark comes full in one run (`finish: 'run'`). The first movement is stopped where it stands, and one
+   * movement takes the dim block on from there until it has left the mark. It leaves at the speed the first
+   * had at that moment, so nothing changes pace where the one takes over, and it eases out. It is one
+   * animation, handed to the browser whole like the others. Gives how long it takes (seconds).
+   */
+  const runOn = (now: number) => {
+    if (!moves) return 0
+    const at = (t: number) => A.share * eFirst((t - tFirst) / (A.seconds * 1000))
+    // (the first movement is held at this very moment of the page's clock: where it is said to stand is where
+    // it stands)
+    if (began) {
+      began.pause()
+      began.currentTime = now - tFirst
+    }
+    const from = at(now)
+    const perSecond = (at(now + 8) - at(now - 8)) / 0.016
+    const left = 1 - from
+    const seconds = O.flow.run.base + O.flow.run.per * left
+    // a curve that leaves at that speed: its first handle lies on the line of that speed
+    const [x1, x2] = O.flow.run.ease
+    const y1 = Math.max(0, Math.min(0.92, ((perSecond * seconds) / left) * x1))
+    // (the block is a little wider than the mark: it runs on until all of it is out)
+    play(second, [{ transform: 'translate3d(0, 0, 0)' }, { transform: `translate3d(${(left * 100 + 4).toFixed(2)}%, 0, 0)` }], seconds, [x1, y1, x2, 1], now)
+    return seconds
+  }
+
   /* ------------------------------------------------------------------ when the page may be shown */
   let openAt = Infinity
 
@@ -201,20 +246,23 @@ export function startOpening(source: OpeningSource) {
 
   const tick = (now: number) => {
     const at = source.poll(now)
-    // what the page opens on exists: the second movement
-    if (tScene < 0 && at.scene) {
+    // what the page opens on exists: the second movement (where the mark fills in three)
+    if (tScene < 0 && at.scene && finish === 'close') {
       tScene = clock()
       milestone('scene')
       play(second, [{ transform: 'translate3d(0, 0, 0)' }, { transform: `translate3d(${F.scene.share * 100}%, 0, 0)` }], F.scene.seconds, F.scene.ease, tScene)
       count()
     }
-    // it is whole: the last movement closes what is left of the mark
+    // it is whole: the mark comes full, in one run from where it stands or by a last movement that closes
+    // what is left
     if (tDone < 0 && at.whole) {
       tDone = clock()
       milestone('ready')
-      play(last, [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], F.done.seconds, F.done.ease, tDone)
+      let seconds: number = F.done.seconds
+      if (finish === 'run') seconds = runOn(tDone)
+      else play(last, [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], F.done.seconds, F.done.ease, tDone)
       count()
-      openAt = moves ? Math.max(tDone + (F.done.seconds + F.hold) * 1000, tFirst + O.minShow * 1000) : tDone
+      openAt = moves ? Math.max(tDone + (seconds + F.hold) * 1000, tFirst + O.minShow * 1000) : tDone
     }
     // ...and the cover goes once the mark is full and what is behind it runs evenly
     if (tDone >= 0 && at.settled && clock() >= openAt) {

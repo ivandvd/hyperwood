@@ -1,6 +1,20 @@
 /**
  * The journey's picture: one shader over the whole screen, driven by how far the journey has been scrolled.
  *
+ * It is put together from pieces, because the hero comes in two kinds (the end of this file). The hero as a
+ * room, which the page shows:
+ *
+ *   the lids      two bowed bands of Hyper Neon close over the opening words, then part again
+ *   the drop      in the opening eye stands a drop of light. It rises to where a bare bulb hangs and draws in
+ *                 to the bulb's size: it is the lamp of a room
+ *   the room      the lamp's light reaches further and further, and the films, which lie under this picture,
+ *                 show where it reaches (film/FilmStack.tsx). Scrolled on, the light draws back to the
+ *                 lamp, the lamp goes over to the next film's bulb, and its light opens the next room: three
+ *                 films. Then it draws back for the last time
+ *   the gate, the current: as below (this hero has no wordmark and no dots)
+ *
+ * And the hero as the mark, which it was before the films (the address ?hero=mark):
+ *
  *   the lids      two bowed bands of Hyper Neon close over the opening words, then part again
  *   the drop      in the opening eye stands a drop of light. It spreads into the Hyperwood mark (the brand
  *                 kit's own morph: a drop becomes the mark)
@@ -22,14 +36,18 @@
  * layout has put their boxes (journey.module.css; timeline.ts measures them and passes them in). When things
  * happen is config.journey.beats and config.journey.lids.
  *
+ * The mark's picture is opaque. The room's has a clear share: wherever the film shows, the colour is this
+ * picture's share of the light only, and alpha says how large that share is (timeline.ts asks for a canvas
+ * that keeps its alpha).
+ *
  * `progress` is the journey, 0 to 1. `time` is seconds, and stays 0 under reduced motion.
  * All coordinates: `uv` 0..1 with y up; `a` is the same in screen heights, x from the middle.
  */
 import { config } from '../config'
+import { markTiming, roomTiming } from './timing'
 
 /** A number as GLSL wants a float written. */
 const f = (n: number) => (Number.isInteger(n) ? n.toFixed(1) : String(n))
-const L = config.journey.lids
 const F = config.journey.floor
 const B = config.journey.body
 const T = config.journey.beats
@@ -37,66 +55,17 @@ const W = config.journey.wave
 /** The most pieces a course has: the traced wave's. (The first course has fewer; its points beyond its last
  *  lie on its last and give nothing.) */
 const MOST = Math.max(F.pieces, W.pieces)
-const PT = config.journey.picture
+const R = config.journey.room
+/** (the room's journey is longer: its own beats, and when its films follow one another) */
+const TR = roomTiming.beats
+const RT = roomTiming.room
 /** A beat as the two ends of a smoothstep. */
 const beat = (b: readonly [number, number]) => `${f(b[0])}, ${f(b[1])}`
 
 export const VERTEX = `attribute vec2 corner;void main(){gl_Position=vec4(corner,0.,1.);}`
 
-export const FRAGMENT = /* glsl */ `
-precision highp float;
-uniform vec2 res;
-uniform vec2 pointer;
-uniform float pointerActive;
-uniform float time;
-uniform float progress;
-uniform sampler2D typeTex;
-uniform float typeReady;
-uniform sampler2D markTex;
-uniform float markReady;
-// the body: its middle (x in screen heights from the middle of the screen, y up from the bottom) and half its width
-uniform vec3 body;
-// the gate: half its width, its top and its foot (screen heights, up from the bottom)
-uniform vec3 gate;
-// the current's course over the floor, point by point: how far to the side, how far from the gate, and how
-// broad the piece that ends there is (timeline.ts works it out every frame)
-uniform vec3 course[${MOST + 1}];
-// which course that is: 1 the wave traced from the reference frame, 0 the first course (drawn as it was),
-// and how many pieces it has
-uniform float traced;
-uniform float pieces;
-// the gate's middle, across from the middle of the screen (screen heights)
-uniform float gateX;
-// whether one of the two currents above is drawn (1) or the guide's picture is (0); the picture, and how far
-// it has come in (0 until the page has it)
-uniform float flow;
-uniform float picture;
-uniform sampler2D portalTex;
-uniform vec3 cInk;
-uniform vec3 cNeon;
-uniform vec3 cHot;
-uniform vec3 cLime;
-uniform vec3 cMoss;
-uniform vec3 cDeep;
-
-float ss( float a, float b, float v ) { return smoothstep( a, b, v ); }
-mat2 turn( float angle ) { float c = cos( angle ), s = sin( angle ); return mat2( c, -s, s, c ); }
-float hash( vec2 p ) { return fract( sin( dot( p, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 ); }
-// two outlines run together (the lesser of two distances, rounded where they meet), and one cut by another
-float joined( float a, float b, float k ) { float h = max( k - abs( a - b ), 0. ) / k; return min( a, b ) - h * h * k * .25; }
-float cutBy( float a, float b, float k ) { return -joined( -a, -b, k ); }
-
-// ---------------------------------------------------------------- tone
-// The one scale every colour of the picture is taken from: Ink, deep, moss, lime, Neon, hot.
-vec3 tone( float v ) {
-  vec3 c = mix( cInk, cDeep, ss( 0., .2, v ) );
-  c = mix( c, cMoss, ss( .16, .44, v ) );
-  c = mix( c, cLime, ss( .42, .68, v ) );
-  c = mix( c, cNeon, ss( .66, .88, v ) );
-  return mix( c, cHot, ss( .9, 1., v ) );
-}
-
-// ---------------------------------------------------------------- the mark, as a body
+/** The mark as a body: its two fields, and which way its surface faces. */
+const MARK_FUNCS = /* glsl */ `// ---------------------------------------------------------------- the mark, as a body
 // markTex holds two things about the mark: r, how full the body is over each point (its height squared: the
 // shape of a film blown up over the outline, so its root is a round cross-section); g, the distance to the
 // outline. Object units: the mark is 2 wide; the texture covers 2.4 by 1.2.
@@ -150,30 +119,10 @@ vec3 markNormal( vec3 p ) {
   return n;
 }
 
-// ---------------------------------------------------------------- the current
-// (the error function, to three places and without an exponential: the light of a soft band over a length of it)
-float erf_( float x ) {
-  float ax = abs( x );
-  float d = 1. + ax * ( .278393 + ax * ( .230389 + ax * ( .000972 + ax * .078108 ) ) );
-  d *= d;
-  float y = 1. - 1. / ( d * d );
-  return x < 0. ? -y : y;
-}
+`
 
-void main() {
-  vec2 uv = gl_FragCoord.xy / res;
-  float aspect = res.x / res.y;
-  vec2 a = vec2( ( uv.x - .5 ) * aspect, uv.y );
-  float s = progress;
-
-  // ---------------- the lids: they close over the words, and part again
-  float cover = ss( ${f(L.from)}, ${f(L.to)}, s ) * ( 1. - ss( ${beat(L.part)}, s ) );
-  float bow = ${f(L.bow)} * pow( abs( uv.x - .5 ) * 2., ${f(L.bowPower)} );
-  float aperture = mix( ${f(L.open)}, ${f(L.shut)}, cover ) - bow;
-  float lid = ss( aperture - ${f(L.feather)}, aperture + ${f(L.feather)}, abs( uv.y - .5 ) ) * ss( ${beat(L.appear)}, s );
-  vec3 lidColor = mix( cLime, cNeon, ss( .04, .5, abs( uv.y - .5 ) ) );
-
-  // ---------------- the beats of the mark: a drop, the mark, a body, the mark again, a drop, the gate
+/** The beats of the mark and its shape of light: a drop, the mark, a body, the mark again, a drop, the gate. */
+const MARK_LIGHT = /* glsl */ `  // ---------------- the beats of the mark: a drop, the mark, a body, the mark again, a drop, the gate
   float arrive = ss( ${beat(T.drop)}, s );
   float spread = ss( ${beat(T.morph)}, s );
   float cool = ss( ${beat(T.cool)}, s );
@@ -229,7 +178,350 @@ void main() {
     shape = mix( gathered, gateD, square );
     flatShown = ss( ${f(T.heroOut[1] - 0.008)}, ${f(T.heroOut[1])}, s );
   }
-  float riverIn = ss( ${f(T.river[0] - 0.01)}, ${f(T.river[0] + 0.015)}, s ) * flow;
+`
+
+/** The body itself: black liquid, Neon on its edges. */
+const MARK_BODY = /* glsl */ `  // ---------------- the body: black liquid, Neon on its edges
+  vec2 ob = ( a - home ) / body.z;
+  if ( bodyShown > .001 && max( abs( ob.x ) / 1.42, abs( ob.y ) / 1.08 ) < 1. ) {
+    float px = 1. / ( body.z * res.y );
+    vec3 origin = vec3( ob, .95 );
+    float ray = 0.;
+    float hit = 0.;
+    float step_ = 0.;
+    float nearest = 1.;
+    float nearestAt = 0.;
+    for ( int i = 0; i < 64; i++ ) {
+      float dist = markDistance( origin - vec3( 0., 0., ray ) );
+      if ( dist < nearest ) { nearest = dist; nearestAt = ray; }
+      if ( dist < .0007 ) { hit = 1.; break; }
+      step_ = max( dist, .0013 );
+      ray += step_;
+      if ( ray > 1.9 ) break;
+    }
+    // A ray that passes within half a pixel of the body counts as on it, and one a little further off takes
+    // a share: the outline is a clean line, and a ray that runs along the edge without settling is no gap.
+    // (nearest is half the true distance, as markDistance gives it)
+    float graze = 1. - ss( px * .25, px * .75, nearest );
+    float there = max( hit, graze );
+    if ( there > .002 ) {
+      if ( hit > .5 ) {
+        // settle on the surface itself (a few halvings back and forth)
+        for ( int i = 0; i < 5; i++ ) {
+          step_ *= .5;
+          ray += markDistance( origin - vec3( 0., 0., ray ) ) < .0 ? -step_ : step_;
+        }
+      } else ray = nearestAt;
+      vec3 surface = origin - vec3( 0., 0., ray );
+      vec3 n = markNormal( surface );
+      // Lit as the kit's liquid artwork is: the light comes from behind and from the floor. So the edge
+      // glows all the way round, hottest at the very outline and strongest underneath; the undersides carry
+      // a broad glow that thins into the dark, the flanks to the right a fainter one; the faces towards the
+      // eye stay black. A strip of light overhead is mirrored as a thin line along the upper shoulders.
+      float facing = clamp( n.z, 0., 1. );
+      float fres = 1. - facing;
+      vec2 lean = n.xy / max( length( n.xy ), 1e-4 );
+      float fromBelow = ss( -.3, .9, dot( lean, vec2( -.243, -.97 ) ) );
+      float fromRight = ss( .25, 1., dot( lean, vec2( .949, .316 ) ) );
+      float edgeGain = .5 + .5 * fromBelow + .2 * fromRight;
+      float level = ( pow( fres, 5. ) * .62 + pow( fres, 2.3 ) * .42 ) * edgeGain
+        + pow( fres, .46 ) * ( fromBelow * .86 + fromRight * .3 );
+      // (the faces that look up keep a trace of the room, so the black is not flat)
+      level += .06 * ss( .15, .9, n.y ) * facing;
+      vec3 mirrored = vec3( 2. * n.z * n.xy, 2. * n.z * n.z - 1. );
+      float strip = exp( -pow( ( mirrored.y - .66 ) / .06, 2. ) ) * ( 1. - ss( .45, .85, abs( mirrored.x + .12 ) ) ) * ss( .1, .4, n.z );
+      level += strip * .62;
+      vec3 bodyColor = tone( clamp( level, 0., 1. ) );
+      bodyColor = mix( bodyColor, cHot, strip * strip * .55 );
+      // Full of light, it is the mark itself, in Neon. The light leaves the faces towards the eye first and
+      // the edges last, and comes back the same way.
+      float drained = mix( -.02, 1.3, 1. - alight );
+      bodyColor = mix( bodyColor, cNeon, ss( drained - .26, drained, fres ) );
+      result = mix( result, bodyColor, there * bodyShown );
+    }
+  }
+
+`
+
+/** What follows the pointer about the mark: the dotted matrix, and the glow round the wordmark. */
+const MARK_POINTER = /* glsl */ `  // ---------------- the dots: short runs of a fine matrix, only around the pointer
+  float steady = cool * ( 1. - ss( 0., .45, leave ) );
+  float dotsShown = steady * pointerActive;
+  if ( dotsShown > .001 ) {
+    vec2 grid = uv * vec2( aspect, 1. ) * 180.;
+    vec2 cell = floor( grid );
+    vec2 block = floor( cell / vec2( 7., 6. ) );
+    float seed = hash( block );
+    float along = 1. - step( .5, abs( mod( cell.y, 6. ) - mod( floor( seed * 11. ), 6. ) ) );
+    float upright = 1. - step( .5, abs( mod( cell.x, 7. ) - floor( seed * 7. ) ) );
+    float pulse = ss( -.5, .7, sin( time * .65 + seed * 6.283 + block.y * .24 ) );
+    float twinkle = .25 + .75 * pow( .5 + .5 * sin( time * ( 1.4 + seed * 1.8 ) + dot( cell, vec2( 2.17, 3.31 ) ) ), 3. );
+    float round_ = 1. - ss( .08, .22, length( fract( grid ) - .5 ) );
+    float nearPointer = 1. - ss( .06, .4, length( ( uv - pointer ) * vec2( aspect, 1. ) ) );
+    float edges = ss( 0., .12, uv.y ) * ( 1. - ss( .88, 1., uv.y ) );
+    float dots = round_ * max( along, upright ) * ( .16 + .6 * pulse ) * twinkle * nearPointer * edges * dotsShown;
+    result = mix( result, cHot, dots );
+  }
+
+  // ---------------- the word: Neon, always the one colour. Light that falls on it shows in the glow around
+  // the letters, never in the letters themselves (the logo carries no effects).
+  // Only the glow is drawn here. The letters are the page's own: the wordmark as supplied, drawn by the
+  // browser over this picture at the screen's full sharpness (journey.module.css, .word). Drawn here they
+  // were only as sharp as this picture's pixels, and soft while they came into focus.
+  float wordIn = ss( ${beat(T.word)}, s );
+  float wordShown = wordIn * ( 1. - ss( 0., .5, leave ) ) * typeReady;
+  if ( wordShown > .001 ) {
+    float glow = texture2D( typeTex, uv ).g;
+    float spot = exp( -dot( ( uv - pointer ) * vec2( aspect, 1. ) / .26, ( uv - pointer ) * vec2( aspect, 1. ) / .26 ) ) * pointerActive;
+    // with no pointer, a sheen passes over the letters now and then
+    float passing = fract( time * .085 ) * 2.6 - .8;
+    float sheen = exp( -pow( ( uv.x + ( uv.y - .5 ) * .35 - passing ) / .045, 2. ) ) * ( 1. - pointerActive ) * step( .001, time );
+    float shine = clamp( spot + sheen * .85, 0., 1. );
+    result += cNeon * glow * ( .1 + .42 * shine ) * wordShown;
+  }
+
+`
+
+/* ------------------------------------------------------------------------------------------------------------
+   The hero as a room. The films stand in a box that lies under this picture (film/FilmStack.tsx), and the
+   journey's light is their bulb: the drop rises to where the bulb hangs and is the lamp, the lamp's light opens
+   the room, and later the same backwards. These pieces stand in for the mark's. */
+
+/** The bulb's light as a round with a soft edge, which is what the drop is made into before it is given the
+ *  bulb's own fall (config.journey.room.light): how far from the bulb's middle the light is down to half, and
+ *  how soft the edge has to be for a round of that size to be nine tenths lit where the bulb's light is. Both
+ *  in film widths. */
+const [HALF, EDGE] = (() => {
+  const { full, sigma, tail, knee } = R.light
+  const lit = (r: number) => {
+    const x = full * Math.exp((-r * r) / (2 * sigma * sigma)) + tail[0] * Math.exp(-r / tail[1])
+    const h = Math.max(0, Math.min(1, 0.5 + (0.5 * (1 - x)) / knee))
+    return 1 + (x - 1) * h - knee * h * (1 - h)
+  }
+  const where = (level: number) => {
+    let within = 0
+    let beyond = 6 * sigma
+    for (let i = 0; i < 40; i++) {
+      const middle = (within + beyond) / 2
+      if (lit(middle) > level) within = middle
+      else beyond = middle
+    }
+    return within
+  }
+  const half = where(0.5)
+  // (a smooth step is nine tenths lit 0.608 of its half-breadth inside its middle)
+  return [half, (half - where(0.9)) / 0.608]
+})()
+
+/** What the page tells the picture about the room. */
+const ROOM_UNIFORMS = /* glsl */ `// ---------------------------------------------------------------- the hero as a room
+// the bulb of the film that is showing: where it hangs (as "a" counts, below) and how wide that film is drawn,
+// in screen heights
+uniform vec3 lamp;
+// the box the films play in: its middle, half its width and half its height
+uniform vec4 room;
+// the drop's radius
+uniform float drop;
+// over how much of half the box's width the film gives way to the page at either side (none where the box
+// runs from edge to edge of the screen)
+uniform float roomSide;
+// 1: the drop drawn as the films' lamp seen through their lens, out of focus and grainy (the address ?drop=lens)
+uniform float lens;
+
+`
+
+/** The beats of the light and its shape: a drop, the lamp, the drop again, the gate. */
+const ROOM_LIGHT = /* glsl */ `  // ---------------- the beats of the light: a drop, the lamp of the room, a drop again, the gate
+  float arrive = ss( ${beat(TR.drop)}, s );
+  // (the drop rises to where the bulb hangs and draws in to its size: it is the lamp)
+  float hang = ss( ${beat(TR.morph)}, s );
+  // How far the lamp's light reaches: all the way while a room stands open. Between two films it draws back
+  // to the lamp and comes out again (in the dark between, the page puts the next film in the box and moves
+  // the lamp to where that film's bulb hangs: timeline.ts).
+  float reach = ss( ${beat(RT.open)}, s ) * ( 1. - ss( ${beat(RT.shut)}, s ) );
+${RT.turns.map((turn) => `  reach *= 1. - ss( ${beat(turn.shut)}, s ) * ( 1. - ss( ${beat(turn.open)}, s ) );\n`).join('')}  // (the gathering has four parts: the lamp swells into the drop, the drop goes to the gate's place, it is
+  // drawn down to the floor, its lower end is squared off into the gate's foot)
+  float gather = clamp( ( s - ${f(TR.gather[0])} ) / ${f(TR.gather[1] - TR.gather[0])}, 0., 1. );
+  float swell = ss( ${beat(R.swell)}, gather );
+  float rise = ss( .32, .68, gather );
+  float pour = ss( .6, .92, gather );
+  float square = ss( .84, 1., gather );
+  float stand = ss( ${beat(TR.stand)}, s );
+  // the gate's outline: an arch, its shaft, cut off at the foot
+  vec2 archAt = vec2( gateX, gate.y - gate.x );
+  float gateD = max( length( vec2( a.x - gateX, max( a.y - archAt.y, 0. ) ) ) - gate.x, gate.z - a.y );
+
+  // ---------------- the shape of light. A drop in the opening eye. It rises to the bulb's place and draws in
+  // to the bulb's size; later it swells again, goes to the gate's place and pours down into the gate.
+  // (before the hero, or after it)
+  float early = step( s, ${f((TR.word[1] + TR.heroOut[0]) / 2)} );
+  // How much it is the lamp (1), how much the drop (0). The drop is made into the lamp in two steps that run
+  // into one another: its size and its edge go to the bulb's, the edge ever softer ("shaped"); then its fall
+  // is the bulb's own (the lamp, below).
+  float asLamp = mix( 1. - swell, ss( .15, 1., hang ), early );
+  float shaped = ss( 0., .6, asLamp );
+  float filmWide = max( lamp.z, .0001 );
+  vec2 lightAt = mix( mix( lamp.xy, archAt, rise ), mix( vec2( 0., .5 ), lamp.xy, hang ), early );
+  // (as a drop it is as large as the drop, and on its way to the gate as broad as the gate; as the lamp it
+  // ends where the bulb's light is down to half)
+  float radius = mix( mix( mix( drop, gate.x, rise ), drop * arrive, early ), filmWide * ${f(HALF)}, shaped );
+  vec2 fromLight = a - lightAt;
+  float lightAway = length( fromLight );
+  // (the drop, drawn down by as much as it has poured: a pill)
+  fromLight.y -= clamp( fromLight.y, -pour * max( archAt.y - gate.z - gate.x, 0. ), 0. );
+  float shape = mix( length( fromLight ) - radius, gateD, square );
+  float flatShown = step( .001, arrive );
+  // (what the picture's later parts ask of the mark: here the light is the only shape, and there is no body)
+  float markD = shape;
+  float bodyShown = 0.;
+`
+
+/** The lamp: the drop, drawn as the films draw their bulb. */
+const ROOM_LAMP = /* glsl */ `  // ---------------- the lamp. Until the drop pours it is one round of light, drawn here in place of the shape
+  // above: crisp and with its glow on the air while it is the drop (the same picture as above); smaller and
+  // ever softer as it is made into the lamp, its glow going; and at last with the bulb's own fall, as the
+  // films have it (how much Neon at a distance from the bulb's middle: measured on the finished films). By
+  // then the round and that fall are all but one, so nothing shows where the one takes over: the light on
+  // the screen and the bulb in the film are one picture where they hand over to one another.
+  if ( pour < .0001 ) {
+    float edge = mix( 1.2 / res.y, filmWide * ${f(EDGE)}, shaped );
+    vec3 light = cInk + cNeon * halo * flatShown * ( 1. - shaped );
+    light = mix( light, cNeon, ( 1. - ss( -edge, edge, lightAway - radius ) ) * flatShown );
+    float lampAway = lightAway / filmWide;
+    float lampLight = ${f(R.light.full)} * exp( -lampAway * lampAway / ${f(2 * R.light.sigma ** 2)} ) + ${f(R.light.tail[0])} * exp( -lampAway / ${f(R.light.tail[1])} );
+    // (never more than Neon, and rounded off where it comes to that)
+    float under = clamp( .5 + .5 * ( 1. - lampLight ) / ${f(R.light.knee)}, 0., 1. );
+    lampLight = mix( 1., lampLight, under ) - ${f(R.light.knee)} * under * ( 1. - under );
+    result = mix( light, mix( cInk, cNeon, lampLight ), ss( .6, 1., asLamp ) * flatShown );
+    // (The address ?drop=lens: the drop drawn as the films' lamp is seen through their lens while it is out of
+    // focus. A light out of focus is a round a shade deeper inside than at its rim; and the films' grain and
+    // flicker lie on it and on its glow, as on everything in them, at their 24 frames a second. The rim goes as
+    // the drop comes into focus as the lamp; the grain stays, as the films have it; all of it goes as the drop
+    // rises to the gate, which is as clean as the river. (Faint rings inside the round, as some lenses give,
+    // were tried too: moving, they read as a target.))
+    if ( lens > .5 ) {
+      float frame = floor( time * 24. );
+      float grain = hash( floor( gl_FragCoord.xy / 1.5 ) + frame * vec2( 7.13, 3.71 ) ) - .5;
+      float flicker = .008 * sin( 6.2832 * frame / 5.3 ) + .005 * sin( 6.2832 * frame / 2.1 );
+      vec3 span = cNeon - cInk;
+      // (how much of this point is the drop's light: its place on the line from Ink to Neon)
+      float lit = clamp( dot( result - cInk, span ) / dot( span, span ), 0., 1. );
+      float r = lightAway / max( radius, 1e-4 );
+      float defocus = 1. - shaped;
+      float inner = 1. - defocus * .06 * ( 1. - ss( .72, .97, r ) );
+      float filmic = flatShown * ( 1. - ss( 0., .7, rise ) );
+      lit = lit * mix( 1., inner * ( 1. + flicker ), filmic ) + grain * .08 * lit * filmic;
+      // (grain goes both ways: below Neon towards Ink, above it towards the hot Neon kept for highlights, so the
+      // light is as bright as it was on the whole and only its surface is grained)
+      result = mix( cInk + span * clamp( lit, 0., 1. ), cHot, clamp( ( lit - 1. ) * 3., 0., 1. ) );
+    }
+  }
+  // (with the room wholly open the lamp is the film's own, and nothing of this one is drawn)
+  result = mix( result, cInk, ss( .9, 1., reach ) );
+
+`
+
+/** The room: where the film under this picture shows through. */
+const ROOM_THROUGH = /* glsl */ `  // ---------------- the room. The lamp's light reaches further and further, and the film, which lies under this
+  // picture, shows where it reaches. The front of the light is soft by a share of how far it has got, so no
+  // edge travels. With the light all the way out, the whole box is the film's.
+  vec2 corner = abs( lamp.xy - room.xy ) + room.zw;
+  float front = length( corner ) / ${f(1 - R.soft)} * 1.03 * pow( reach, ${f(R.ease)} );
+  float through = ( 1. - ss( front * ${f(1 - R.soft)}, max( front, .0001 ), length( a - lamp.xy ) ) ) * ss( 0., .01, reach );
+  // (Only inside the box. The box's upper and lower edges melt into the page: the box itself fades there.
+  // Its sides do the same here: towards either side the film gives way to the page's Ink.)
+  vec2 within = room.zw - abs( a - room.xy );
+  through *= ss( -1.5 / res.y, room.z * roomSide, within.x ) * step( -1.5 / res.y, within.y );
+  // From here on "result" is only this picture's share of the light at a point, and "seen" says how large that
+  // share is: the rest is the film's.
+  float seen = 1. - through;
+  result *= seen;
+
+`
+
+const fragment = (room: boolean) => {
+  // (what both heroes have in common reads its moments from the journey it is in: timing.ts)
+  const when = room ? roomTiming : markTiming
+  const L = { ...config.journey.lids, ...when.lids }
+  const T = when.beats
+  const PT = { ...config.journey.picture, ...when.picture }
+  return /* glsl */ `
+precision highp float;
+uniform vec2 res;
+uniform vec2 pointer;
+uniform float pointerActive;
+uniform float time;
+uniform float progress;
+uniform sampler2D typeTex;
+uniform float typeReady;
+uniform sampler2D markTex;
+uniform float markReady;
+// the body: its middle (x in screen heights from the middle of the screen, y up from the bottom) and half its width
+uniform vec3 body;
+// the gate: half its width, its top and its foot (screen heights, up from the bottom)
+uniform vec3 gate;
+// the current's course over the floor, point by point: how far to the side, how far from the gate, and how
+// broad the piece that ends there is (timeline.ts works it out every frame)
+uniform vec3 course[${MOST + 1}];
+// which course that is: 1 the wave traced from the reference frame, 0 the first course (drawn as it was),
+// and how many pieces it has
+uniform float traced;
+uniform float pieces;
+// the gate's middle, across from the middle of the screen (screen heights)
+uniform float gateX;
+// whether one of the two currents above is drawn (1) or the guide's picture is (0); the picture, and how far
+// it has come in (0 until the page has it)
+uniform float flow;
+uniform float picture;
+uniform sampler2D portalTex;
+uniform vec3 cInk;
+uniform vec3 cNeon;
+uniform vec3 cHot;
+uniform vec3 cLime;
+uniform vec3 cMoss;
+uniform vec3 cDeep;
+
+float ss( float a, float b, float v ) { return smoothstep( a, b, v ); }
+mat2 turn( float angle ) { float c = cos( angle ), s = sin( angle ); return mat2( c, -s, s, c ); }
+float hash( vec2 p ) { return fract( sin( dot( p, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 ); }
+// two outlines run together (the lesser of two distances, rounded where they meet), and one cut by another
+float joined( float a, float b, float k ) { float h = max( k - abs( a - b ), 0. ) / k; return min( a, b ) - h * h * k * .25; }
+float cutBy( float a, float b, float k ) { return -joined( -a, -b, k ); }
+
+// ---------------------------------------------------------------- tone
+// The one scale every colour of the picture is taken from: Ink, deep, moss, lime, Neon, hot.
+vec3 tone( float v ) {
+  vec3 c = mix( cInk, cDeep, ss( 0., .2, v ) );
+  c = mix( c, cMoss, ss( .16, .44, v ) );
+  c = mix( c, cLime, ss( .42, .68, v ) );
+  c = mix( c, cNeon, ss( .66, .88, v ) );
+  return mix( c, cHot, ss( .9, 1., v ) );
+}
+
+${room ? ROOM_UNIFORMS : MARK_FUNCS}// ---------------------------------------------------------------- the current
+// (the error function, to three places and without an exponential: the light of a soft band over a length of it)
+float erf_( float x ) {
+  float ax = abs( x );
+  float d = 1. + ax * ( .278393 + ax * ( .230389 + ax * ( .000972 + ax * .078108 ) ) );
+  d *= d;
+  float y = 1. - 1. / ( d * d );
+  return x < 0. ? -y : y;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / res;
+  float aspect = res.x / res.y;
+  vec2 a = vec2( ( uv.x - .5 ) * aspect, uv.y );
+  float s = progress;
+
+  // ---------------- the lids: they close over the words, and part again
+  float cover = ss( ${f(L.from)}, ${f(L.to)}, s ) * ( 1. - ss( ${beat(L.part)}, s ) );
+  float bow = ${f(L.bow)} * pow( abs( uv.x - .5 ) * 2., ${f(L.bowPower)} );
+  float aperture = mix( ${f(L.open)}, ${f(L.shut)}, cover ) - bow;
+  float lid = ss( aperture - ${f(L.feather)}, aperture + ${f(L.feather)}, abs( uv.y - .5 ) ) * ss( ${beat(L.appear)}, s );
+  vec3 lidColor = mix( cLime, cNeon, ss( .04, .5, abs( uv.y - .5 ) ) );
+
+${room ? ROOM_LIGHT : MARK_LIGHT}  float riverIn = ss( ${f(T.river[0] - when.span(0.01))}, ${f(T.river[0] + when.span(0.015))}, s ) * flow;
   // its light on the air around it
   float outline = max( mix( markD, shape, flatShown ), 0. );
   // (the gate glows more than the mark did: a rim of the deeper green all round it. Where the guide's picture
@@ -260,7 +552,7 @@ void main() {
     result = mix( result, mix( cNeon, door, ss( .3, 1., pour ) ), inside * flatShown );
   }
 
-  // ---------------- the floor before the gate: the gate's light spills over it
+${room ? ROOM_LAMP : ''}  // ---------------- the floor before the gate: the gate's light spills over it
   if ( stand > .001 && a.y < gate.z + .012 ) {
     // the floor: 1 away at the gate's foot, nearer and nearer down the screen
     float away = ${f(F.rise)} / max( gate.z + ${f(F.rise)} - a.y, .001 );
@@ -417,107 +709,17 @@ void main() {
     result = mix( result, mix( cInk, cNeon, lightOf ), taken );
   }
 
-  // ---------------- the body: black liquid, Neon on its edges
-  vec2 ob = ( a - home ) / body.z;
-  if ( bodyShown > .001 && max( abs( ob.x ) / 1.42, abs( ob.y ) / 1.08 ) < 1. ) {
-    float px = 1. / ( body.z * res.y );
-    vec3 origin = vec3( ob, .95 );
-    float ray = 0.;
-    float hit = 0.;
-    float step_ = 0.;
-    float nearest = 1.;
-    float nearestAt = 0.;
-    for ( int i = 0; i < 64; i++ ) {
-      float dist = markDistance( origin - vec3( 0., 0., ray ) );
-      if ( dist < nearest ) { nearest = dist; nearestAt = ray; }
-      if ( dist < .0007 ) { hit = 1.; break; }
-      step_ = max( dist, .0013 );
-      ray += step_;
-      if ( ray > 1.9 ) break;
-    }
-    // A ray that passes within half a pixel of the body counts as on it, and one a little further off takes
-    // a share: the outline is a clean line, and a ray that runs along the edge without settling is no gap.
-    // (nearest is half the true distance, as markDistance gives it)
-    float graze = 1. - ss( px * .25, px * .75, nearest );
-    float there = max( hit, graze );
-    if ( there > .002 ) {
-      if ( hit > .5 ) {
-        // settle on the surface itself (a few halvings back and forth)
-        for ( int i = 0; i < 5; i++ ) {
-          step_ *= .5;
-          ray += markDistance( origin - vec3( 0., 0., ray ) ) < .0 ? -step_ : step_;
-        }
-      } else ray = nearestAt;
-      vec3 surface = origin - vec3( 0., 0., ray );
-      vec3 n = markNormal( surface );
-      // Lit as the kit's liquid artwork is: the light comes from behind and from the floor. So the edge
-      // glows all the way round, hottest at the very outline and strongest underneath; the undersides carry
-      // a broad glow that thins into the dark, the flanks to the right a fainter one; the faces towards the
-      // eye stay black. A strip of light overhead is mirrored as a thin line along the upper shoulders.
-      float facing = clamp( n.z, 0., 1. );
-      float fres = 1. - facing;
-      vec2 lean = n.xy / max( length( n.xy ), 1e-4 );
-      float fromBelow = ss( -.3, .9, dot( lean, vec2( -.243, -.97 ) ) );
-      float fromRight = ss( .25, 1., dot( lean, vec2( .949, .316 ) ) );
-      float edgeGain = .5 + .5 * fromBelow + .2 * fromRight;
-      float level = ( pow( fres, 5. ) * .62 + pow( fres, 2.3 ) * .42 ) * edgeGain
-        + pow( fres, .46 ) * ( fromBelow * .86 + fromRight * .3 );
-      // (the faces that look up keep a trace of the room, so the black is not flat)
-      level += .06 * ss( .15, .9, n.y ) * facing;
-      vec3 mirrored = vec3( 2. * n.z * n.xy, 2. * n.z * n.z - 1. );
-      float strip = exp( -pow( ( mirrored.y - .66 ) / .06, 2. ) ) * ( 1. - ss( .45, .85, abs( mirrored.x + .12 ) ) ) * ss( .1, .4, n.z );
-      level += strip * .62;
-      vec3 bodyColor = tone( clamp( level, 0., 1. ) );
-      bodyColor = mix( bodyColor, cHot, strip * strip * .55 );
-      // Full of light, it is the mark itself, in Neon. The light leaves the faces towards the eye first and
-      // the edges last, and comes back the same way.
-      float drained = mix( -.02, 1.3, 1. - alight );
-      bodyColor = mix( bodyColor, cNeon, ss( drained - .26, drained, fres ) );
-      result = mix( result, bodyColor, there * bodyShown );
-    }
-  }
-
-  // ---------------- the dots: short runs of a fine matrix, only around the pointer
-  float steady = cool * ( 1. - ss( 0., .45, leave ) );
-  float dotsShown = steady * pointerActive;
-  if ( dotsShown > .001 ) {
-    vec2 grid = uv * vec2( aspect, 1. ) * 180.;
-    vec2 cell = floor( grid );
-    vec2 block = floor( cell / vec2( 7., 6. ) );
-    float seed = hash( block );
-    float along = 1. - step( .5, abs( mod( cell.y, 6. ) - mod( floor( seed * 11. ), 6. ) ) );
-    float upright = 1. - step( .5, abs( mod( cell.x, 7. ) - floor( seed * 7. ) ) );
-    float pulse = ss( -.5, .7, sin( time * .65 + seed * 6.283 + block.y * .24 ) );
-    float twinkle = .25 + .75 * pow( .5 + .5 * sin( time * ( 1.4 + seed * 1.8 ) + dot( cell, vec2( 2.17, 3.31 ) ) ), 3. );
-    float round_ = 1. - ss( .08, .22, length( fract( grid ) - .5 ) );
-    float nearPointer = 1. - ss( .06, .4, length( ( uv - pointer ) * vec2( aspect, 1. ) ) );
-    float edges = ss( 0., .12, uv.y ) * ( 1. - ss( .88, 1., uv.y ) );
-    float dots = round_ * max( along, upright ) * ( .16 + .6 * pulse ) * twinkle * nearPointer * edges * dotsShown;
-    result = mix( result, cHot, dots );
-  }
-
-  // ---------------- the word: Neon, always the one colour. Light that falls on it shows in the glow around
-  // the letters, never in the letters themselves (the logo carries no effects).
-  // Only the glow is drawn here. The letters are the page's own: the wordmark as supplied, drawn by the
-  // browser over this picture at the screen's full sharpness (journey.module.css, .word). Drawn here they
-  // were only as sharp as this picture's pixels, and soft while they came into focus.
-  float wordIn = ss( ${beat(T.word)}, s );
-  float wordShown = wordIn * ( 1. - ss( 0., .5, leave ) ) * typeReady;
-  if ( wordShown > .001 ) {
-    float glow = texture2D( typeTex, uv ).g;
-    float spot = exp( -dot( ( uv - pointer ) * vec2( aspect, 1. ) / .26, ( uv - pointer ) * vec2( aspect, 1. ) / .26 ) ) * pointerActive;
-    // with no pointer, a sheen passes over the letters now and then
-    float passing = fract( time * .085 ) * 2.6 - .8;
-    float sheen = exp( -pow( ( uv.x + ( uv.y - .5 ) * .35 - passing ) / .045, 2. ) ) * ( 1. - pointerActive ) * step( .001, time );
-    float shine = clamp( spot + sheen * .85, 0., 1. );
-    result += cNeon * glow * ( .1 + .42 * shine ) * wordShown;
-  }
-
-  // ---------------- the lids, over everything: Ink behind them until they have shut, the drop after
+${room ? ROOM_THROUGH : MARK_BODY}${room ? '' : MARK_POINTER}  // ---------------- the lids, over everything: Ink behind them until they have shut, the drop after
   vec3 behind = mix( cInk, result, step( ${f(L.part[0])}, s ) );
   result = mix( behind, lidColor, lid );
-
+${room ? `  seen = mix( mix( 1., seen, step( ${f(L.part[0])}, s ) ), 1., lid );\n` : ''}
   // a breath of grain, so the long gradients cannot band
-  result += ( hash( gl_FragCoord.xy ) - .5 ) * .012;
-  gl_FragColor = vec4( max( result, 0. ), 1. );
+  result += ( hash( gl_FragCoord.xy ) - .5 ) * .012${room ? ' * seen' : ''};
+  gl_FragColor = vec4( max( result, 0. ), ${room ? 'seen' : '1.'} );
 }`
+}
+
+/** The journey with the mark as its hero. */
+export const FRAGMENT = fragment(false)
+/** The journey with the room as its hero: the films, and the lamp that is their bulb. */
+export const FRAGMENT_ROOM = fragment(true)

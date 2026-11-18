@@ -1,0 +1,40 @@
+/* The call to action (LaunchLink.tsx): Hyper Neon, square, Ink words and an arrow. Under the pointer it moves
+   as the reference's button does: the measures are that page's (bulk.trade). */
+.launch {
+  --arrow: 1.15em;
+  --between: 0.7em;
+  /* the reference's curve: a steep ease-out, all but done in half its time */
+  --roll: cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex; align-items: center; justify-content: center; height: var(--launch-height, 51px); padding: 0 var(--launch-pad, 25px);
+  background: var(--hw-neon); color: var(--hw-ink); text-decoration: none; white-space: nowrap;
+  font-family: var(--font-text); font-size: var(--launch-type, 17px); font-weight: 700; letter-spacing: -0.01em; line-height: 1;
+  transition: background-color 0.26s ease;
+}
+.launch:hover, .launch:focus-visible { background: var(--hw-white); }
+.launch:focus-visible { outline: 2px solid var(--hw-white); outline-offset: 4px; }
+
+/* the words: once whole for those who do not see the page, once as letters that roll */
+.words { position: relative; display: inline-flex; }
+.said { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.letters { display: inline-flex; }
+.space { display: inline-block; width: 0.28em; }
+/* each letter in a window one line high, over a copy of itself */
+.cell { display: inline-block; overflow: hidden; height: 1.2em; line-height: 1.2em; }
+.roll { display: block; transform: translate3d(0, 0, 0); }
+.roll > span { display: block; height: 1.2em; }
+/* under the pointer the pair rises by a line, letter after letter; when it leaves, it drops back at once */
+.launch:hover .roll, .launch:focus-visible .roll { transform: translate3d(0, -1.2em, 0); transition: transform 450ms var(--roll) calc(var(--i) * 29ms); }
+
+/* the arrow is in the button twice: after the words, and before them with no room of its own. Under the
+   pointer the two change places, so the button keeps its width. */
+.lead, .trail { display: inline-flex; flex: none; overflow: hidden; transition: width 450ms var(--roll), margin 450ms var(--roll), opacity 450ms var(--roll), transform 450ms var(--roll); }
+.lead svg, .trail svg { display: block; flex: none; width: var(--arrow); height: calc(var(--arrow) * 0.6); }
+.lead { width: 0; margin-right: 0; opacity: 0; transform: translate3d(-20px, 0, 0); }
+.trail { width: var(--arrow); margin-left: var(--between); opacity: 1; }
+.launch:hover .lead, .launch:focus-visible .lead { width: var(--arrow); margin-right: var(--between); opacity: 1; transform: none; }
+.launch:hover .trail, .launch:focus-visible .trail { width: 0; margin-left: 0; opacity: 0; transform: translate3d(20px, 0, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .launch:hover .roll, .launch:focus-visible .roll { transform: none; transition: none; }
+  .lead, .trail { transition: opacity 0.2s linear; }
+}

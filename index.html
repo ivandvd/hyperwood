@@ -31,31 +31,23 @@
 
       /* The mark. Its shape is a mask (the master, src/assets/brand/hyperwood-symbol-neon.svg), and under the
          mask it is Hyper Neon from the start. What is seen filling is the part not yet filled drawing back:
-         one dim block, moved by three movements that add up.
-           .op-a  the first, started here with the first paint;
-           .op-b  the second, started by opening.ts when the hero's scene exists;
-           .op-c  the last: it closes whatever is left once the hero is ready.
-         (The first movement's numbers are repeated in src/config.ts, opening.fill.first: keep them the same.) */
-      .op-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 22px; transition: opacity 0.35s linear 0.04s; }
+         one dim block, moved by two movements that follow one another.
+           .op-a  the first, started here with the first paint: brisk, then creeping for as long as it takes;
+           .op-b  the one that runs on from wherever the first has got to, to the full mark, once the page is
+                  whole (opening.ts stops the first there and starts this one at the speed the first had).
+         (The first movement's numbers are repeated in src/config.ts, opening.flow.first: keep them the same.) */
+      .op-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; transition: opacity 0.35s linear 0.04s; }
       .op[data-state='open'] .op-center { opacity: 0; }
       .op-mark { position: relative; width: clamp(150px, 15vw, 232px); aspect-ratio: 428 / 191; overflow: hidden; background: #ccff00; -webkit-mask: var(--op-mark) center / 100% 100% no-repeat; mask: var(--op-mark) center / 100% 100% no-repeat; }
-      .op-a, .op-b, .op-c { position: absolute; inset: 0; will-change: transform; }
-      .op-c { transform-origin: 100% 50%; }
-      .op-a { animation: op-first 3.2s cubic-bezier(0.12, 0.6, 0.2, 1) both; }
+      .op-a, .op-b { position: absolute; inset: 0; will-change: transform; }
+      .op-a { animation: op-first 3.2s cubic-bezier(0.1, 0.7, 0.2, 1) both; }
       .op-rest { position: absolute; inset: -2px -3% -2px -2px; background: #212221; }
-      @keyframes op-first { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(34%, 0, 0); } }
-
-      /* The same in numbers: one column of figures behind a window one figure high. opening.ts moves it a
-         row at a time, and shows it once its typeface is there. */
-      .op-count { display: flex; gap: 5px; height: 16px; margin: 0 0 0 -1ch; font: 400 11px/16px 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: rgba(244, 245, 240, 0.48); opacity: 0; transition: opacity 0.35s linear; }
-      .op[data-type] .op-count { opacity: 1; }
-      .op-win { display: block; width: 3ch; height: 16px; overflow: hidden; text-align: right; color: #f4f5f0; }
-      .op-strip { display: block; white-space: pre; will-change: transform; }
+      @keyframes op-first { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(45%, 0, 0); } }
 
       /* Reduced motion: nothing runs or fills. The mark is simply there, and the cover fades. */
       @media (prefers-reduced-motion: reduce) {
         .op-a { animation: none; }
-        .op-c, .op-count { display: none; }
+        .op-b { display: none; }
         .op-cover { transition: opacity 0.3s linear; }
         .op-center { transition: opacity 0.2s linear; }
       }
@@ -67,8 +59,7 @@
     <div id="opening" class="op" role="status" aria-label="Loading" data-state="loading">
       <div class="op-cover" aria-hidden="true"></div>
       <div class="op-center" aria-hidden="true">
-        <div class="op-mark"><div class="op-c"><div class="op-b"><div class="op-a"><div class="op-rest"></div></div></div></div></div>
-        <p class="op-count"><span class="op-win"><span class="op-strip">0</span></span><span>%</span></p>
+        <div class="op-mark"><div class="op-b"><div class="op-a"><div class="op-rest"></div></div></div></div>
       </div>
     </div>
     <div id="root"></div>

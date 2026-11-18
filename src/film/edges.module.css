@@ -1,0 +1,14 @@
+/* How a box of film melts into the page along its upper and lower edge (edges.tsx): what is in the box is drawn
+   twice, once sharp with those edges faded out, once smeared up and down and shown only along them. */
+.sharp, .smear { position: absolute; inset: 0; }
+/* the sharp copy: its upper tenth and lower fifth fade out */
+.sharp {
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 4.5%, #000 10%, #000 80%, rgba(0, 0, 0, 0.7) 91%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 4.5%, #000 10%, #000 80%, rgba(0, 0, 0, 0.7) 91%, rgba(0, 0, 0, 0) 100%);
+}
+/* the smeared copy (its blur is set on it by edges.tsx): only along those two edges, and gone at the very edge */
+.smear {
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, #000 4%, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0) 78%, #000 90%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, #000 4%, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0) 78%, #000 90%, rgba(0, 0, 0, 0) 100%);
+}
+.defs { position: absolute; width: 0; height: 0; }

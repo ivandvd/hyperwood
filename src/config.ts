@@ -307,6 +307,20 @@ export const config = {
       done: { seconds: 0.42, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
       hold: 0.1,
     },
+    /** The landing page's mark fills in one sweep (ui/opening.ts, `finish: 'run'`).
+     *  `first`: the movement its own styles start with the first paint, brisk and then creeping for as long as
+     *  the page takes to arrive. Its three numbers are written in index.html as well (.op-a and @keyframes
+     *  op-first): keep the two the same.
+     *  `run`: when the page is whole, the first movement is stopped where it stands and one movement runs on
+     *  from there to the full mark. It takes `base` seconds, and `per` more for a whole mark still to fill;
+     *  it leaves at the speed the first movement has at that moment and eases out (`ease`: the two numbers of
+     *  its curve that do not follow from that speed). On a quick load the mark is about a fifth full when the
+     *  page is whole and full a little over half a second later, at an even pace: with these numbers the
+     *  fastest moment of the sweep is about one and a half times its average. */
+    flow: {
+      first: { share: 0.45, seconds: 3.2, ease: [0.1, 0.7, 0.2, 1] as [number, number, number, number] },
+      run: { base: 0.3, per: 0.5, ease: [0.3, 0.55] as [number, number] },
+    },
     /** The cover stays at least this long (seconds), so the mark is seen to fill and the page does not flash. */
     minShow: 0.9,
     /** Consecutive smooth frames (< 34 ms) of the scene required before the cover comes down, so the hero
@@ -537,6 +551,42 @@ export const config = {
      *  is wide), and how large the drop is that it comes out of (its radius, as a share of half the mark's
      *  width). */
     body: { full: 0.8, drop: 0.26 },
+    /** The hero as a room: the films stand in a box (film/FilmStack.tsx), and the journey's light is their
+     *  bulb. The drop that stands in the opening eye rises to where the bulb hangs and draws in to its size:
+     *  it is the lamp. The lamp's light then reaches further and further, and the film shows where it
+     *  reaches. Leaving, the same backwards: the light draws back to the lamp, the lamp swells into the drop,
+     *  and the drop goes to the gate.
+     *  `stay`: how much longer the journey is with the room as its hero, as a share of its length with the
+     *  mark: all of it goes to the hero's rest, where the three films follow one another as the page is
+     *  scrolled. The other beats are carried over so that each keeps its stretch of scrolling
+     *  (journey/timing.ts).
+     *  `turns`: where in that rest one film gives way to the next (the middle of each change, as a share of
+     *  the rest), and `turn`, how long a change takes (the same). A change is the light drawing back to the
+     *  lamp, the lamp going over to the next film's bulb, and the light opening the next room.
+     *  `open`, `shut`: when the light opens the first room and when it draws back from the last, in journey
+     *  progress as the mark's journey counts it (they sit between its beats, and are carried over with them).
+     *  `soft`: how soft the front of that light is, as a share of how far it has reached. `ease`: how it
+     *  reaches (1 is evenly; more lingers about the lamp first).
+     *  `swell`: when the lamp swells into the drop again, as a share of the gathering (beats.gather).
+     *  `side`: over how much of half the box's width the film gives way to the page's Ink at either side
+     *  (its upper and lower edges melt into the page by the box's own fade).
+     *  `light`: the bulb's light as the films have it, measured on the finished films (all three bulbs were
+     *  finished to one fall: scripts/film/tint.cjs). How much Neon there is at a distance from the bulb's
+     *  middle: `full` times a bell `sigma` wide, plus a faint tail (how strong, how far), never more than 1:
+     *  where it comes to 1 it is rounded off over `knee`, so the bulb's full middle has no rim. Distances in
+     *  film widths. (Measured: scripts/film/light.ts prints the films' own fall beside this one.) */
+    room: {
+      stay: 0.375,
+      turns: [0.31, 0.69],
+      turn: 0.165,
+      open: [0.365, 0.45] as [number, number],
+      shut: [0.585, 0.645] as [number, number],
+      soft: 0.55,
+      ease: 1.5,
+      swell: [0.12, 0.34] as [number, number],
+      side: 0.16,
+      light: { full: 1.1, sigma: 0.0335, tail: [0.05, 0.07] as [number, number], knee: 0.1 },
+    },
     /** The floor the current runs over, from the gate towards the viewer, and the current's course on it.
      *  `rise`: how far above the gate's foot the eye's level lies, in screen heights (less is a flatter floor).
      *  The course: `straight` out of the gate, then one long bend to the left and back across to the right,

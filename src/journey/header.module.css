@@ -29,6 +29,13 @@
 }
 .launch span { display: inline-block; margin-left: 2px; }
 
+/* With the room as hero: the call to action alone, at the upper right (Header.tsx). */
+.bar {
+  --launch-height: 42px; --launch-pad: 20px; --launch-type: 15px;
+  position: fixed; top: var(--header-top); right: var(--edge); z-index: 10;
+  opacity: 0; pointer-events: none; /* timeline.ts takes both over */
+}
+
 /* a phone: the first link and the last, the mark, the call to action */
 @media (max-width: 760px) {
   .nav a:not(:first-child):not(:last-child) { display: none; }

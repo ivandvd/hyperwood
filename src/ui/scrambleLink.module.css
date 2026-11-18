@@ -1,0 +1,22 @@
+/* A link whose letters fall into place under the pointer (ScrambleLink.tsx). It takes its type and its colour
+   from where it stands; under the pointer it is Hyper Neon. */
+.link { position: relative; display: inline-block; color: inherit; text-decoration: none; white-space: pre; transition: color 0.2s linear; }
+.link:hover, .link:focus-visible { color: var(--hw-neon); }
+.link:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 5px; }
+/* the word itself, for those who do not see the page: out of sight, in its place */
+.word { position: absolute; inset: 0; overflow: hidden; clip-path: inset(50%); }
+.seen { display: inline-block; }
+/* The icon: beside the word, out of the line's run, so the word never moves for it. The reference's are 16 px
+   at 14 px type, a little faint: the arrow at 0.55, a channel's own at 0.6. */
+.icon {
+  position: absolute; top: 50%; left: calc(100% + 0.45em); display: block; width: 1.15em; height: 1.15em;
+  opacity: 0; transform: translate3d(-0.3em, -52%, 0); pointer-events: none;
+  transition: opacity 0.2s linear, transform 0.26s var(--ease-out);
+}
+.icon svg { display: block; width: 100%; height: 100%; }
+.link[data-arrow='before'] .icon { left: auto; right: calc(100% + 0.5em); transform: translate3d(0.3em, -52%, 0); }
+.link:hover .icon, .link:focus-visible .icon { opacity: 0.55; transform: translate3d(0, -52%, 0); }
+.link[data-icon]:hover .icon, .link[data-icon]:focus-visible .icon { opacity: 0.6; }
+@media (prefers-reduced-motion: reduce) {
+  .icon, .link[data-arrow='before'] .icon { transition: opacity 0.2s linear; transform: translate3d(0, -52%, 0); }
+}

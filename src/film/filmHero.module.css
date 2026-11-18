@@ -1,0 +1,138 @@
+/* The film hero (FilmHero.tsx). Its measures are bulk.trade's first screen, taken from that page at 1440 by 900
+   and at four other sizes; the colours and the type are Hyperwood's.
+
+   Up to 1440 px wide the page's own pixels are used. Wider screens enlarge the whole arrangement in step with
+   their width: --u is one pixel of the 1440 design. */
+.hero {
+  --u: max(1px, calc(100vw / 1440));
+  --gut: calc(32 * var(--u));
+  --gap: calc(12 * var(--u));
+  --top: calc(80 * var(--u));
+  /* the tagline: 7.55 hundredths of the width up to 1440, then growing with the arrangement */
+  --hl: clamp(42px, max(7.55vw, calc(11.517vw - 57.1px)), 8.542vw);
+  /* The tagline's two lines interlock, as the reference's do (it sets them at 0.8 with the second line 0.95
+     of the type size in). These words in Manrope need their own two numbers: the q, y and both p of "Equity
+     perps." hang 0.24 below the line, and at this indent each of them comes down beside the P, between the
+     i and the v, over the a and over the p of "Private positions.", never onto a tall letter. At 0.86 they
+     clear the small letters under them by 0.06 of the type size. Change the words or the typeface and both
+     numbers have to be found again. */
+  --lead: 0.86;
+  --indent: 1.3em;
+  /* how far the film reaches down over the tagline: the reference's 0.225 of the type size, and half of the
+     extra leading, so it reaches as far over the letters */
+  --lap: calc(0.225 + (var(--lead) - 0.8) / 2);
+  --ground: var(--hw-ink);
+  --rule: rgba(244, 245, 240, 0.26);
+
+  position: relative; isolation: isolate; overflow: hidden;
+  display: grid; height: 100vh; min-height: calc(560 * var(--u));
+  grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gap);
+  grid-template-rows: var(--top) minmax(0, 1fr) auto;
+  padding: 0 var(--gut) var(--gut);
+  background: var(--ground); color: var(--hw-white);
+  font-family: var(--font-text); font-synthesis: none;
+}
+@supports (height: 100svh) {
+  .hero { height: 100svh; }
+}
+
+/* ------------------------------------------------------------------ the lockup, in Neon (scripts/brand/lockup.py) */
+.logo { grid-area: 1 / 1; align-self: center; justify-self: start; display: block; margin: calc(14 * var(--u)) 0 0 calc(7 * var(--u)); }
+.logo img { display: block; height: calc(27 * var(--u)); width: auto; }
+.logo:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 6px; }
+
+/* ------------------------------------------------------------------ the films
+   Two of the three columns, less one gutter. The box reaches down over the tagline's upper edge. (What is in
+   it, the strip of films and its melting edges: FilmStrip.tsx, filmStrip.module.css.) */
+.film {
+  grid-area: 2 / 1 / 3 / 3; position: relative; z-index: 2;
+  margin: 0 var(--gut) calc(-1 * var(--lap) * var(--hl)) 0;
+}
+
+/* the market's card: a piece of Paper on the film, flush with its right edge */
+.card {
+  position: absolute; top: calc(64 * var(--u)); right: 0; width: calc(240 * var(--u)); height: 72px;
+  display: block; overflow: hidden;
+  background: var(--hw-paper); color: var(--hw-ink); color-scheme: light; text-decoration: none; pointer-events: auto;
+}
+.card:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 3px; }
+/* what the card says until the live quote is there (and if it never comes): the ticker and the name, no figure */
+.plain { position: absolute; inset: 0; display: grid; align-content: center; gap: 3px; padding: 10px; transition: opacity 0.25s linear; }
+.plain[data-gone] { opacity: 0; }
+.ticker { font-family: var(--font-mono); font-size: 14px; font-weight: 500; letter-spacing: 0.03em; line-height: 1.4; color: rgba(10, 10, 10, 0.62); }
+.name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+/* the live quote: their frame, as wide as the card. It takes no clicks: the card is the link. */
+.quote { position: absolute; inset: 0; display: block; opacity: 0; transition: opacity 0.25s linear; pointer-events: none; }
+.quote[data-there] { opacity: 1; }
+.quote :global(.tradingview-widget-container), .quote :global(.tradingview-widget-container__widget), .quote iframe { display: block; width: 100% !important; }
+
+/* ------------------------------------------------------------------ the third column */
+.side { grid-area: 1 / 3 / 3 / 4; position: relative; z-index: 3; padding-top: calc(24 * var(--u)); min-width: 0; }
+/* the way around: two lists between two hairlines, the right one shorter */
+.panel {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; height: calc(300 * var(--u));
+  padding: calc(9 * var(--u)) calc(17 * var(--u)) 0;
+  font-family: var(--font-mono); font-size: calc(14 * var(--u)); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1;
+}
+.panel::before, .panel::after { content: ''; position: absolute; top: 0; width: 1px; background: var(--rule); }
+.panel::before { left: 0; height: 100%; }
+.panel::after { right: 0; height: 79.7%; }
+.panel ul { list-style: none; display: grid; align-content: start; row-gap: calc(18 * var(--u)); }
+.panel ul + ul { justify-items: end; }
+.panel a { color: inherit; text-decoration: none; transition: color 0.18s linear; }
+.panel a:hover { color: var(--hw-neon); }
+.panel a:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 5px; }
+
+.line { margin-top: calc(28 * var(--u)); max-width: calc(410 * var(--u)); font-size: calc(22 * var(--u)); font-weight: 500; line-height: 1.15; letter-spacing: -0.014em; }
+.whole { white-space: nowrap; }
+.launch {
+  display: inline-flex; align-items: center; gap: calc(12 * var(--u)); height: calc(51 * var(--u)); margin-top: calc(24 * var(--u)); padding: 0 calc(25 * var(--u));
+  background: var(--hw-neon); color: var(--hw-ink); text-decoration: none; white-space: nowrap;
+  font-size: calc(17 * var(--u)); font-weight: 700; letter-spacing: -0.01em;
+  transition: background-color 0.18s linear;
+}
+.arrow { width: calc(15 * var(--u)); height: calc(15 * var(--u)); flex: none; }
+.launch:hover { background: var(--hw-white); }
+.launch:focus-visible { outline: 2px solid var(--hw-white); outline-offset: 4px; }
+
+/* whose figures the cards show: small, at the foot of the third column */
+.credit {
+  grid-area: 3 / 3; align-self: end; justify-self: end; position: relative; z-index: 3;
+  font-family: var(--font-mono); font-size: calc(11 * var(--u)); letter-spacing: 0.04em; text-transform: uppercase; line-height: 1;
+  color: var(--text-3); text-decoration: none; transition: color 0.18s linear;
+}
+.credit:hover { color: var(--hw-white); }
+.credit:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 4px; }
+
+/* ------------------------------------------------------------------ the tagline, across the film's lower edge */
+.title {
+  grid-area: 3 / 1 / 4 / 4; position: relative; z-index: 1; margin: 0;
+  font-family: var(--font-display); font-size: var(--hl); line-height: var(--lead); letter-spacing: -0.03em; font-weight: 800; color: var(--hw-white);
+}
+.title span { display: block; white-space: nowrap; }
+.title span + span { margin-left: var(--indent); font-weight: 400; }
+
+/* ------------------------------------------------------------------ one column: a tablet held upright, a phone
+   The film runs from edge to edge; under the tagline come the line and the call to action. */
+@media (max-width: 1023px) {
+  .hero {
+    --gut: clamp(18px, 4.6vw, 24px);
+    /* (the second line and its indent are 8.7 of these wide: 98 hundredths of the width between the gutters) */
+    --hl: calc(0.113 * (100vw - 2 * var(--gut)));
+    --lap: calc(0.215 + (var(--lead) - 0.8) / 2);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--top) minmax(0, 1fr) auto auto;
+  }
+  .logo { grid-area: 1 / 1; margin: 0; }
+  .film { grid-area: 2 / 1; margin: 0 calc(-1 * var(--gut)) calc(-1 * var(--lap) * var(--hl)); }
+  /* (an upright screen shows a slice of the film: the slice with its subject in it, reel.ts says which) */
+  .film video { object-position: var(--at, 30%) 50%; }
+  .card { top: 52px; right: var(--gut); width: min(216px, 56vw); }
+  .title { grid-area: 3 / 1; }
+  .side { grid-area: 4 / 1; padding-top: 0; display: grid; justify-items: end; }
+  .panel { display: none; }
+  .line { margin-top: 28px; max-width: none; font-size: 17px; line-height: 1.25; text-align: right; color: var(--text-2); }
+  .launch { margin-top: 22px; width: 100%; justify-content: center; }
+  .hero { grid-template-rows: var(--top) minmax(0, 1fr) auto auto auto; }
+  .credit { grid-area: 5 / 1; margin-top: 14px; font-size: 10px; }
+}

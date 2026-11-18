@@ -60,6 +60,66 @@
    and on any screen; the shader lays only its glow round it) */
 .journey[data-shader] .sculpture { opacity: 0; }
 
+/* The hero as a room (data-hero='room'): the films in place of the mark's body. Their box (.room, the stack of
+   film/FilmStack.tsx) lies under the canvas, and timeline.ts lays it where .screen stands in the hero's layout.
+   Each film has its words: one sentence across the box's lower edge, which melts into the page, and a smaller
+   one under it. All three films' words stand in the one place, and timeline.ts brings each in with its film. */
+.room { position: absolute; left: 0; top: 0; width: 0; height: 0; visibility: hidden; }
+/* (its sides melt into the page as its upper and lower edges do: the shader sees to that, and where nothing is
+   drawn the box does it itself) */
+.journey[data-webgl='off'] .room {
+  --room-sides: linear-gradient(to right, rgba(0, 0, 0, 0), #000 8%, #000 92%, rgba(0, 0, 0, 0));
+  -webkit-mask-image: var(--film-fade), var(--room-sides); mask-image: var(--film-fade), var(--room-sides);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+.screen { flex: none; width: var(--room-width); aspect-ratio: var(--room-shape); visibility: hidden; }
+.journey[data-hero='room'] .hero { justify-content: flex-start; padding-top: var(--room-top); }
+/* (the name is here to be read out: what is seen of the brand is the mark in the header) */
+.name { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* Each film's title is as large as the reference's tagline (its own measure, read off its page: 7.55 hundredths
+   of the width up to 1440 px, growing faster above), never wider than the screen and never so large that it and
+   its note do not fit under the film. --say-w is the widest title on one line in ems, --say-w2 the widest of the
+   titles' halves, both measured by the page once the typeface is there (Journey.tsx). A title reaches over the
+   film's lower edge by 0.3 of its size; its note is the size of the reference's line. */
+.says {
+  --say-note: clamp(15px, 1.4vw, 24px);
+  /* (what is left of the stage under the film) */
+  --say-room: calc(100 * var(--stage-1) - var(--room-top) - var(--room-height));
+  --say-size: min(
+    clamp(42px, max(7.55vw, calc(11.517vw - 57.1px)), 8.542vw),
+    calc((100vw - 2 * var(--edge)) / (var(--say-w, 9) + 0.06)),
+    calc((var(--say-room) - 1.3 * var(--say-note) - 24px) / 1.06)
+  );
+  flex: none; display: grid; justify-items: center; width: 100%; margin-top: calc(-0.3 * var(--say-size));
+}
+.say { grid-area: 1 / 1; display: grid; justify-items: center; padding: 0 var(--edge); opacity: 0; will-change: opacity, transform, filter; }
+.sayLine {
+  margin: 0; font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--say-size); line-height: 1;
+  letter-spacing: var(--track-display); text-align: center; white-space: nowrap; color: var(--on);
+}
+.sayPart { display: inline-block; }
+.sayNote { margin: calc(0.14 * var(--say-size)) 0 0; font-size: var(--say-note); line-height: 1.3; text-align: center; color: var(--on); opacity: 0.72; }
+/* an upright screen: each title in its two halves, one under the other, as wide as the screen allows */
+@media (max-aspect-ratio: 1/1), (max-width: 560px) {
+  .says {
+    --say-size: min(
+      calc((100vw - 2 * var(--edge)) / (var(--say-w2, 5) + 0.06)),
+      calc((var(--say-room) - 2.6 * var(--say-note) - 24px) / 2.18),
+      120px
+    );
+  }
+  /* (at 1.06, so a letter hanging below the first half keeps clear of the tall letters of the second: the y of
+     "stays" over the t of "private.") */
+  .sayLine { display: flex; flex-direction: column; align-items: center; line-height: 1.06; }
+}
+/* the room's journey is longer by the three films' stay (timeline.ts says by how much: --room-stay, a share of
+   the length the journey has without it) */
+.journey[data-hero='room'] { height: calc(var(--journey-height) + var(--journey-hold) + var(--room-stay, 0) * (var(--journey-height) - 100 * var(--stage-1))); }
+/* (an upright screen shows a slice of each film: the slice with its figure and its bulb in it, film/reel.ts) */
+@media (max-aspect-ratio: 1/1), (max-width: 560px) {
+  .room video { object-position: var(--at, 50%) 50%; }
+}
+
 .heroLine {
   margin: var(--hero-line-gap) var(--edge) 0;
   font-size: var(--type-hero-line); line-height: 1.35; text-align: center; color: var(--on);
@@ -122,6 +182,120 @@
 .right {
   left: calc(var(--door-left, 50%) + var(--door-width) / 2 + var(--door-gap)); text-align: left;
   transform: translate3d(calc((1 - var(--in, 1)) * -22px), 0, 0);
+}
+
+/* The closing as the page's hero (data-hero='room'). Around the gate and the river it is laid out as the
+   reference lays out its first screen (bulk.trade: the measures were taken from that page at 1440 by 900 and at
+   four other sizes, and film/filmHero.module.css follows the same ones). The logo at the upper left. A column at
+   the right, a third of the screen between its gutters: the way around the site between two hairlines, the
+   line, the call to action. And the tagline at the gate's left, set as the reference sets its own: two lines,
+   the first heavy, the second light and set in by 0.95 of the type size, at a leading of 0.8 (the words are
+   `gate` in content.home.ts).
+   Up to 1440 px wide the page's own pixels are used; wider screens enlarge the arrangement in step with their
+   width (--u is one pixel of the 1440 design). */
+.journey[data-hero='room'] .closing {
+  --u: max(1px, calc(100vw / 1440));
+  --gut: calc(32 * var(--u));
+  --gap: calc(12 * var(--u));
+  --rule: rgba(244, 245, 240, 0.26);
+  /* where the logo and the tagline begin */
+  --lead-in: calc(var(--gut) + 7 * var(--u));
+}
+/* (the closing's links can be used while the closing is there: timeline.ts keeps it inert otherwise) */
+.journey[data-hero='room'] .closing a { pointer-events: auto; }
+/* The lockup, in Neon (src/assets/brand/hyperwood-lockup-neon.svg: the kit's symbol, and the word outlined from
+   the kit's typeface; it is 7.974 times as wide as tall). As wide as the kit has a lockup in a navigation bar,
+   160 px (here 160 of the design's pixels, so it grows with a wider screen), and its word's baseline (0.739 of
+   its height down) on the baseline of the panel's first row (44.8 down). */
+.logo { --logo: calc(160 / 7.974 * var(--u)); position: absolute; left: var(--lead-in); top: calc(44.8 * var(--u) - 0.739 * var(--logo)); display: block; }
+.logo img { display: block; height: var(--logo); width: auto; }
+.logo:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 6px; }
+.side { position: absolute; top: calc(24 * var(--u)); right: var(--gut); width: calc((100% - 2 * var(--gut) - 2 * var(--gap)) / 3); }
+/* the way around: two lists between two hairlines, the right one shorter */
+.panel {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; height: calc(300 * var(--u));
+  padding: calc(9 * var(--u)) calc(17 * var(--u)) 0;
+  font-family: var(--font-mono); font-size: calc(14 * var(--u)); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1;
+  color: var(--on);
+}
+.panel::before, .panel::after { content: ''; position: absolute; top: 0; width: 1px; background: var(--rule); }
+.panel::before { left: 0; height: 100%; }
+.panel::after { right: 0; height: 79.7%; }
+.panel ul { list-style: none; margin: 0; padding: 0; display: grid; align-content: start; row-gap: calc(18 * var(--u)); }
+.panel ul + ul { justify-items: end; }
+/* (no word left alone on its last line) */
+.line { margin: calc(28 * var(--u)) 0 0; max-width: calc(410 * var(--u)); font-size: calc(22 * var(--u)); font-weight: 500; line-height: 1.15; letter-spacing: -0.014em; text-wrap: pretty; color: var(--on); }
+.whole { white-space: nowrap; }
+.launch { --launch-height: calc(51 * var(--u)); --launch-pad: calc(25 * var(--u)); --launch-type: calc(17 * var(--u)); margin-top: calc(24 * var(--u)); }
+
+/* The tagline: the hero's. Two sentences, a line each (--tag-lines, from content.home.ts), at a leading of 0.8:
+   the first in 800, the second in 400 and set in, as the reference sets its own: set in so that it ends where
+   the first ends (--tag-indent, found by the page), by no more than the reference's 0.95 of the type size. Its
+   capitals begin level with the gate's crown (a capital's top lies 0.065 of the type size under its line's
+   top). It is as large as the reference's (its own measure, read off its page: 7.55 hundredths of the width up
+   to 1440 px, growing faster above, 108.7 px at 1440 and 162 px at 1905), and no larger than the room it has
+   allows:
+   - across, from where the logo begins to the gate's left edge less a gap of 0.03 of the picture's height, where
+     the gate's glow begins (the gate's middle is 49.7 hundredths of the stage across, 8 px less for a scrollbar),
+     over its widest line: --tag-w, in ems, measured by the page once its typeface is there (Journey.tsx), so
+     other words take their own size;
+   - down, from the crown to the gate's foot, where the gate opens out into the river: its lines and the letters
+     hanging below the last are --tag-h of its size.
+   (Words to come: at a leading of 0.8 a letter that hangs below one line can meet one of the next. Measure the
+   letters, do not guess.) */
+.tagline {
+  --room: calc(49.7vw - 8px - 0.068 * var(--art-h) - 0.03 * var(--art-h) - var(--lead-in));
+  /* (its lines at 0.8, the letters hanging below the last, and on an upright screen the little more two light
+     lines keep apart) */
+  --tag-h: calc(var(--tag-lines, 2) * 0.8 + 0.32);
+  --tag-size: min(
+    clamp(42px, max(7.55vw, calc(11.517vw - 57.1px)), 8.542vw),
+    calc(var(--room) / (var(--tag-w, 8.8) + 0.06)),
+    calc(var(--door-height) / (var(--tag-h) - 0.065))
+  );
+  position: absolute; left: var(--lead-in); top: calc(var(--door-top) - 0.065 * var(--tag-size)); margin: 0;
+  font-family: var(--font-display); font-weight: 800; font-size: var(--tag-size);
+  line-height: 0.8; letter-spacing: -0.03em; color: var(--on); white-space: nowrap;
+  transform: translate3d(0, calc((1 - var(--in, 1)) * 20px), 0);
+}
+.tagline > span { display: block; }
+.tagline > span[data-light] { margin-left: calc(var(--tag-indent, 0.95) * 1em); font-weight: 400; }
+/* (a sentence's halves: on one line here, one under the other on an upright screen) */
+.tagline [data-part] { display: inline-block; }
+
+/* A screen with no room for the column (a tablet held upright, a phone, a phone on its side): the logo and the
+   tagline begin at the page's edge, the logo level with the call to action, which stays in the header there
+   (timeline.ts looks whether the column is shown). */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1), (max-height: 520px) {
+  .journey[data-hero='room'] .closing { --lead-in: var(--edge); }
+  .side { display: none; }
+  /* the kit's navigation size (160 px wide), level with the call to action at the upper right
+     (header.module.css: 42 px tall) */
+  .logo { --logo: 20px; top: calc(var(--header-top) + (42px - var(--logo)) / 2); }
+}
+/* a phone: the lockup is smaller (136 px wide), so it keeps clear of the call to action */
+@media (max-width: 480px) {
+  .logo { --logo: 17px; }
+}
+/* An upright screen: no room beside the gate. The tagline stands above it, across the screen, each sentence in
+   its two halves (--tag-halves lines): as wide as the screen allows (--tag-w2, its widest half), and never so
+   tall that it comes within 24 px of the gate's crown. The gate stands lower than the guide has it (40
+   hundredths of the stage down, not 30.9), to give the tagline that room; the picture moves with it. */
+@media (max-aspect-ratio: 1/1), (max-width: 560px) {
+  .journey[data-hero='room']:not([data-wave]) { --door-top: calc(40 * var(--stage-1)); }
+  .tagline {
+    --tag-h: calc(var(--tag-halves, 4) * 0.8 + 0.32);
+    --tag-size: min(
+      calc((100vw - 2 * var(--edge)) / (var(--tag-w2, 5) + 0.06)),
+      calc((var(--door-top) - 24px - var(--title-top)) / var(--tag-h)),
+      128px
+    );
+    top: var(--title-top);
+  }
+  .tagline [data-part] { display: block; width: fit-content; }
+  /* (the light halves keep a little more apart: at 0.8 the y of "Privately," came down onto the e of
+     "anytime.") */
+  .tagline > span[data-light] > [data-part] + [data-part] { margin-top: 0.07em; }
 }
 
 /* with the guide's picture the closing words come as the guide has them come: they rise */

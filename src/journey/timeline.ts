@@ -8,8 +8,18 @@
  *   body fills with light again and gathers into a gate; the closing words come out from the gate, and the
  *   current runs out of it.
  *
- * When each happens is config.journey.beats and config.journey.lids, which the shader reads too: the words take
- * the lids' colour exactly where the lids are.
+ * That is the journey with the mark as its hero (the address ?hero=mark). The page shows the hero as a room:
+ * the drop rises to where a bulb hangs and is the lamp, the lamp's light opens the room, and in the room
+ * stands a film (film/FilmStack.tsx). Scrolled on, the light draws back to the lamp, the lamp goes over to
+ * where the next film's bulb hangs, and its light opens the next room: three films, each with its words.
+ * Then the light draws back for the last time, the lamp swells into the drop again, and the drop goes to the
+ * gate. For that hero this file also lays the films' box where the hero's layout has its place, says which
+ * film is in the box, moves the lamp from bulb to bulb and brings each film's words in and out (`screen`, and
+ * "The room" in `frame`).
+ *
+ * When each happens is timing.ts (config.journey's beats and lids, carried over into the room's longer journey
+ * where the hero is the room), which the shader reads too: the words take the lids' colour exactly where the
+ * lids are.
  *
  * Where the body, the word and the gate stand is the page's layout: three boxes (Journey.tsx) are measured
  * here and passed to the shader, so a different screen needs no numbers of its own.
@@ -22,8 +32,10 @@ import { config } from '../config'
 import { milestone } from '../utils/milestone'
 import type { OpeningSource } from '../ui/opening'
 import wordmarkFile from '../assets/brand/hyperwood-wordmark-neon.svg?raw'
-import { FRAGMENT, VERTEX } from './shader'
+import type { FilmStackHandle } from '../film/FilmStack'
+import { FRAGMENT, FRAGMENT_ROOM, VERTEX } from './shader'
 import { buildMarkField, type MarkField } from './markField'
+import { markTiming, roomTiming } from './timing'
 
 const clamp = (x: number, a = 0, b = 1) => Math.max(a, Math.min(b, x))
 /** GLSL's smoothstep. */
@@ -65,6 +77,15 @@ export function journeyOpening(): OpeningSource {
   }
 }
 
+/**
+ * The journey's program is kept with its canvas (a canvas has one context for life). A journey that is stopped
+ * and started again on the same canvas takes the program over: it is neither thrown away nor asked for twice.
+ * In development React stops and starts every effect once as the page mounts, so this happens on every load
+ * there. Throwing away a program that is still being built makes the graphics process wait for the build, and
+ * the whole screen waits with it: a quarter of a second, measured, with the opening's mark standing still.
+ */
+const built = new WeakMap<HTMLCanvasElement, { source: string; program: WebGLProgram; shaders: WebGLShader[] }>()
+
 export interface JourneyParts {
   journey: HTMLElement
   stage: HTMLElement
@@ -73,22 +94,38 @@ export interface JourneyParts {
   intro: HTMLElement
   lines: HTMLElement[]
   hero: HTMLElement
-  /** Where the mark's body is drawn. */
+  /** Where the mark's body is drawn. (Where the hero is the room: where the films' box stands.) */
   sculpture: HTMLElement
-  /** Where the wordmark is drawn. */
-  word: HTMLElement
+  /** Where the wordmark is drawn (the hero as the mark has one; the room has not). */
+  word?: HTMLElement
   closing: HTMLElement
   /** Where the gate is drawn. */
   door: HTMLElement
   /** As tall as the journey holds its last picture (journey.module.css). */
   hold: HTMLElement
+  /** The films, where the hero is the room and not the mark. They lie under the canvas: the picture is then
+   *  drawn with a share left clear, and the films show through it (shader.ts, "the room"). */
+  films?: FilmStackHandle
+  /** The films' words, in the films' order: for each film the elements that say them. */
+  says?: HTMLElement[][]
+  /** The column at the gate, with the way around the site and the call to action (not shown on a screen
+   *  with no room for it). */
+  side?: HTMLElement
 }
 
 export function startJourney(parts: JourneyParts): () => void {
-  const { journey, stage, canvas, header, intro, lines, hero, sculpture, word, closing, door, hold } = parts
+  const { journey, stage, canvas, header, intro, lines, hero, sculpture, word, closing, door, hold, films, says = [], side } = parts
   const J = config.journey
-  const B = J.beats
-  const L = J.lids
+  /** When things happen: the journey as it was made, or carried over into the room's longer one (timing.ts). */
+  const when = films ? roomTiming : markTiming
+  const B = when.beats
+  const L = { ...J.lids, ...when.lids }
+  const R = J.room
+  const turns = films ? roomTiming.room.turns : []
+  const roomOpen = roomTiming.room.open
+  const roomShut = roomTiming.room.shut
+  // (the room's journey is longer by its films' stay: journey.module.css makes the section that much taller)
+  if (films) journey.style.setProperty('--room-stay', String(R.stay))
   const reduced = matchMedia('(prefers-reduced-motion: reduce)')
   /** How the river is drawn. As the guide draws it: one painted picture, laid by the gate (config.journey.
    *  picture). Or, when the address ends in ?wave=traced or ?wave=old, one of the two earlier currents, which
@@ -101,7 +138,8 @@ export function startJourney(parts: JourneyParts): () => void {
   let disposed = false
 
   /* ------------------------------------------------------------------ WebGL: asked for, never waited for */
-  const attrs = { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' as const }
+  // (with the films under it, the picture has a clear share: the canvas keeps its alpha)
+  const attrs = { alpha: !!films, antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' as const }
   let gl2: WebGL2RenderingContext | null = null
   let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null
   try {
@@ -210,7 +248,7 @@ export function startJourney(parts: JourneyParts): () => void {
   const typeCanvas = document.createElement('canvas')
   const typeContext = typeCanvas.getContext('2d')
   const drawType = () => {
-    if (!gl || !typeTexture || !typeContext || !canvas.width || !canvas.height) return
+    if (!word || !gl || !typeTexture || !typeContext || !canvas.width || !canvas.height) return
     const g = gl
     const w = stage.clientWidth
     const h = stage.clientHeight
@@ -270,7 +308,7 @@ export function startJourney(parts: JourneyParts): () => void {
     const corner = g.getAttribLocation(program, 'corner')
     g.enableVertexAttribArray(corner)
     g.vertexAttribPointer(corner, 2, g.FLOAT, false, 0, 0)
-    for (const name of ['res', 'time', 'progress', 'pointer', 'pointerActive', 'typeTex', 'typeReady', 'markTex', 'markReady', 'body', 'gate', 'course', 'traced', 'pieces', 'gateX', 'flow', 'picture', 'portalTex', 'cInk', 'cNeon', 'cHot', 'cLime', 'cMoss', 'cDeep'])
+    for (const name of ['res', 'time', 'progress', 'pointer', 'pointerActive', 'typeTex', 'typeReady', 'markTex', 'markReady', 'body', 'gate', 'course', 'traced', 'pieces', 'gateX', 'flow', 'picture', 'portalTex', 'cInk', 'cNeon', 'cHot', 'cLime', 'cMoss', 'cDeep', 'lamp', 'room', 'drop', 'roomSide', 'lens'])
       u[name] = g.getUniformLocation(program, name)
     const P = J.palette
     g.uniform3fv(u.cInk, rgb(P.ink))
@@ -288,6 +326,8 @@ export function startJourney(parts: JourneyParts): () => void {
     portalTexture = texture(2)
     g.uniform1i(u.portalTex, 2)
     g.uniform1f(u.flow, pictured ? 0 : 1)
+    // (the address ?drop=lens: the drop as the films' lamp out of focus, grainy: shader.ts, "the lamp")
+    g.uniform1f(u.lens, new URLSearchParams(window.location.search).get('drop') === 'lens' ? 1 : 0)
     journey.dataset.shader = ''
     ready = true
     state.scene = true
@@ -295,26 +335,36 @@ export function startJourney(parts: JourneyParts): () => void {
     measure()
     whole()
   }
-  /** The opening is told when the journey is whole: the program is there, the fields are, the type has set. */
+  /** The opening is told when the journey is whole: the program is there, the fields are, the type has set.
+   *  (The room needs no fields: its light is a round one.) */
   const whole = () => {
-    if (state.whole || !ready || !markField || !typeSet) return
+    if (state.whole || !ready || (!markField && !films) || !typeSet) return
     state.whole = true
     milestone('journey-whole')
   }
 
   if (gl) {
     const g = gl
-    const make = (type: number, source: string) => {
-      const shader = g.createShader(type)!
-      shaders.push(shader)
-      g.shaderSource(shader, source)
-      g.compileShader(shader)
-      return shader
+    const source = films ? FRAGMENT_ROOM : FRAGMENT
+    const had = built.get(canvas)
+    if (had && had.source === source && !g.isContextLost()) {
+      // (this canvas has the program already, built or being built: see `built`)
+      program = had.program
+      shaders.push(...had.shaders)
+    } else {
+      const make = (type: number, text: string) => {
+        const shader = g.createShader(type)!
+        shaders.push(shader)
+        g.shaderSource(shader, text)
+        g.compileShader(shader)
+        return shader
+      }
+      program = g.createProgram()!
+      g.attachShader(program, make(g.VERTEX_SHADER, VERTEX))
+      g.attachShader(program, make(g.FRAGMENT_SHADER, source))
+      g.linkProgram(program)
+      built.set(canvas, { source, program, shaders: [...shaders] })
     }
-    program = g.createProgram()!
-    g.attachShader(program, make(g.VERTEX_SHADER, VERTEX))
-    g.attachShader(program, make(g.FRAGMENT_SHADER, FRAGMENT))
-    g.linkProgram(program)
     // where the driver can say "done" without being waited for, ask it now and then
     const parallel = g.getExtension('KHR_parallel_shader_compile')
     const ask = () => {
@@ -324,7 +374,7 @@ export function startJourney(parts: JourneyParts): () => void {
     }
     askTimer = window.setTimeout(ask, 0)
     // the mark's fields take a moment to work out: after this turn, beside the driver's own work
-    window.setTimeout(buildMark, 0)
+    if (!films) window.setTimeout(buildMark, 0)
   } else still()
 
   /* ------------------------------------------------------------------ the guide's picture of the gate and the river */
@@ -430,6 +480,17 @@ export function startJourney(parts: JourneyParts): () => void {
   /** Where the page has put the three boxes, as the shader counts: in screen heights, across from the middle
    *  of the stage and up from its bottom. (Layout offsets: the blocks' transforms do not move them.) */
   const place = { body: [0, 0.59, 0.43], gate: [0.095, 0.9, 0.555], gateX: 0, room: Infinity, free: 1, clear: 0 }
+  /** Where the hero is the room. The films' box, as the shader counts (its middle, half its width and half
+   *  its height), and how much of it melts into the page at either side; the drop's radius; where each film's
+   *  bulb hangs and how wide that film is drawn (`bulbs`, read off the films whenever the screen has changed);
+   *  and the lamp, which is at the bulb of the film that is in the box, or on its way from one to the next. */
+  const screen = { box: [0, 0.55, 0.43, 0.31], side: R.side as number, drop: 0.11, bulbs: [[-0.15, 0.78, 0.86]], lamp: [-0.15, 0.78, 0.86] }
+  /** Whether the column at the gate is shown (there is room for it): it has the call to action then, and the
+   *  header's own goes while the gate stands. */
+  let sideShown = false
+  /** Which film is in the box (-1: none, the box is not to be seen), and whether the films have been asked for. */
+  let filmIn = -1
+  let filmsAsked = false
 
   function measure() {
     held = hold.offsetHeight
@@ -441,6 +502,27 @@ export function startJourney(parts: JourneyParts): () => void {
       1 - (sculpture.offsetTop + sculpture.offsetHeight / 2) / sh,
       sculpture.offsetWidth / 2 / sh,
     ]
+    sideShown = !!side && getComputedStyle(side).display !== 'none'
+    if (films?.box) {
+      // the films' box is laid where the hero's layout has its place, under the canvas
+      const box = films.box
+      box.style.left = `${sculpture.offsetLeft}px`
+      box.style.top = `${sculpture.offsetTop}px`
+      box.style.width = `${sculpture.offsetWidth}px`
+      box.style.height = `${sculpture.offsetHeight}px`
+      screen.box = [place.body[0], place.body[1], place.body[2], sculpture.offsetHeight / 2 / sh]
+      // (a box that runs from edge to edge of the screen keeps its sides: the screen's edges are its own)
+      screen.side = sculpture.offsetWidth >= sw - 1 ? 0 : R.side
+      // (the drop is as large as it was when it carried the mark: a share of half the mark's width)
+      screen.drop = J.body.drop * 0.43 * Math.min(1, sw / sh)
+      // where the films' bulbs hang, now that the box is laid
+      const rect = stage.getBoundingClientRect()
+      const bulbs = films
+        .lights()
+        .filter((at) => at.width > 0)
+        .map((at) => [(at.x - rect.left - rect.width / 2) / sh, 1 - (at.y - rect.top) / sh, at.width / sh])
+      if (bulbs.length) screen.bulbs = bulbs
+    }
     place.gate = [door.offsetWidth / 2 / sh, 1 - door.offsetTop / sh, 1 - (door.offsetTop + door.offsetHeight) / sh]
     // (the gate's box is hung by its middle: its `left` is its middle line)
     place.gateX = (door.offsetLeft - sw / 2) / sh
@@ -624,6 +706,12 @@ export function startJourney(parts: JourneyParts): () => void {
     g.uniform3f(u.gate, place.gate[0], place.gate[1], place.gate[2])
     g.uniform1f(u.gateX, place.gateX)
     g.uniform1f(u.picture, pictured ? pictureIn : 0)
+    if (films) {
+      g.uniform3f(u.lamp, screen.lamp[0], screen.lamp[1], screen.lamp[2])
+      g.uniform4f(u.room, screen.box[0], screen.box[1], screen.box[2], screen.box[3])
+      g.uniform1f(u.drop, screen.drop)
+      g.uniform1f(u.roomSide, screen.side)
+    }
     if (!pictured && s > B.stand[0]) {
       if (traced) layWave(reduced.matches ? 0 : now / 1000)
       else layCourse(reduced.matches ? 0 : now / 1000)
@@ -653,7 +741,7 @@ export function startJourney(parts: JourneyParts): () => void {
     }
 
   /** With the guide's picture the closing words come as the guide has them come: with the river. */
-  const pictureBeats = { ...B, closing: J.picture.copy }
+  const pictureBeats = { ...B, closing: when.picture.copy }
 
   function frame(now: number) {
     const dt = Math.min(64, now - last || 16)
@@ -724,7 +812,7 @@ export function startJourney(parts: JourneyParts): () => void {
       })
 
     if (drawnS !== s) {
-      const beats = flat ? { ...B, ...J.stillBeats } : pictured ? pictureBeats : B
+      const beats = flat ? { ...B, ...when.stillBeats } : pictured ? pictureBeats : B
       // (the line leaves in the first half of the beat: the body fills with light in the second)
       const heroOut = smooth(0, 0.5, smooth(beats.heroOut[0], beats.heroOut[1], s))
       hero.style.opacity = String(smooth(beats.word[0], beats.word[1], s) * (1 - heroOut))
@@ -734,19 +822,84 @@ export function startJourney(parts: JourneyParts): () => void {
       const closingIn = smooth(beats.closing[0], beats.closing[1], s)
       // (when the journey holds, its words go out at once, before the river's light: other words come up
       // over them)
-      closing.style.opacity = String(closingIn * (1 - smooth(0.02, 0.3, dusk)))
+      const closingThere = closingIn * (1 - smooth(0.02, 0.3, dusk))
+      closing.style.opacity = String(closingThere)
+      // (with the films the closing has links in it: they can be used only while it is there)
+      if (films) closing.inert = closingThere < 0.6
       closing.style.setProperty('--in', closingIn.toFixed(4))
-      const headerIn = smooth(beats.header[0], beats.header[1], s)
+      // With the films the header is the call to action alone. It comes with the first film and stays for the
+      // rest of the page, but for the gate: there the column at the right has the call to action, where the
+      // header's would stand, so the header's goes as the gate comes to stand and is back when the journey's
+      // last picture goes out. (On a screen with no room for the column it simply stays.)
+      const forGate = films && sideShown ? smooth(beats.stand[0], beats.stand[1], s) * (1 - smooth(0.3, 0.6, dusk)) : 0
+      const headerIn = smooth(beats.header[0], beats.header[1], s) * (1 - forGate)
       header.style.opacity = String(headerIn)
       header.style.pointerEvents = headerIn > 0.6 ? 'auto' : 'none'
       header.inert = headerIn < 0.6
+    }
+
+    if (films?.box) {
+      // The room. Its box is there from the moment the lamp's light begins to reach until it has drawn back
+      // for the last time, and a film plays only while it is in the box.
+      // Which film: the first until the middle of the first change, then the next. (The shader has drawn the
+      // light back to the lamp by then: the box is dark while its film is changed.)
+      let which = 0
+      for (const turn of turns) if (s >= turn.at) which++
+      // (without a picture there is no lamp: the room comes and goes with the hero's words)
+      const shown = flat ? Number(hero.style.opacity) > 0.001 : drawing && s > roomOpen[0] - when.span(0.004) && s < roomShut[1] + when.span(0.004)
+      const film = shown ? which : -1
+      if (film !== filmIn) {
+        if (film < 0 !== filmIn < 0) films.box.style.visibility = shown ? 'visible' : 'hidden'
+        filmIn = film
+        films.show(film)
+      }
+      // The lamp hangs where the bulb of that film hangs, and goes over to the next bulb in the dark.
+      const bulbs = screen.bulbs
+      let lamp = bulbs[0]
+      turns.forEach((turn, i) => {
+        const to = bulbs[Math.min(bulbs.length - 1, i + 1)]
+        const over = smooth(turn.over[0], turn.over[1], s)
+        if (over > 0) lamp = lamp.map((v, k) => v + (to[k] - v) * over)
+      })
+      screen.lamp = lamp
+      if (drawnS !== s) {
+        // Each film's words come as its room opens and go as the light draws back from it: into focus and up
+        // a little, out of focus and on. (The first film's come with the hero and the last film's go with it:
+        // above.)
+        says.forEach((say, i) => {
+          const come = i === 0 ? 1 : smooth(turns[i - 1].wordsIn[0], turns[i - 1].wordsIn[1], s)
+          const go = i < turns.length ? smooth(turns[i].wordsOut[0], turns[i].wordsOut[1], s) : 0
+          const there = come * (1 - go)
+          const soft = (1 - come) * 12 + go * 10
+          const shift = (1 - come) * 14 - go * 10
+          for (const el of say) {
+            el.style.opacity = there.toFixed(3)
+            el.style.visibility = there > 0.001 ? '' : 'hidden'
+            el.style.filter = soft > 0.01 && there > 0.001 ? `blur(${soft.toFixed(2)}px)` : ''
+            el.style.transform = Math.abs(shift) > 0.01 ? `translate3d(0, ${shift.toFixed(2)}px, 0)` : ''
+          }
+        })
+        // (without a picture the box itself goes dark between two films)
+        if (flat) {
+          let lit = Number(hero.style.opacity)
+          for (const turn of turns) lit *= 1 - smooth(turn.shut[0], turn.shut[1], s) * (1 - smooth(turn.open[0], turn.open[1], s))
+          films.box.style.opacity = lit.toFixed(3)
+        }
+      }
+      // (The films are fetched once the page has been let go and its opening words stand still, or at the
+      // first scroll: a film's first frame makes the graphics process set up its decoder, which cost a late
+      // frame while the words were still coming into focus.)
+      if (!filmsAsked && state.opened && (now - state.openedAt > J.intro.delay + J.intro.focus + 400 || target > 0.01)) {
+        filmsAsked = true
+        films.fetch()
+      }
     }
 
     if (ready && active && gl && program) {
       if (!drawing && mayBegin(now)) begin()
       if (drawing) {
         // (fields that were not there for the first picture go with the next)
-        if (!markSent) sendMark()
+        if (!markSent && !films) sendMark()
         if (pictureSource && (target === current || s > B.heroOut[0])) sendPicture()
         if (pictureSent && pictureIn < 1) pictureIn = Math.min(1, pictureIn + dt / 240)
         paint(s, now)
@@ -760,6 +913,10 @@ export function startJourney(parts: JourneyParts): () => void {
 
   addEventListener('scroll', onScroll, { passive: true })
   addEventListener('resize', measure)
+  // (the films' box is laid by the script: it is laid again whenever the stage changes its size, which a
+  // scrollbar that comes or goes does without the window changing its own)
+  const sized = films ? new ResizeObserver(() => measure()) : null
+  sized?.observe(stage)
   // nothing is drawn while the journey is off screen
   const seen = new IntersectionObserver(([entry]) => {
     active = entry.isIntersecting
@@ -773,6 +930,7 @@ export function startJourney(parts: JourneyParts): () => void {
     cancelAnimationFrame(raf)
     window.clearTimeout(askTimer)
     seen.disconnect()
+    sized?.disconnect()
     removeEventListener('scroll', onScroll)
     removeEventListener('resize', measure)
     stage.removeEventListener('pointermove', onMove)
@@ -780,12 +938,18 @@ export function startJourney(parts: JourneyParts): () => void {
     window.removeEventListener('blur', onLeave)
     if (gl) {
       textures.forEach((t) => gl!.deleteTexture(t))
-      shaders.forEach((sh) => gl!.deleteShader(sh))
       if (buffer) gl.deleteBuffer(buffer)
-      if (program) gl.deleteProgram(program)
+      // (the program is not thrown away: it stays with its canvas, see `built`)
     }
     delete journey.dataset.webgl
     delete journey.dataset.shader
     delete journey.dataset.drawn
+    if (films?.box) {
+      films.show(-1)
+      films.box.style.visibility = ''
+      films.box.style.opacity = ''
+      journey.style.removeProperty('--room-stay')
+    }
+    for (const say of says) for (const el of say) el.removeAttribute('style')
   }
 }

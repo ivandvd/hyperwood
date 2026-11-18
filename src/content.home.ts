@@ -4,6 +4,17 @@
  * architecture paper ("Hyperwood: Architecture and Core Execution") and is a draft for approval.
  * The long read is the Architecture page (content.ts, content.sections.ts).
  */
+import type { FilmName } from './film/reel'
+import type { IconName } from './ui/icons'
+
+/** A link of the way around the site at the gate. `icon`: the small icon it shows under the pointer, in
+ *  place of the arrow (ui/icons.tsx). */
+export interface PanelLink {
+  label: string
+  href: string
+  icon?: IconName
+}
+
 export const BRAND = 'Hyperwood'
 
 export const home = {
@@ -13,8 +24,74 @@ export const home = {
   /** The opening words, one line each: the tagline, in its two lines. The lids close over them. */
   intro: ['Equity perps.', 'Private positions.'],
 
-  /** Under the word in the hero: the approved line. */
+  /** The approved line. It stands under the wordmark in the journey as it was before the films (?hero=mark), and
+   *  in the page's description (index.html). (With the films, the gate has a line of its own: `gate`.) */
   heroLine: 'Go long or short on stocks and indices. Zero-knowledge proofs verify settlement onchain.',
+
+  /** The hero: three films, one after another as the page is scrolled, and what is said on each. Read in
+   *  turn the three titles are one story, the story of a trade: what you do, what becomes of it, what settles
+   *  it. The gate's tagline (below) ends it.
+   *  `film` names the film (film/reel.ts). `shows` says what it shows, for those who cannot see it. `title`
+   *  is the sentence across the film's lower edge, in its two halves: one line on a wide screen, the halves one
+   *  under the other on an upright one. `note` is the smaller sentence under it. All a draft for approval: the
+   *  notes are the approved line and the page's own words, taken apart. */
+  films: [
+    {
+      film: 'board',
+      shows: 'A board boy on a ladder chalking prices onto a great blackboard, while a crowd of brokers below him shouts and waves order slips.',
+      title: ['Go long', 'or short.'],
+      note: 'Perpetuals on stocks and equity indices.',
+    },
+    {
+      film: 'booth',
+      shows: 'A broker alone in a lit telephone booth, writing down an order, while the floor of a 1920s stock exchange crowds past outside the glass.',
+      title: ['It stays', 'private.'],
+      note: 'Market, direction, size and entry stay sealed.',
+    },
+    {
+      film: 'seal',
+      shows: 'A settlement clerk pressing the seal into stock certificates at an iron press, while clerks and runners hurry past his desk.',
+      title: ['A proof', 'settles it.'],
+      note: 'Zero-knowledge proofs verify settlement onchain.',
+    },
+  ] satisfies { film: FilmName; shows: string; title: [string, string]; note: string }[],
+
+  /** At the gate, the way around the site, as the reference's side panel: two lists between two hairlines, in a
+   *  column at the right with the gate's line and the call to action under them, four and four as the
+   *  reference has them: the site's parts on the left; the channels and the docs on the right, each with its
+   *  icon. (The header's own list, below, belongs to the journey as it was before the films.)
+   *  Products opens the app on this page. Learn and Docs open the Architecture page, the long read, until
+   *  there are guides and docs of their own. Stake, and the channels, have no address yet (nothing in the
+   *  papers describes staking): until then each points to a part of the page that does not exist, so it goes
+   *  nowhere. Put the real address in its place (one beginning with https opens in a new tab). */
+  panel: [
+    [
+      { label: 'Products', href: '#app' },
+      { label: 'Markets', href: '#markets' },
+      { label: 'Learn', href: 'architecture/' },
+      { label: 'Stake', href: '#stake' },
+    ],
+    [
+      { label: 'X (Twitter)', href: '#x', icon: 'x' },
+      { label: 'Discord', href: '#discord', icon: 'discord' },
+      { label: 'Telegram', href: '#telegram', icon: 'telegram' },
+      { label: 'Docs', href: 'architecture/', icon: 'docs' },
+    ],
+  ] as PanelLink[][],
+
+  /** At the gate, which is the page's hero: its tagline and the line beside it, over the call to action. A
+   *  draft for approval. The tagline is two sentences, a line each: the first heavy, the second light and set
+   *  in, as the reference sets the two lines of its own. It is as large as the reference's where the room
+   *  beside the gate allows: the shorter its widest line, the larger it can be (the page measures it:
+   *  Journey.tsx). Each sentence is given in its two halves: on an upright screen, with no room beside the
+   *  gate, the halves stand one under the other, four lines across the screen. */
+  gate: {
+    title: [
+      ['Trade', 'the market.'],
+      ['Privately,', 'anytime.'],
+    ],
+    line: 'A confidential network for stocks and indices, designed for you to trade privately.',
+  },
 
   /** At the gate: what leaves the engine, and what does not. The two sentences are one title; each stands on
    *  its side of the gate with its note under it. Every part is a line there (on a phone they run on). */

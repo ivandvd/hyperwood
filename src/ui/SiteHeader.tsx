@@ -1,5 +1,6 @@
 /**
- * Site header: the horizontal lockup from the brand kit, in Hyper Neon, fixed for the whole page.
+ * Site header: the horizontal lockup (the kit's symbol, and the word outlined from the kit's typeface:
+ * scripts/brand/lockup.py), in Hyper Neon, fixed for the whole page.
  * Over the hero it is the lockup alone, so the opening stays clean. Once the film hands over to the page it
  * becomes a bar on Ink with the links and the call to action. On the landing page the lockup takes you back
  * to the top; on the Architecture page it takes you home.
@@ -9,7 +10,7 @@ import { content } from '../content'
 import { sections } from '../content.sections'
 import { restartExperience } from '../scroll/useScrollTimeline'
 import { glideTo } from './glide'
-import lockup from '../assets/brand/hyperwood-horizontal-neon.svg'
+import lockup from '../assets/brand/hyperwood-lockup-neon.svg'
 import kit from '../sections/kit.module.css'
 import styles from './SiteHeader.module.css'
 
