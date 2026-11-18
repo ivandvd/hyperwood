@@ -45,6 +45,7 @@
  */
 import { config } from '../config'
 import { markTiming, roomTiming } from './timing'
+import { EXCHANGE as EX } from './exchange'
 
 /** A number as GLSL wants a float written. */
 const f = (n: number) => (Number.isInteger(n) ? n.toFixed(1) : String(n))
@@ -439,7 +440,151 @@ const ROOM_THROUGH = /* glsl */ `  // ---------------- the room. The lamp's ligh
 
 `
 
-const fragment = (room: boolean) => {
+/** The gate as the doorway of a stock exchange of our own (?gate=exchange): its pictures (exchange.ts). */
+const EXCHANGE_UNIFORMS = /* glsl */ `// ---------------------------------------------------------------- the exchange
+// its four pictures (exchange.ts), and how far they have come in (0 until the page has them)
+uniform sampler2D exBase;
+uniform sampler2D exDoor;
+uniform sampler2D exGlow;
+uniform sampler2D exSpace;
+uniform float exchange;
+// a light as the pictures keep it, back to itself
+float exLight( float v ) { return ( exp2( v * ${f(Math.log2(1 + EX.encode))} ) - 1. ) / ${f(EX.encode)}; }
+
+`
+
+/** The exchange, in place of the guide's gate. Its moments are the picture's: as the picture would take over, the
+ *  doors open (the doorway's light reaches out); as its river would arrive, the river pours: down the steps first,
+ *  then over the street, where it is the guide's river as the page had it. */
+const exchangeScene = (PT: Omit<typeof config.journey.picture, 'mix' | 'arrive' | 'out' | 'copy'> & { mix: readonly [number, number]; arrive: readonly [number, number] }) => {
+  const span = PT.arrive[1] - PT.arrive[0]
+  const open: [number, number] = [PT.mix[0], PT.mix[1] + span * 0.3]
+  const steps: [number, number] = [PT.arrive[0] - span * 0.1, PT.arrive[0] + span * 0.25]
+  const street: [number, number] = [PT.arrive[0] + span * 0.18, PT.arrive[1] + span * 0.05]
+  // (the guide's picture: its doorway's foot, up from its bottom edge, in its heights; the CSS gives its doorway
+  // 1.603 times its breadth of height, and the picture is as tall as the screen or 0.62512 of its width)
+  const melFoot = PT.arch[0] + PT.arch[1] - 1.603 * 2 * PT.arch[1]
+  // (how much broader the river is at the steps' foot than at their top; the guide's river's half breadth just
+  // under its doorway, where it is half lit, in its picture's heights (measured: 294 of its 1536 rows across); and
+  // how far under the steps' foot it opens out to that breadth, in the same heights)
+  const SPREAD = 1.35
+  const GUIDE_RIVER_HALF = 0.0957
+  const OPEN = 0.08
+  return /* glsl */ `  // ---------------- the exchange: the gate is the doorway of a stock exchange (exchange.ts). Its pictures are laid
+  // by the gate (the doorway on the gate, at its size). First the doorway's light reaches out over the steps, the
+  // columns and the wet street, and the building comes out of the night with it; then the river pours out of the
+  // doorway, down the steps and away over the street. (Nothing of it is worked out before the doors begin to open:
+  // till then it is not on the screen.)
+  if ( exchange > .001 && s > ${f(open[0] - 0.003)} ) {
+    // where a point of the screen lies in the pictures (across, and up from their bottom edge: 0 to 1)
+    float exH = ( gate.y - gate.z ) / ${f(EX.doorway.top - EX.doorway.foot)};
+    vec2 exAt = vec2( .5 + ( a.x - gateX ) / ( exH * ${f(EX.aspect)} ), ${f(EX.doorway.foot)} + ( a.y - gate.z ) / exH );
+    float within = step( 0., exAt.x ) * step( exAt.x, 1. ) * step( 0., exAt.y ) * step( exAt.y, 1. );
+    float exV = exAt.y;
+    exAt.y = 1. - exAt.y;
+    float stoneL = exLight( texture2D( exBase, exAt ).r ) * within;
+    float doorL = exLight( texture2D( exDoor, exAt ).r ) * within;
+    float glowL = exLight( texture2D( exGlow, exAt ).r ) * within;
+    vec2 place = texture2D( exSpace, exAt ).rg;
+    float along = mix( 1., place.r, within );
+    float off = mix( 4., place.g * 4., within );
+    // The doors open: the doorway's light reaches out from its foot (how far, in doorway half breadths), with a
+    // soft front, and the night's stone comes up with it.
+    float opened = ss( ${beat(open)}, s );
+    float fromFoot = length( vec2( a.x - gateX, ( a.y - gate.z ) * 1.25 ) ) / gate.x;
+    float spread = opened * 56.;
+    float doorLit = 1. - ss( spread * .45, spread + .001, fromFoot );
+    // (the night's stone is faint: the building is seen by the doorway's light, and the night only shows its outline)
+    float night = ss( .15, 1., opened );
+    vec3 scene = mix( cInk, vec3( .6, .61, .58 ), .36 * pow( clamp( stoneL * 2.4, 0., 1. ), .85 ) * night );
+    // (the doorway's light on it: on the line from the stone to Neon, never paler; where it is faint, the stone
+    // keeps its own grey)
+    scene = mix( scene, cNeon, ss( .03, .72, 1. - exp( -doorL * 10. ) ) * doorLit );
+    // The river, out of the doorway and down the steps along its course in the pictures (0 at the doorway).
+    // Liquid light: full Neon along its middle, a shade deeper towards its margins, with bands that drift along it
+    // as it flows; its glow on the air, and its light on the steps about it. Down the steps it spreads a little,
+    // its edges clean, and each riser under it is a shade deeper than the treads, so it runs down the steps and
+    // does not lie over them. At their foot the guide's river takes it on, as broad (below); only without the
+    // guide's picture does this one run on over the street too.
+    float front = mix( -.03, ${f(EX.alongSteps + 0.02)}, ss( ${beat(steps)}, s ) ) + ( 1. - picture ) * ${f(1.03 - EX.alongSteps - 0.02)} * ss( ${beat(street)}, s );
+    // (once at the steps' foot it runs on a little under the guide's river, which covers its end)
+    front = mix( front, ${f(EX.alongSteps + 0.14)}, ss( ${f(EX.alongSteps)}, ${f(EX.alongSteps + 0.02)}, front ) * picture );
+    float poured = 1. - ss( front - .015, front, along );
+    // (the steps' foot is a level line across the screen: under it the guide's river comes in over a few pixels,
+    // and this one goes out a little further down, so the one is whole before the other goes. Its course turns
+    // as it leaves the steps: under the guide's river it runs straight on instead, as broad as at the steps' foot,
+    // since by its course its end slanted across the seam and bent away to the side)
+    float melH = max( 1., .62512 * res.x / res.y );
+    float stepsFoot = gate.z - ${f(EX.doorway.foot - EX.stepsFoot)} * exH;
+    float handOver = ss( -.001 * melH, .009 * melH, stepsFoot - a.y );
+    poured *= 1. - ss( .004 * melH, .014 * melH, stepsFoot - a.y ) * picture;
+    off = mix( off, abs( a.x - gateX ) / ( ${f(EX.footBreadth)} * exH ), ss( -.0005 * melH, .0005 * melH, stepsFoot - a.y ) * picture );
+    float offR = off / ( 1. + ${f(SPREAD - 1)} * ss( ${f(EX.alongPorch)}, ${f(EX.alongSteps)}, along ) * picture );
+    float level = 1. - .34 * ss( .05, .95, offR );
+    level -= .1 * ( .5 + .5 * sin( along * 70. - time * 1.3 + offR * 2.5 ) ) * ss( .2, .7, offR );
+    // (which risers of the steps a point is on: they are level lines across the pictures)
+    float pxV = .5 / ( exH * res.y );
+    float riser = 0.;
+    ${EX.risers.map(([top, foot]) => `riser += ss( ${f(foot)} - pxV, ${f(foot)} + pxV, exV ) - ss( ${f(top)} - pxV, ${f(top)} + pxV, exV );`).join('\n    ')}
+    level -= .16 * riser;
+    vec3 riverC = mix( cInk, cNeon, clamp( level, 0., 1. ) );
+    // (its light is strong on the wet street about it, and faint on the building, which stays black and white)
+    float onStreet = 1. - step( 3.95, off );
+    float ownLight = mix( 1., 1. - ss( ${f(EX.alongSteps)}, ${f(EX.alongSteps + 0.05)}, along ), picture );
+    scene = mix( scene, cNeon, ss( .06, .85, 1. - exp( -glowL * 4. ) ) * mix( .25, 1., onStreet ) * poured * ownLight );
+    scene = mix( scene, cNeon, .22 * exp( -max( offR - .9, 0. ) * 2.2 ) * ( 1. - .4 * riser ) * poured );
+    scene = mix( scene, riverC, ( 1. - ss( .8, .96, offR ) ) * poured );
+    // The river as it was: the guide's painted river, laid at the size the page gave it, its doorway's foot at the
+    // steps' foot (its doorway itself is the exchange's, up the steps, and is left out). It comes in from that
+    // foot downward and ripples as it runs, as before. It begins as broad as the river coming down the steps, and
+    // opens out to its own breadth as it comes onto the street, as water does at the foot of a flight of steps.
+    if ( picture > .001 ) {
+      float narrow = clamp( ${f(0.88 * SPREAD * EX.footBreadth)} * exH / ( ${f(GUIDE_RIVER_HALF)} * melH ), .2, 1. );
+      float opening = mix( narrow, 1., ss( 0., ${f(OPEN)} * melH, stepsFoot - a.y ) );
+      vec2 tex = vec2( .5 + ( a.x - gateX ) / ( melH * ${f(PT.size[0] / PT.size[1])} * opening ), ${f(melFoot)} + ( a.y - stepsFoot ) / melH );
+      // (the guide's ripple, number for number: none at its foot, more and more down the river)
+      float riverDepth = clamp( ( .48 - tex.y ) / .48, 0., 1. );
+      float riverWeight = ss( 0., .65, riverDepth );
+      float travel = riverDepth * 8.5 - time * .48;
+      float meander = .048 * sin( travel ) + .022 * sin( riverDepth * 15. - time * .31 + 1.4 );
+      float breathing = 1. + riverWeight * .065 * sin( riverDepth * 10. - time * .38 );
+      tex.x = .5 + ( tex.x - .5 ) / breathing + meander * riverWeight;
+      tex.y += .012 * sin( riverDepth * 12. - time * .48 ) * riverWeight;
+      tex.x += .006 * sin( riverDepth * 24. - time * .85 ) * riverWeight;
+      float over = abs( tex.x - .5 ) - ${f(0.5 - PT.margin)};
+      if ( over > 0. ) tex.x = .5 + sign( tex.x - .5 ) * ( .5 - ${f(PT.margin)} * exp( -over / ${f(PT.margin)} ) );
+      // (read through a small blur: the painting carries a grain of its own, which broke its edges into specks)
+      vec2 grain = vec2( ${f(1.6 / PT.size[0])}, ${f(1.6 / PT.size[1])} );
+      vec2 melAt = vec2( tex.x, 1. - tex.y );
+      vec3 art = .25 * ( texture2D( portalTex, melAt + grain * vec2( .9, .4 ) ).rgb + texture2D( portalTex, melAt + grain * vec2( -.4, .9 ) ).rgb
+        + texture2D( portalTex, melAt + grain * vec2( -.9, -.4 ) ).rgb + texture2D( portalTex, melAt + grain * vec2( .4, -.9 ) ).rgb );
+      art *= step( 0., tex.y ) * step( tex.y, 1. );
+      // (its front begins at its foot, wholly above it, and runs down: nothing of it shows before it pours)
+      float revealFront = mix( ${f(melFoot + PT.feather)}, ${f(PT.front[1])}, ss( ${beat(street)}, s ) );
+      float artReveal = ss( revealFront - ${f(PT.feather)}, revealFront + ${f(PT.feather)}, tex.y );
+      float lightOf = clamp( ( dot( art, vec3( .3, .59, .11 ) ) * artReveal - ${f(PT.light[0])} ) / ${f(PT.light[1] - PT.light[0])}, 0., 1. );
+      lightOf = pow( lightOf, ${f(PT.light[2])} );
+      lightOf *= 1. - ${f(PT.tone[0])} * ss( ${f(PT.tone[1])}, ${f(PT.tone[2])}, art.b - art.r );
+      // (only below its doorway's foot: it begins there, as the river coming down the steps ends)
+      lightOf *= handOver;
+      scene = mix( scene, cNeon, lightOf * picture );
+    }
+    // The gate stays the doorway's own light, crisp over the pictures, and glows on the air about it as the
+    // films' bulb glows: a close bright rim and a broad soft fall, so the doorway is the building's light and not
+    // laid on it. (No grain over the pictures: they are to be smooth.) The pictures take the screen over as the
+    // doors begin to open.
+    float gateIn = ( 1. - ss( -1.2 / res.y, 1.2 / res.y, gateD ) ) * square;
+    float awayD = max( gateD, 0. ) / gate.x;
+    float bloom = .42 * exp( -awayD / .16 ) + .14 * exp( -awayD / 1.1 );
+    scene = mix( scene, cNeon, mix( halo, bloom, opened ) * ( 1. - gateIn ) );
+    scene = mix( scene, result, gateIn );
+    result = mix( result, scene, exchange * ss( ${f(open[0] - 0.003)}, ${f(open[0])}, s ) );
+  }
+
+`
+}
+
+const fragment = (room: boolean, exchange = false) => {
   // (what both heroes have in common reads its moments from the journey it is in: timing.ts)
   const when = room ? roomTiming : markTiming
   const L = { ...config.journey.lids, ...when.lids }
@@ -498,7 +643,7 @@ vec3 tone( float v ) {
   return mix( c, cHot, ss( .9, 1., v ) );
 }
 
-${room ? ROOM_UNIFORMS : MARK_FUNCS}// ---------------------------------------------------------------- the current
+${room ? ROOM_UNIFORMS : MARK_FUNCS}${exchange ? EXCHANGE_UNIFORMS : ''}// ---------------------------------------------------------------- the current
 // (the error function, to three places and without an exponential: the light of a soft band over a length of it)
 float erf_( float x ) {
   float ax = abs( x );
@@ -657,7 +802,7 @@ ${room ? ROOM_LAMP : ''}  // ---------------- the floor before the gate: the gat
     }
   }
 
-  // ---------------- the gate and the river, as the guide draws them: one painted picture. It is laid by the gate
+${exchange ? exchangeScene(PT) : `  // ---------------- the gate and the river, as the guide draws them: one painted picture. It is laid by the gate
   // (its doorway on the gate, at the gate's size), takes the screen over from the gate drawn above, and is
   // revealed from the gate downward. Below the gate it ripples, so the river runs. Its colours are read as
   // the brand's one light: Neon where the picture is light, Ink where it is dark.
@@ -709,7 +854,7 @@ ${room ? ROOM_LAMP : ''}  // ---------------- the floor before the gate: the gat
     result = mix( result, mix( cInk, cNeon, lightOf ), taken );
   }
 
-${room ? ROOM_THROUGH : MARK_BODY}${room ? '' : MARK_POINTER}  // ---------------- the lids, over everything: Ink behind them until they have shut, the drop after
+`}${room ? ROOM_THROUGH : MARK_BODY}${room ? '' : MARK_POINTER}  // ---------------- the lids, over everything: Ink behind them until they have shut, the drop after
   vec3 behind = mix( cInk, result, step( ${f(L.part[0])}, s ) );
   result = mix( behind, lidColor, lid );
 ${room ? `  seen = mix( mix( 1., seen, step( ${f(L.part[0])}, s ) ), 1., lid );\n` : ''}
@@ -723,3 +868,5 @@ ${room ? `  seen = mix( mix( 1., seen, step( ${f(L.part[0])}, s ) ), 1., lid );\
 export const FRAGMENT = fragment(false)
 /** The journey with the room as its hero: the films, and the lamp that is their bulb. */
 export const FRAGMENT_ROOM = fragment(true)
+/** The same, with the gate as the doorway of a stock exchange (?gate=exchange). */
+export const FRAGMENT_ROOM_EXCHANGE = fragment(true, true)

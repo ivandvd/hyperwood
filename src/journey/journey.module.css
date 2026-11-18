@@ -148,6 +148,28 @@
   --door-gap: calc(0.065 * var(--art-h));
   --closing-level: 0.4;
 }
+/* The exchange (?gate=exchange): the gate is the doorway in its pictures (src/journey/exchange.ts), which are
+   2.1 times as wide as tall: as tall as the screen, or taller where the screen is wider than they are (so they
+   reach its sides), their top at the screen's top. The doorway's top lies 0.2818 of their height down, and its
+   breadth is 0.0839 of it. */
+.journey[data-gate='exchange']:not([data-wave]) {
+  --art-h: max(calc(100 * var(--stage-1)), calc(100vw / 2.1));
+  --door-top: calc(0.2818 * var(--art-h));
+  --door-width: calc(0.0839 * var(--art-h));
+}
+/* Beside the exchange the tagline has the room up to the building's outer columns (0.222 of the pictures'
+   height from the doorway's middle), less a gap; it may be as tall as from the doorway's top to the foot of the
+   steps (0.36 of their height). */
+@media (min-aspect-ratio: 1001/1000) and (min-width: 561px) {
+  .journey[data-gate='exchange']:not([data-wave]) .tagline {
+    --room: calc(49.7vw - 8px - 0.222 * var(--art-h) - 0.02 * var(--art-h) - var(--lead-in));
+    --tag-size: min(
+      clamp(42px, max(7.55vw, calc(11.517vw - 57.1px)), 8.542vw),
+      calc(var(--room) / (var(--tag-w, 8.8) + 0.06)),
+      calc(0.36 * var(--art-h) / (var(--tag-h) - 0.065))
+    );
+  }
+}
 /* the first course (?wave=old) keeps the words where they stood with it: level with the gate's middle, and
    closer to it */
 .journey[data-wave='old'] { --closing-level: 0.5; }
@@ -296,6 +318,24 @@
   /* (the light halves keep a little more apart: at 0.8 the y of "Privately," came down onto the e of
      "anytime.") */
   .tagline > span[data-light] > [data-part] + [data-part] { margin-top: 0.07em; }
+}
+/* The exchange on an upright screen: its pictures are only as tall as lets the whole building stand within the
+   screen's width (it is 0.53 of their height wide, the steps' blocks included), and no taller than 62
+   hundredths of the stage; they stand low, the doorway's top 0.58 of their height above the stage's foot, so
+   the river runs off the bottom and the building stands under the tagline, which keeps 16 px clear of its
+   pediment (0.222 of their height above the doorway's top). */
+@media (max-aspect-ratio: 1/1), (max-width: 560px) {
+  .journey[data-gate='exchange']:not([data-wave]) {
+    --art-h: min(calc((100vw - 2 * var(--edge)) / 0.56), calc(62 * var(--stage-1)));
+    --door-top: calc(100 * var(--stage-1) - 0.58 * var(--art-h));
+  }
+  .journey[data-gate='exchange']:not([data-wave]) .tagline {
+    --tag-size: min(
+      calc((100vw - 2 * var(--edge)) / (var(--tag-w2, 5) + 0.06)),
+      calc((var(--door-top) - 0.222 * var(--art-h) - 16px - var(--title-top)) / var(--tag-h)),
+      128px
+    );
+  }
 }
 
 /* with the guide's picture the closing words come as the guide has them come: they rise */

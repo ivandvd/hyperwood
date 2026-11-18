@@ -33,7 +33,8 @@ import { milestone } from '../utils/milestone'
 import type { OpeningSource } from '../ui/opening'
 import wordmarkFile from '../assets/brand/hyperwood-wordmark-neon.svg?raw'
 import type { FilmStackHandle } from '../film/FilmStack'
-import { FRAGMENT, FRAGMENT_ROOM, VERTEX } from './shader'
+import { FRAGMENT, FRAGMENT_ROOM, FRAGMENT_ROOM_EXCHANGE, VERTEX } from './shader'
+import { EXCHANGE_PICTURES } from './exchange.pictures'
 import { buildMarkField, type MarkField } from './markField'
 import { markTiming, roomTiming } from './timing'
 
@@ -133,8 +134,13 @@ export function startJourney(parts: JourneyParts): () => void {
    *  also stands in if the picture does not come. (journey.module.css gives each its gate and its words.) */
   const asked = new URLSearchParams(window.location.search).get('wave')
   const traced = asked !== 'old'
+  /** The gate as the doorway of a stock exchange of our own, when the address asks for it (?gate=exchange): its
+   *  pictures stand in for the guide's (exchange.ts, shader.ts "the exchange"). Only with the films. */
+  const exchanged = !!films && new URLSearchParams(window.location.search).get('gate') === 'exchange'
+  // (the exchange keeps the guide's river: it runs on from the foot of the exchange's steps)
   let pictured = asked !== 'old' && asked !== 'traced'
-  if (!pictured) journey.dataset.wave = traced ? 'traced' : 'old'
+  if (!pictured && !exchanged) journey.dataset.wave = traced ? 'traced' : 'old'
+  if (exchanged) journey.dataset.gate = 'exchange'
   let disposed = false
 
   /* ------------------------------------------------------------------ WebGL: asked for, never waited for */
@@ -158,6 +164,12 @@ export function startJourney(parts: JourneyParts): () => void {
   let typeTexture: WebGLTexture | null = null
   let markTexture: WebGLTexture | null = null
   let portalTexture: WebGLTexture | null = null
+  /** The exchange's pictures: their textures, the pictures once they have come and been read, how many the driver
+   *  has, and how far they have come in. */
+  const exchangeTextures: WebGLTexture[] = []
+  const exchangeSources: (TexImageSource | null)[] = [null, null, null, null]
+  let exchangeSent = 0
+  let exchangeIn = 0
   /** The guide's picture, once it has come and been read; whether the driver has it; and how far it has
    *  come in. */
   let pictureSource: TexImageSource | null = null
@@ -308,7 +320,7 @@ export function startJourney(parts: JourneyParts): () => void {
     const corner = g.getAttribLocation(program, 'corner')
     g.enableVertexAttribArray(corner)
     g.vertexAttribPointer(corner, 2, g.FLOAT, false, 0, 0)
-    for (const name of ['res', 'time', 'progress', 'pointer', 'pointerActive', 'typeTex', 'typeReady', 'markTex', 'markReady', 'body', 'gate', 'course', 'traced', 'pieces', 'gateX', 'flow', 'picture', 'portalTex', 'cInk', 'cNeon', 'cHot', 'cLime', 'cMoss', 'cDeep', 'lamp', 'room', 'drop', 'roomSide', 'lens'])
+    for (const name of ['res', 'time', 'progress', 'pointer', 'pointerActive', 'typeTex', 'typeReady', 'markTex', 'markReady', 'body', 'gate', 'course', 'traced', 'pieces', 'gateX', 'flow', 'picture', 'portalTex', 'cInk', 'cNeon', 'cHot', 'cLime', 'cMoss', 'cDeep', 'lamp', 'room', 'drop', 'roomSide', 'lens', 'exchange', 'exBase', 'exDoor', 'exGlow', 'exSpace'])
       u[name] = g.getUniformLocation(program, name)
     const P = J.palette
     g.uniform3fv(u.cInk, rgb(P.ink))
@@ -325,7 +337,14 @@ export function startJourney(parts: JourneyParts): () => void {
     g.uniform1i(u.markTex, 1)
     portalTexture = texture(2)
     g.uniform1i(u.portalTex, 2)
-    g.uniform1f(u.flow, pictured ? 0 : 1)
+    g.uniform1f(u.flow, pictured || exchanged ? 0 : 1)
+    if (exchanged) {
+      const names = ['exBase', 'exDoor', 'exGlow', 'exSpace'] as const
+      names.forEach((name, i) => {
+        exchangeTextures.push(texture(3 + i))
+        g.uniform1i(u[name], 3 + i)
+      })
+    }
     // (the address ?drop=lens: the drop as the films' lamp out of focus, grainy: shader.ts, "the lamp")
     g.uniform1f(u.lens, new URLSearchParams(window.location.search).get('drop') === 'lens' ? 1 : 0)
     journey.dataset.shader = ''
@@ -345,7 +364,7 @@ export function startJourney(parts: JourneyParts): () => void {
 
   if (gl) {
     const g = gl
-    const source = films ? FRAGMENT_ROOM : FRAGMENT
+    const source = films ? (exchanged ? FRAGMENT_ROOM_EXCHANGE : FRAGMENT_ROOM) : FRAGMENT
     const had = built.get(canvas)
     if (had && had.source === source && !g.isContextLost()) {
       // (this canvas has the program already, built or being built: see `built`)
@@ -383,6 +402,8 @@ export function startJourney(parts: JourneyParts): () => void {
     if (disposed || !pictured) return
     pictured = false
     pictureSource = null
+    // (the exchange has a river of its own to fall back on: shader.ts)
+    if (exchanged) return
     journey.dataset.wave = 'traced'
     if (gl && program && ready) {
       gl.useProgram(program)
@@ -411,6 +432,55 @@ export function startJourney(parts: JourneyParts): () => void {
     }
     img.onerror = fallBack
     img.src = J.picture.url
+  }
+  if (exchanged && gl) {
+    const order = [EXCHANGE_PICTURES.base, EXCHANGE_PICTURES.door, EXCHANGE_PICTURES.glow, EXCHANGE_PICTURES.space]
+    order.forEach((url, i) => {
+      const img = new Image()
+      img.decoding = 'async'
+      img.onload = () => {
+        if (disposed) return
+        const keep = (source: TexImageSource) => {
+          if (!disposed) exchangeSources[i] = source
+        }
+        if (typeof createImageBitmap === 'function')
+          createImageBitmap(img).then(
+            (bitmap) => keep(bitmap),
+            () => keep(img),
+          )
+        else keep(img)
+      }
+      img.src = url
+    })
+  }
+  /** The exchange's pictures, handed to the driver one a frame (a few milliseconds each), as the guide's is. */
+  const sendExchange = () => {
+    if (!gl || exchangeSent >= 4 || exchangeTextures.length < 4) return
+    const source = exchangeSources[exchangeSent]
+    if (!source) return
+    const g = gl
+    g.activeTexture(g.TEXTURE3 + exchangeSent)
+    g.bindTexture(g.TEXTURE_2D, exchangeTextures[exchangeSent])
+    g.pixelStorei(g.UNPACK_FLIP_Y_WEBGL, false)
+    // (the three lights are grey: with WebGL 2 each is kept as one channel and with its smaller copies, so the
+    // page reads it smoothly where it is drawn smaller than it is; the river's place is read as it is)
+    const light = exchangeSent < 3 && gl2 !== null
+    try {
+      if (light && gl2) gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.R8, gl2.RED, gl2.UNSIGNED_BYTE, source)
+      else g.texImage2D(g.TEXTURE_2D, 0, g.RGBA, g.RGBA, g.UNSIGNED_BYTE, source)
+    } catch {
+      // (a picture the page may not read: the gate stands alone)
+      exchangeSent = 9
+      return
+    }
+    if (light && gl2) {
+      gl2.generateMipmap(gl2.TEXTURE_2D)
+      gl2.texParameteri(gl2.TEXTURE_2D, gl2.TEXTURE_MIN_FILTER, gl2.LINEAR_MIPMAP_LINEAR)
+    }
+    if (typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap) source.close()
+    exchangeSources[exchangeSent] = null
+    exchangeSent++
+    if (exchangeSent === 4 && reduced.matches) exchangeIn = 1
   }
   /** The picture is handed to the driver while the screen stands still (it takes a few milliseconds), or at
    *  the latest as the gate begins to gather. */
@@ -706,13 +776,14 @@ export function startJourney(parts: JourneyParts): () => void {
     g.uniform3f(u.gate, place.gate[0], place.gate[1], place.gate[2])
     g.uniform1f(u.gateX, place.gateX)
     g.uniform1f(u.picture, pictured ? pictureIn : 0)
+    if (exchanged) g.uniform1f(u.exchange, exchangeSent === 4 ? exchangeIn : 0)
     if (films) {
       g.uniform3f(u.lamp, screen.lamp[0], screen.lamp[1], screen.lamp[2])
       g.uniform4f(u.room, screen.box[0], screen.box[1], screen.box[2], screen.box[3])
       g.uniform1f(u.drop, screen.drop)
       g.uniform1f(u.roomSide, screen.side)
     }
-    if (!pictured && s > B.stand[0]) {
+    if (!pictured && !exchanged && s > B.stand[0]) {
       if (traced) layWave(reduced.matches ? 0 : now / 1000)
       else layCourse(reduced.matches ? 0 : now / 1000)
       g.uniform3fv(u.course, course)
@@ -812,7 +883,7 @@ export function startJourney(parts: JourneyParts): () => void {
       })
 
     if (drawnS !== s) {
-      const beats = flat ? { ...B, ...when.stillBeats } : pictured ? pictureBeats : B
+      const beats = flat ? { ...B, ...when.stillBeats } : pictured || exchanged ? pictureBeats : B
       // (the line leaves in the first half of the beat: the body fills with light in the second)
       const heroOut = smooth(0, 0.5, smooth(beats.heroOut[0], beats.heroOut[1], s))
       hero.style.opacity = String(smooth(beats.word[0], beats.word[1], s) * (1 - heroOut))
@@ -902,6 +973,8 @@ export function startJourney(parts: JourneyParts): () => void {
         if (!markSent && !films) sendMark()
         if (pictureSource && (target === current || s > B.heroOut[0])) sendPicture()
         if (pictureSent && pictureIn < 1) pictureIn = Math.min(1, pictureIn + dt / 240)
+        if (exchanged && exchangeSent < 4 && (target === current || s > B.heroOut[0])) sendExchange()
+        if (exchangeSent === 4 && exchangeIn < 1) exchangeIn = Math.min(1, exchangeIn + dt / 240)
         paint(s, now)
         frames++
         if (frames === 1) milestone('journey-first-frame')
@@ -944,6 +1017,7 @@ export function startJourney(parts: JourneyParts): () => void {
     delete journey.dataset.webgl
     delete journey.dataset.shader
     delete journey.dataset.drawn
+    delete journey.dataset.gate
     if (films?.box) {
       films.show(-1)
       films.box.style.visibility = ''
