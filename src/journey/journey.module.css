@@ -232,6 +232,8 @@
 .logo { --logo: calc(160 / 7.974 * var(--u)); position: absolute; left: var(--lead-in); top: calc(44.8 * var(--u) - 0.739 * var(--logo)); display: block; }
 .logo img { display: block; height: var(--logo); width: auto; }
 .logo:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 6px; }
+/* (with the logo that stays, a try: it stands in this one's place, so this one is not shown: SwimLogo.tsx) */
+.journey[data-logo] .logo { display: none; }
 .side { position: absolute; top: calc(24 * var(--u)); right: var(--gut); width: calc((100% - 2 * var(--gut) - 2 * var(--gap)) / 3); }
 /* the way around: two lists between two hairlines, the right one shorter */
 .panel {

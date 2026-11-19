@@ -33,6 +33,7 @@ import { milestone } from '../utils/milestone'
 import type { OpeningSource } from '../ui/opening'
 import wordmarkFile from '../assets/brand/hyperwood-wordmark-neon.svg?raw'
 import type { FilmStackHandle } from '../film/FilmStack'
+import { SHAPE } from '../film/reel'
 import { FRAGMENT, FRAGMENT_ROOM, FRAGMENT_ROOM_EXCHANGE, VERTEX, roomFragmentWith } from './shader'
 import { EXCHANGE_PICTURES } from './exchange.pictures'
 import { buildMarkField, MARK_FLOW, type MarkField } from './markField'
@@ -113,10 +114,13 @@ export interface JourneyParts {
   /** The column at the gate, with the way around the site and the call to action (not shown on a screen
    *  with no room for it). */
   side?: HTMLElement
+  /** The logo that stays at the upper left after the hero (a try: SwimLogo.tsx). It comes as the closing comes,
+   *  in the hero's own logo's place, and does not go with it. */
+  logo?: HTMLElement
 }
 
 export function startJourney(parts: JourneyParts): () => void {
-  const { journey, stage, canvas, header, intro, lines, hero, sculpture, word, closing, door, hold, films, says = [], side } = parts
+  const { journey, stage, canvas, header, intro, lines, hero, sculpture, word, closing, door, hold, films, says = [], side, logo } = parts
   const J = config.journey
   /** When things happen: the journey as it was made, or carried over into the room's longer one (timing.ts). */
   const when = films ? roomTiming : markTiming
@@ -126,8 +130,23 @@ export function startJourney(parts: JourneyParts): () => void {
   const turns = films ? roomTiming.room.turns : []
   const roomOpen = roomTiming.room.open
   const roomShut = roomTiming.room.shut
-  // (the room's journey is longer by its films' stay: journey.module.css makes the section that much taller)
-  if (films) journey.style.setProperty('--room-stay', String(R.stay))
+  /** A try (?films=after): the films come after the hero (landing/FilmBlock.tsx) and the journey has none. It is
+   *  the room's journey with the films' stretch left out: from where the lamp's light would begin to open the
+   *  first room to where it has drawn back from the last. On either side of that stretch the picture is the same
+   *  (the lamp hangs where the drop stood, in the middle of the eye, `measure`, and no room is open), so the
+   *  journey goes on from the one end of it to the other as one picture, and its section is that much shorter.
+   *  (The scroll is eased first and then carried over the gap: `along`.) The header's call to action comes as the
+   *  light runs into the mark, not with a first film. */
+  const filmsAfter = !!films && new URLSearchParams(window.location.search).get('films') === 'after'
+  const skipped = filmsAfter ? roomShut[1] - roomOpen[0] : 0
+  const along = (eased: number) => {
+    const s = eased * (1 - skipped)
+    return s < roomOpen[0] ? s : s + skipped
+  }
+  const headerAfter: readonly [number, number] = [roomShut[1] + 0.003, roomShut[1] + 0.04]
+  // (the room's journey is longer by its films' stay: journey.module.css makes the section that much taller; without
+  // the films it is shorter by their stretch)
+  if (films) journey.style.setProperty('--room-stay', String(filmsAfter ? (1 + R.stay) * (1 - skipped) - 1 : R.stay))
   const reduced = matchMedia('(prefers-reduced-motion: reduce)')
   /** How the river is drawn. As the guide draws it: one painted picture, laid by the gate (config.journey.
    *  picture). Or, when the address ends in ?wave=traced or ?wave=old, one of the two earlier currents, which
@@ -620,6 +639,12 @@ export function startJourney(parts: JourneyParts): () => void {
         .filter((at) => at.width > 0)
         .map((at) => [(at.x - rect.left - rect.width / 2) / sh, 1 - (at.y - rect.top) / sh, at.width / sh])
       if (bulbs.length) screen.bulbs = bulbs
+      // (no films: the lamp hangs where the drop stood, in the middle of the eye, as large as the first film's
+      // bulb would be, the film covering the box)
+      if (filmsAfter) {
+        const wide = sculpture.offsetWidth / Math.max(1, sculpture.offsetHeight) > SHAPE
+        screen.bulbs = [[0, 0.5, (wide ? sculpture.offsetWidth : sculpture.offsetHeight * SHAPE) / sh]]
+      }
     }
     place.gate = [door.offsetWidth / 2 / sh, 1 - door.offsetTop / sh, 1 - (door.offsetTop + door.offsetHeight) / sh]
     // (the gate's box is hung by its middle: its `left` is its middle line)
@@ -847,12 +872,14 @@ export function startJourney(parts: JourneyParts): () => void {
     last = now
     current += (target - current) * (reduced.matches ? 1 : 1 - Math.exp(-dt / J.ease))
     if (Math.abs(target - current) < 0.00002) current = target
-    const s = current
+    const s = filmsAfter ? along(current) : current
     // the light stays while what follows comes up over it, then goes out: the stage is Ink before it leaves
     if (dusk !== duskAim) {
       dusk = reduced.matches ? duskAim : dusk + (duskAim - dusk) * (1 - Math.exp(-dt / 70))
       if (Math.abs(duskAim - dusk) < 0.0005) dusk = duskAim
-      stage.style.setProperty('--dusk', smooth(0.1, 0.66, dusk).toFixed(3))
+      // (with the films after the hero, the light goes out sooner: within the first quarter of the hold, so the river
+      // is dark before the films' box comes up across it)
+      stage.style.setProperty('--dusk', (filmsAfter ? smooth(0, 0.26, dusk) : smooth(0.1, 0.66, dusk)).toFixed(3))
       // (the closing words go first: see below)
       drawnS = -1
     }
@@ -921,19 +948,26 @@ export function startJourney(parts: JourneyParts): () => void {
       const closingIn = smooth(beats.closing[0], beats.closing[1], s)
       // (when the journey holds, its words go out at once, before the river's light: other words come up
       // over them)
-      const closingThere = closingIn * (1 - smooth(0.02, 0.3, dusk))
+      const closingThere = closingIn * (1 - (filmsAfter ? smooth(0, 0.12, dusk) : smooth(0.02, 0.3, dusk)))
       closing.style.opacity = String(closingThere)
       // (with the films the closing has links in it: they can be used only while it is there)
       if (films) closing.inert = closingThere < 0.6
       closing.style.setProperty('--in', closingIn.toFixed(4))
+      // (the logo that stays comes with the closing, where the closing's own would be, and stays)
+      if (logo) {
+        logo.style.opacity = String(closingIn)
+        logo.style.pointerEvents = closingIn > 0.6 ? 'auto' : 'none'
+        logo.inert = closingIn < 0.6
+      }
       // With the films the header is the call to action alone. It comes with the first film and stays for the
       // rest of the page, but for the gate: there the column at the right has the call to action, where the
       // header's would stand, so the header's goes as the gate comes to stand and is back when the journey's
       // last picture goes out. (On a screen with no room for the column it simply stays. With the exchange at the
       // right it stays where the bar has its row, being the last thing in it; where the bar has only the button
       // that opens the way around, it gives way to that button, which stands in its place.)
-      const forGate = films && gives ? smooth(beats.stand[0], beats.stand[1], s) * (1 - smooth(0.3, 0.6, dusk)) : 0
-      const headerIn = smooth(beats.header[0], beats.header[1], s) * (1 - forGate)
+      const forGate = films && gives ? smooth(beats.stand[0], beats.stand[1], s) * (1 - (filmsAfter ? smooth(0.1, 0.24, dusk) : smooth(0.3, 0.6, dusk))) : 0
+      const headerAt = filmsAfter ? headerAfter : beats.header
+      const headerIn = smooth(headerAt[0], headerAt[1], s) * (1 - forGate)
       header.style.opacity = String(headerIn)
       header.style.pointerEvents = headerIn > 0.6 ? 'auto' : 'none'
       header.inert = headerIn < 0.6
@@ -947,7 +981,7 @@ export function startJourney(parts: JourneyParts): () => void {
       let which = 0
       for (const turn of turns) if (s >= turn.at) which++
       // (without a picture there is no lamp: the room comes and goes with the hero's words)
-      const shown = flat ? Number(hero.style.opacity) > 0.001 : drawing && s > roomOpen[0] - when.span(0.004) && s < roomShut[1] + when.span(0.004)
+      const shown = !filmsAfter && (flat ? Number(hero.style.opacity) > 0.001 : drawing && s > roomOpen[0] - when.span(0.004) && s < roomShut[1] + when.span(0.004))
       const film = shown ? which : -1
       if (film !== filmIn) {
         if (film < 0 !== filmIn < 0) films.box.style.visibility = shown ? 'visible' : 'hidden'

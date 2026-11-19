@@ -1,0 +1,53 @@
+/* The statement after the films (Statement.tsx), laid out as the reference lays out its own (bulk.trade): one screen
+   of the page's Ink, the words at the upper left, level with the films' lines above, and the steps under them,
+   flush with the screen's left edge. The screen (.frame) is held while the page is scrolled 0.9 of a screen more:
+   the section is 1.9 screens tall (after.module.css begins the page's hairlines under it). */
+.statement { position: relative; height: 190vh; height: 190svh; margin: 0 calc(-1 * var(--edge)); }
+.frame { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; overflow: hidden; }
+
+/* The words: five lines, the first three light and the last two heavy, each on a line of its own. As large as the
+   reference's (3.8 hundredths of the width, up to 60 px at 1580 px and growing in step with the width above 1905),
+   and no larger than lets the longest line (--st-w ems) stand within 76 hundredths of the width. Each rises into
+   place with the scroll (Statement.tsx writes its opacity and its offset). */
+.words {
+  --st-size: min(clamp(28px, 3.8vw, max(60px, 3.15vw)), calc(76vw / (var(--st-w, 23) + 0.04)));
+  position: relative; padding: clamp(72px, 12vh, 130px) var(--edge) 0;
+  font-family: var(--font-display); font-size: var(--st-size); line-height: 1.38; letter-spacing: -0.02em;
+}
+.words p { margin: 0; white-space: nowrap; opacity: 0; will-change: transform, opacity; }
+.light { font-weight: 400; color: color-mix(in srgb, var(--hw-paper) 70%, var(--hw-ink)); }
+.heavy { font-weight: 700; color: var(--hw-white); }
+
+/* The steps: they take what is left of the screen under the words, flush with its left edge, and reach two thirds of
+   the way across, the shortest at the top. Each is two layers: a faint light that is always there, a little brighter
+   towards its far end, and its fill, Ink at the left brightening into Hyper Neon at its front, which the scroll draws
+   out from the left (Statement.tsx). */
+.steps { position: relative; flex: 1; min-height: 0; margin-top: 40px; display: flex; flex-direction: column; align-items: flex-start; width: calc(200% / 3); }
+.step { position: relative; flex: 1; }
+.step:nth-child(1) { width: 45%; }
+.step:nth-child(2) { width: 72%; }
+.step:nth-child(3) { width: 100%; }
+.step i, .step b { position: absolute; inset: 0; }
+.step i { background: linear-gradient(to right, rgba(204, 255, 0, 0), rgba(204, 255, 0, 0.055)); }
+/* (Where two steps meet between two rows of pixels, each would cover only part of that row, and the dark would show
+   through as a line between them. So a fill reaches a pixel down under the step below it, which is drawn over it and
+   is always filled at least as far; and the three are drawn together, as one picture (none is a layer of its own:
+   layers are put on the screen each to its own whole pixel, and the line came back between two of them at 150%).) */
+.step b {
+  bottom: -1px;
+  background: linear-gradient(to right, color-mix(in srgb, var(--hw-neon) 16%, var(--hw-ink)), var(--hw-neon));
+  transform-origin: left center; transform: scaleX(0);
+}
+
+/* A screen with no room for that (upright, or narrower than 1024 px): the lines run on as they need to, and the
+   steps reach across the whole width at the foot, up to three tenths of the screen. */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .words { --st-size: clamp(28px, 7.2vw, 54px); padding-top: clamp(80px, 14vh, 140px); line-height: 1.16; }
+  .words p { white-space: normal; text-wrap: balance; }
+  .words p + p { margin-top: 0.1em; }
+  .steps { flex: 0 1 30vh; flex: 0 1 30svh; width: 100%; margin-top: auto; padding-top: 24px; }
+}
+/* (under reduced motion the words stand there; the steps still fill with the scroll, which is the reader's own doing) */
+@media (prefers-reduced-motion: reduce) {
+  .words p { opacity: 1 !important; transform: none !important; }
+}

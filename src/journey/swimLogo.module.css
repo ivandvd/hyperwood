@@ -1,0 +1,23 @@
+/* The logo that stays at the upper left (SwimLogo.tsx): where the hero has its own and as large (journey.module.css,
+   .logo: the lockup 160 of the design's pixels wide, its word's baseline 44.8 down, 39 in from the left; on a
+   screen without the bar's row, 20 px tall level with the call to action, 17 on a phone). timeline.ts brings it in
+   with the hero. The lockup is 7.974 times as wide as tall, and its mark is the first 0.2806 of its width: the word
+   is the lockup with that covered, and the mark is drawn over its place, in a canvas with room about it for the
+   wave (SwimLogo.tsx: ROOM). */
+.logo {
+  --u: max(1px, calc(100vw / 1440));
+  --logo: calc(160 / 7.974 * var(--u));
+  position: fixed; z-index: 10; left: calc(39 * var(--u)); top: calc(44.8 * var(--u) - 0.739 * var(--logo));
+  display: block; width: calc(7.974 * var(--logo)); height: var(--logo);
+  opacity: 0; pointer-events: none; /* timeline.ts takes both over */
+}
+.logo:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 6px; }
+.word { position: absolute; left: 0; top: 0; display: block; height: 100%; width: auto; clip-path: inset(0 0 0 31%); }
+.swim { position: absolute; left: calc(-0.1 * var(--logo)); top: calc(-0.3 * var(--logo)); width: calc(2.4373 * var(--logo)); height: calc(1.6 * var(--logo)); display: block; pointer-events: none; }
+
+@media (max-width: 1023px), (max-aspect-ratio: 1/1), (max-height: 520px) {
+  .logo { --logo: 20px; left: var(--edge); top: calc(var(--header-top) + (42px - var(--logo)) / 2); }
+}
+@media (max-width: 480px) {
+  .logo { --logo: 17px; }
+}

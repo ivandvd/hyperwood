@@ -34,6 +34,7 @@ import { ScrambleLink } from '../ui/ScrambleLink'
 import { startJourney } from './timeline'
 import { Header } from './Header'
 import { Menu } from './Menu'
+import { SwimLogo } from './SwimLogo'
 import s from './journey.module.css'
 
 /** The films in the order of their story, and what each shows. */
@@ -49,6 +50,14 @@ const shows = Object.fromEntries(home.films.map((film) => [film.film, film.shows
  *  (journey.module.css, "the hero with the exchange at the right".) */
 const asked = new URLSearchParams(window.location.search)
 const sided = asked.get('gate') === 'exchange' && asked.get('layout') === 'right'
+/** Another (the address ?films=after): the films come after the hero (landing/FilmBlock.tsx), and the journey goes
+ *  from the opening eye straight on to the gate. Its box for the films stays, empty: the light still counts by it
+ *  (timeline.ts). */
+const filmsAfter = asked.get('films') === 'after'
+/** A try on that (the address &logo=swim, with the films after the hero and the exchange at the right): the hero's
+ *  logo stays at the upper left for the rest of the page, its mark swimming while the page is scrolled
+ *  (SwimLogo.tsx), and the films' block has no card (landing/FilmBlock.tsx). */
+const swimLogo = sided && filmsAfter && asked.get('logo') === 'swim'
 /** The bar's links: the site's parts and the docs; and the channels, which it shows as their icons. */
 const ways = [...home.panel[0], ...home.panel[1].filter((link) => link.icon === 'docs')]
 const channels = home.panel[1].filter((link) => link.icon && link.icon !== 'docs')
@@ -131,6 +140,7 @@ export function Journey({ films = true }: { films?: boolean }) {
   const says = useRef<HTMLDivElement>(null)
   const side = useRef<HTMLElement>(null)
   const tagline = useRef<HTMLHeadingElement>(null)
+  const swimmer = useRef<HTMLAnchorElement>(null)
 
   // The large words are measured whenever they are put into the page, and again when a typeface has come: so
   // they are fitted however they came to be there (a part of the page that is built anew is measured like the
@@ -175,6 +185,7 @@ export function Journey({ films = true }: { films?: boolean }) {
         films: films ? stack.current! : undefined,
         says: films ? (Array.from(says.current!.children) as HTMLElement[]).map((say) => [say]) : undefined,
         side: side.current ?? undefined,
+        logo: swimmer.current ?? undefined,
       }),
     [films],
   )
@@ -241,15 +252,18 @@ export function Journey({ films = true }: { films?: boolean }) {
       className={s.journey}
       data-hero={films ? 'room' : undefined}
       data-layout={films && sided ? 'right' : undefined}
+      data-logo={films && swimLogo ? 'swim' : undefined}
       aria-label={home.label}
     >
       <span ref={hold} className={s.hold} aria-hidden="true" />
       <div ref={stage} className={s.stage}>
         {/* (the films lie under the picture: timeline.ts lays their box where the hero's layout has its place) */}
-        {films && <FilmStack ref={stack} className={s.room} films={story} labels={shows} />}
+        {films && <FilmStack ref={stack} className={s.room} films={filmsAfter ? [] : story} labels={shows} />}
         <canvas ref={canvas} className={s.light} aria-hidden="true" />
         {/* (the header lies on the page itself, so it can stay over the sections after the journey) */}
         {createPortal(<Header ref={header} only={films ? 'launch' : undefined} row={films && sided} />, document.body)}
+        {/* (the logo that stays, with that try: it lies on the page itself too) */}
+        {films && swimLogo && createPortal(<SwimLogo ref={swimmer} />, document.body)}
         <p ref={intro} className={s.intro}>
           {home.intro.map((line) => (
             <span key={line}>{line} </span>
@@ -261,7 +275,7 @@ export function Journey({ films = true }: { films?: boolean }) {
             {/* (the name is here to be read out: what is seen of the brand is the logo, at the closing) */}
             <h1 className={s.name}>{BRAND}</h1>
             <div ref={putSays} className={s.says}>
-              {home.films.map((film) => (
+              {(filmsAfter ? [] : home.films).map((film) => (
                 <div key={film.film} className={s.say}>
                   {/* (one line on a wide screen, its two halves one under the other on an upright one) */}
                   <p className={s.sayLine}>

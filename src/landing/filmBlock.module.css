@@ -1,0 +1,121 @@
+/* The films after the hero (FilmBlock.tsx), laid out as the reference lays out its first screen (bulk.trade; the
+   film page's measures, film/filmHero.module.css), in the page's three columns: the box of film over the first
+   two, the film's two lines large across its lower edge, and what the film means in the third column, level with
+   the lines' foot. The block is held on the screen (.frame) for --travel of scrolling, while the scroll moves the
+   films on (FilmBlock.tsx); the page's hairlines begin under it (after.module.css).
+
+   Up to 1440 px wide the page's own pixels are used; wider screens enlarge it in step with their width: --u is
+   one pixel of the 1440 design. */
+.block {
+  --u: max(1px, calc(100vw / 1440));
+  --frame-h: max(100vh, calc(560 * var(--u)));
+  --travel: 240vh;
+  position: relative; height: calc(var(--frame-h) + var(--travel));
+}
+@supports (height: 100svh) {
+  .block { --frame-h: max(100svh, calc(560 * var(--u))); --travel: 240svh; }
+}
+
+.frame {
+  --top: calc(80 * var(--u));
+  /* the lines: the reference's tagline size, 7.55 hundredths of the width up to 1440, then growing with it */
+  --hl: clamp(42px, max(7.55vw, calc(11.517vw - 57.1px)), 8.542vw);
+  /* The two lines stand close, as the reference's do, a little further apart than its 0.8: these words hang a k
+     and a y below the first line, and none of them may touch a tall letter of the second. */
+  --lead: 0.95;
+  --indent: 0.95em;
+  /* how far the lines reach up over the film's lower edge, where it melts into the page */
+  --lap: calc(0.225 + (var(--lead) - 0.8) / 2);
+
+  position: sticky; top: 0; height: var(--frame-h);
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: var(--top) minmax(0, 1fr) auto;
+  padding-bottom: calc(40 * var(--u));
+  color: var(--hw-white); font-family: var(--font-text); font-synthesis: none;
+}
+
+/* ------------------------------------------------------------------ the box of film: the first two columns, less
+   the step in from the second column's line, its foot under the lines' first. In it the three films in one place,
+   twice: sharp, with its edges faded (edges.module.css), and smeared, along the edges. The scroll brings each in
+   and takes it out (FilmBlock.tsx writes their opacity and offset). */
+.film { grid-area: 2 / 1 / 3 / 3; position: relative; z-index: 1; overflow: hidden; margin: 0 var(--in, 20px) calc(-1 * var(--lap) * var(--hl)) 0; }
+.rail { position: absolute; inset: 0; }
+.slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; visibility: hidden; will-change: transform, opacity; }
+/* The lamp: the bulbs' light between two films (FilmBlock.tsx lays it, sizes it and writes how bright it is). It
+   has the bulbs' own fall, measured on the finished films (config.journey.room.light: full Neon to 0.015 of the
+   film's width from the middle, half at 0.042, a faint tail to 0.15), and adds its light to the film's, so the
+   two together are one light as the one goes out and the other comes. */
+.lamp {
+  position: absolute; left: 0; top: 0; z-index: 2; visibility: hidden; pointer-events: none; will-change: transform, opacity;
+  background: radial-gradient(closest-side, #ccff00 0%, #ccff00 9.7%, rgba(204, 255, 0, 0.5) 28%, rgba(204, 255, 0, 0.14) 47%, rgba(204, 255, 0, 0.025) 67%, rgba(204, 255, 0, 0) 100%);
+  mix-blend-mode: plus-lighter;
+}
+/* The film fills its frame. Where the frame is wider than the film, the film loses height at the foot (where the
+   passing hats are), so the bulb never rises into the smeared edge. */
+.picture { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; }
+
+/* ------------------------------------------------------------------ the film's two lines, across the box's lower
+   edge and over it: the first heavy, the second light and set in. Each film's stand in one place; the scroll
+   brings the one whose film is in the box (FilmBlock.tsx writes their opacity and offset). */
+.titles { grid-area: 3 / 1 / 4 / 3; position: relative; z-index: 2; display: grid; }
+.title {
+  grid-area: 1 / 1; margin: 0; visibility: hidden;
+  font-family: var(--font-display); font-size: var(--hl); font-weight: 800; line-height: var(--lead); letter-spacing: -0.03em;
+  will-change: transform, opacity;
+}
+.title span { display: block; white-space: nowrap; }
+.title span + span { margin-left: var(--indent); font-weight: 400; }
+
+/* ------------------------------------------------------------------ the third column, from the film's top, set in
+   from the column's line, laid out as the second reference lays out its markets (hyperliquid's): the mark on its
+   card (MarkTile.tsx: a card 1.75 times as wide as it is tall), and what the film means (a line, and
+   under it a few). Each film's words stand in one place, the one whose film the box shows seen (FilmBlock.tsx
+   writes their opacity and offset). */
+.side { grid-area: 2 / 3 / 4 / 4; align-self: start; display: flex; flex-direction: column; align-items: flex-start; padding: 0 0 0 var(--in, 20px); }
+.tile { position: relative; flex: none; width: min(100%, calc(188 * var(--u))); aspect-ratio: 1.75; border-radius: calc(24 * var(--u)); background: var(--hw-neon); overflow: hidden; }
+.tile canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.says { display: grid; margin-top: calc(60 * var(--u)); }
+/* With the logo that stays (a try: FilmBlock.tsx), there is no card: the words stand where it stood, and the
+   column reaches down to the title's foot, where three facts stand between hairlines, the last hairline on the
+   title's baseline (--hl's 0.0925 above its box's foot, in this typeface at this leading). Each fact is its label,
+   in the bar's capitals, and what it is; a target says it is one. */
+.side[data-logo] { align-self: stretch; }
+.side[data-logo] .says { margin-top: 0; }
+.factsStack { display: grid; align-self: stretch; margin: auto 0 calc(0.0925 * var(--hl)); }
+.facts { grid-area: 1 / 1; visibility: hidden; will-change: transform, opacity; margin: 0; padding: 0; border-top: 1px solid rgba(244, 245, 240, 0.16); }
+.facts div { display: flex; justify-content: space-between; align-items: baseline; gap: calc(16 * var(--u)); padding: calc(13 * var(--u)) 0; border-bottom: 1px solid rgba(244, 245, 240, 0.16); }
+.facts dt { font-family: var(--font-mono); font-size: calc(12 * var(--u)); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 245, 240, 0.5); white-space: nowrap; }
+.facts dd { margin: 0; font-size: calc(15 * var(--u)); font-weight: 500; letter-spacing: -0.01em; color: var(--hw-white); text-align: right; }
+.facts dd span { color: rgba(244, 245, 240, 0.5); font-weight: 400; }
+/* (where the call to action stands in the bar's row, 39 of the design's pixels in from the right, as the logo is
+   from the left: header.module.css, the facts under it end where it ends) */
+@media (min-aspect-ratio: 1001/1000) and (min-width: 1024px) and (min-height: 521px) {
+  .factsStack { margin-right: calc(39 * var(--u) - var(--edge)); }
+}
+.say { grid-area: 1 / 1; visibility: hidden; will-change: transform, opacity; }
+.lede { margin: 0; max-width: 16.5em; font-size: calc(26 * var(--u)); font-weight: 500; line-height: 1.2; letter-spacing: -0.02em; text-wrap: balance; color: var(--hw-white); }
+.body { margin: calc(16 * var(--u)) 0 0; max-width: 31ch; font-size: clamp(15px, calc(17 * var(--u)), 26px); line-height: 1.45; letter-spacing: -0.006em; text-wrap: pretty; color: rgba(244, 245, 240, 0.66); }
+
+/* ------------------------------------------------------------------ one column: a tablet held upright, a phone.
+   The film runs from edge to edge, showing the slice with its subject in it (reel.ts); under it the lines, and
+   under them what the film means. */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .frame {
+    /* (the widest line, "Pick a side." set in, is about 6 of these wide) */
+    --hl: min(calc((100vw - 2 * var(--edge)) / 6.3), 112px);
+    --top: 72px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--top) minmax(0, 1fr) auto auto;
+    padding-bottom: 28px;
+  }
+  .film { grid-area: 2 / 1; margin: 0 calc(-1 * var(--edge)) calc(-1 * var(--lap) * var(--hl)); }
+  .picture { object-position: var(--at, 50%) 50%; }
+  .titles { grid-area: 3 / 1; }
+  /* (no room for the tile here: the words and the call to action under the lines) */
+  .side { grid-area: 4 / 1; padding: 18px 0 0; }
+  .tile { display: none; }
+  /* (nor for the facts: they would take the film's room) */
+  .factsStack { display: none; }
+  .says { margin-top: 0; }
+  .lede { max-width: 22em; font-size: 19px; }
+  .body { margin-top: 8px; max-width: 36ch; font-size: 15px; }
+}

@@ -9,6 +9,9 @@
 }
 .rules { position: absolute; inset: 0 var(--edge); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); pointer-events: none; }
 .rules i { border-left: 1px solid var(--rule); }
+/* (with the films first, ?films=after: the hairlines begin under them, a screen held for 2.4 more of scrolling
+   (filmBlock.module.css), and the statement after them, a screen held for 0.9 more (statement.module.css)) */
+.after[data-films] .rules { top: calc(max(100vh, calc(560 * max(1px, 100vw / 1440))) + 240vh + 190vh); top: calc(max(100svh, calc(560 * max(1px, 100vw / 1440))) + 240svh + 190svh); }
 .after > section { position: relative; }
 
 /* ---------------- the app: three columns, each a line, a short text and a film; the outer two a step lower */

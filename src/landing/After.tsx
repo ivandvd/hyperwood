@@ -18,7 +18,9 @@ import { CloseScreen, Phone, TradeScreen } from '../app/Phone'
 import { Reel } from './reel/Reel'
 import { orderFilm, payoutFilm, phonesFilm, sealedFilm } from './reel/films'
 import { OrderSet, PayoutSet, PhonesSet, SealedSet } from './reel/sets'
+import { FilmBlock } from './FilmBlock'
 import { Reveal } from './Reveal'
+import { Statement } from './Statement'
 import { useSeen } from './useSeen'
 import s from './after.module.css'
 
@@ -28,13 +30,20 @@ const films = [
   { film: payoutFilm, set: <PayoutSet /> },
 ]
 
+/** A try (the address ?films=after): the three films come after the hero, as the reference shows its own
+ *  (FilmBlock.tsx), then the statement (Statement.tsx), and the journey has none (timeline.ts). Only with the
+ *  films' hero. */
+const filmsAfter = new URLSearchParams(window.location.search).get('films') === 'after'
+
 export function After() {
   const [board, boardSeen] = useSeen<HTMLDivElement>(0.02)
   const M = home.markets
   const P = home.mobile
   const N = home.network
   return (
-    <div className={s.after}>
+    <div className={s.after} data-films={filmsAfter ? 'after' : undefined}>
+      {filmsAfter && <FilmBlock />}
+      {filmsAfter && <Statement />}
       <div className={s.rules} aria-hidden="true">
         <i />
         <i />

@@ -56,6 +56,66 @@ export const home = {
     },
   ] satisfies { film: FilmName; shows: string; title: [string, string]; note: string }[],
 
+  /** The films after the hero instead (the address ?films=after: landing/FilmBlock.tsx), in the same order, as the
+   *  same story of a trade: what you do, that it stays yours, what settles it. `title`: its two lines, the first
+   *  heavy and the second light, large across the film's lower edge. Beside it, under the mark's tile, `lede`: the
+   *  one thing to know, and `body`: what it means, in the page's own words (the papers' as the rest of the page has
+   *  them). A draft for approval. The first lede's oil, FX and markets that never close are the client's to confirm:
+   *  the papers name stocks and equity indices, each with its own sessions. */
+  filmsAfter: [
+    {
+      film: 'board',
+      title: ['Pick a stock.', 'Pick a side.'],
+      lede: 'Equities, the S&P 500, oil, FX and more, on markets that never close.',
+      body: 'Perpetuals on stock prices and equity indices. Go long or short with the size, leverage and limit price you set.',
+      facts: [
+        { label: 'Gas', value: 'ETH' },
+        { label: 'New markets', value: 'Listed with an ETH bond' },
+        { label: 'On close', value: 'Cash or the stock' },
+      ],
+    },
+    {
+      film: 'booth',
+      title: ['No one sees', 'your trade.'],
+      lede: 'Market, side, size, entry and PnL stay sealed.',
+      body: 'Your position lives inside a protected engine. What reaches the network is a commitment and a proof, never the position itself.',
+      facts: [
+        { label: 'Order book', value: 'No public depth' },
+        { label: 'Your fills', value: 'Encrypted receipts' },
+        { label: 'Market stats', value: 'Aggregated and delayed' },
+      ],
+    },
+    {
+      film: 'seal',
+      title: ['Every trade,', 'proven.'],
+      lede: 'Settled onchain, verified by zero-knowledge proofs.',
+      body: 'Every order is matched in the engine and checked by a public contract, on a Layer 3 that settles to Robinhood Chain and Ethereum.',
+      facts: [
+        { label: 'Blocks', value: '250 ms', target: true },
+        { label: 'Order feedback', value: 'Under 1 s', target: true },
+        { label: 'To a verified proof', value: '5 to 12 s', target: true },
+      ],
+    },
+  ] satisfies {
+    film: FilmName
+    title: [string, string]
+    lede: string
+    body: string
+    /** (with the logo that stays, a try: three short facts at the foot of the third column, level with the
+     *  title's foot, each a label and what it is. Only what the papers say; `target`: one of the papers' targets,
+     *  and said to be one, as the papers insist) */
+    facts: { label: string; value: string; target?: boolean }[]
+  }[],
+
+  /** After those films (the address ?films=after: landing/Statement.tsx): the statement, in five lines, the first
+   *  three light and the last two heavy, said as the reference says its own (bulk.trade: what it combines, what it
+   *  is, its qualities, who it is for). Each line stands on a line of its own on a wide screen, so keep them about
+   *  this long (the page sizes them so that the longest fits). Only what the papers say. A draft for approval. */
+  statement: {
+    light: ['We combine a confidential trading engine', 'with settlement anyone can verify.', 'Hyperwood is private trading for public markets.'],
+    heavy: ['Sealed. Matched. Proven.', 'Built for traders who keep their book closed.'],
+  },
+
   /** At the gate, the way around the site, as the reference's side panel: two lists between two hairlines, in a
    *  column at the right with the gate's line and the call to action under them, four and four as the
    *  reference has them: the site's parts on the left; the channels and the docs on the right, each with its
