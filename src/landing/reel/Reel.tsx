@@ -14,6 +14,7 @@
  * runs only while it is on screen, and for a reader who does not want motion it stands on one chosen moment.
  */
 import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
+import { whenStill } from '../still'
 import s from './reel.module.css'
 
 /** Where the camera is at a moment. Whatever a key leaves out runs on from the keys about it.
@@ -173,10 +174,17 @@ export function Reel({ film, label, ahead = 0, children }: Props) {
     measure()
     show(still.matches ? film.still : ahead % film.length)
     watch.observe(el)
+    // Off screen a reel is not laid out at all (reel.module.css), and laying its two sets out takes the page's
+    // thread several frames on a phone. Left to the browser that happens as the reader comes near, which on the
+    // landing page is while the journey's light goes to the gate: so it is done at a still moment before.
+    const laid = whenStill(() => {
+      el.dataset.laid = ''
+    })
     addEventListener('resize', resize)
     document.addEventListener('visibilitychange', run)
     still.addEventListener('change', rest)
     return () => {
+      laid()
       watch.disconnect()
       removeEventListener('resize', resize)
       document.removeEventListener('visibilitychange', run)

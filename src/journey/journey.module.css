@@ -360,3 +360,125 @@
   .journey:not([data-wave]) .aside.left { transform: translate3d(calc((1 - var(--in, 1)) * 12px), 0, 0); }
   .journey:not([data-wave]) .aside.right { transform: translate3d(calc((1 - var(--in, 1)) * -12px), 0, 0); }
 }
+
+/* The hero with the exchange at the right (the address ?gate=exchange&layout=right: a try beside the arrangement
+   above, Journey.tsx). The exchange stands at the right, and everything said stands in one column: the tagline,
+   the line, the call to action. Across the top a bar: the logo, and at the right the way around the site with the
+   header's call to action at its end, which stands there for the whole page (header.module.css).
+   - A screen wider than tall, 1024 px and up, has all of it.
+   - An upright screen has the bar as the logo and a button that opens the way around, the call to action with
+     it (Menu.tsx); the column stands across the screen and the exchange under it.
+   - Any other screen (a phone on its side) has that bar, over the arrangement above without its column. */
+.bar, .pitch { display: none; }
+.lede { display: contents; }
+/* (the place the bar keeps at its row's end for the header's call to action: the same button, not to be seen,
+   in the header's own measures, which header.module.css tells the page) */
+.spare { display: flex; visibility: hidden; --launch-height: var(--row-call-height); --launch-pad: var(--row-call-pad); --launch-type: var(--row-call-type); }
+@media (min-aspect-ratio: 1001/1000) and (min-width: 1024px) and (min-height: 521px) {
+  /* The exchange: its doorway three quarters of the way across. Its pictures are a fifth taller than the screen,
+     so the building is larger than where it stands in the middle, and never so large that the blocks beside its
+     steps (0.276 of the pictures' height either side of the doorway's middle) come nearer the screen's edge than
+     the gutter. It stands a little lower, so the bar has clear sky over its roof. */
+  .journey[data-layout='right'][data-gate='exchange']:not([data-wave]) {
+    --art-h: min(calc(120 * var(--stage-1)), calc((25vw - 36px) / 0.276));
+    --door-left: 75%;
+    --door-top: calc(0.2818 * var(--art-h) + 3 * var(--stage-1));
+  }
+  /* The bar's row, where the reference has its own way around: the site's parts in the capitals the column had
+     them in, a size smaller; a hairline; the channels, each as its icon; the call to action. Its middle is the
+     logo's (40 of the design's pixels down), which sets the capitals on the logo's baseline, and it ends as far
+     from the screen's edge as the logo begins from the other. Either side of the hairline there is as much room
+     as between two links: a link shows an arrow after its word under the pointer, which needs it. (An icon's
+     drawing does not fill its box: the first begins 2.5 of the design's pixels in, and the room before it is
+     set by the drawing.) */
+  .journey[data-layout='right'] .bar {
+    display: flex; align-items: center; gap: calc(30 * var(--u));
+    position: absolute; right: var(--lead-in); top: calc(40 * var(--u)); transform: translateY(-50%);
+  }
+  .ways ul {
+    display: flex; gap: calc(30 * var(--u)); list-style: none; margin: 0; padding: 0;
+    font-family: var(--font-mono); font-size: calc(12 * var(--u)); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1;
+    color: var(--on);
+  }
+  .channels { display: flex; gap: calc(22 * var(--u)); list-style: none; margin: 0; padding: 0 0 0 calc(27.5 * var(--u)); border-left: 1px solid var(--rule); }
+  .channels a { display: block; width: calc(16 * var(--u)); height: calc(16 * var(--u)); color: var(--on); transition: color 0.2s linear; }
+  .channels a:hover, .channels a:focus-visible { color: var(--hw-neon); }
+  .channels a:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 5px; }
+  .channels svg { display: block; width: 100%; height: 100%; }
+  /* The column: from where the logo begins, its middle the stage's. The tagline is as large as the reference's,
+     and no larger than the room it has: across, up to the building's outer columns (0.222 of the pictures' height
+     from the doorway's middle) less a gap; down, the stage less the bar and the rest of the column. The line and
+     the call to action follow under it. (Until the page has measured the tagline it is taken to be wider than
+     it is, so it is never larger than its room.) */
+  .journey[data-layout='right'] .lede {
+    --lede-room: calc(75vw - 12px - 0.222 * var(--art-h) - 0.025 * var(--art-h) - var(--lead-in));
+    --lede-tag: min(
+      clamp(42px, max(7.55vw, calc(11.517vw - 57.1px)), 8.542vw),
+      calc(var(--lede-room) / (var(--tag-w, 8.8) + 0.06)),
+      calc((100 * var(--stage-1) - 330 * var(--u)) / 2.2)
+    );
+    display: block; position: absolute; left: var(--lead-in); top: 50%;
+    transform: translate3d(0, calc(-50% + (1 - var(--in, 1)) * 20px), 0);
+  }
+  .journey[data-layout='right'][data-gate='exchange']:not([data-wave]) .tagline { --tag-size: var(--lede-tag); position: static; transform: none; }
+  .journey[data-layout='right'] .pitch { display: block; }
+  /* The line stands in its two lines, as the reference's does (content.home.ts gives them). Its first baseline
+     lies one line of the tagline under the tagline's last (the tagline's baseline is 0.017 of its size above its
+     box's foot, the line's 0.958 of its own under its box's top), so the three read as one run of lines; where the
+     tagline is small, the line keeps the distance it had, which is then the greater. */
+  .journey[data-layout='right'] .line {
+    margin-top: max(calc(0.783 * var(--lede-tag) - 22 * var(--u)), calc(0.25 * var(--lede-tag) + 22 * var(--u)));
+    max-width: none; font-size: calc(23 * var(--u));
+  }
+  .journey[data-layout='right'] .lineRow { display: block; white-space: nowrap; }
+  .journey[data-layout='right'] .launch { margin-top: calc(28 * var(--u)); }
+}
+/* A screen without the row: the bar's right is the button that opens the way around (Menu.tsx). It stands where
+   the header's call to action stands on the screens before and after the hero: at the hero that one gives way to
+   it (timeline.ts), and the sheet the button opens has the call to action. */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1), (max-height: 520px) {
+  .journey[data-layout='right'] .bar { display: flex; position: absolute; right: var(--edge); top: var(--header-top); }
+  .journey[data-layout='right'] .ways, .journey[data-layout='right'] .channels, .journey[data-layout='right'] .spare { display: none; }
+}
+/* An upright screen. Everything said stands in one column across the screen, under the bar: the tagline in its
+   four lines, the line in its two, the call to action. The exchange stands under the column and takes the room
+   that is left: its pictures are as tall as lets the building stand within the screen's width (it is 0.53 of
+   their height wide, the steps' blocks included) and no taller than fits under the column with 26 px to spare (the pediment's top
+   lies 0.802 of their height above the stage's foot, the doorway's 0.58). The tagline is as wide as the screen
+   allows (--tag-w2, its widest half) and no larger than leaves the exchange 48 hundredths of the stage for its
+   pictures. (--tag-box: the tagline's lines at a leading of 0.8, the little more its light lines keep apart, and
+   the fifth of its size its letters hang below it. The line and the call to action grow with the screen's
+   width, up to a tablet's.) */
+@media (max-aspect-ratio: 1/1), (max-width: 560px) {
+  .journey[data-layout='right'][data-gate='exchange']:not([data-wave]) {
+    --lede-top: calc(var(--header-top) + 42px + 22px);
+    --line-size: clamp(13.5px, 4.2vw, 24px);
+    --call-h: clamp(44px, 11.6vw, 58px);
+    --pitch-h: calc(14px + 2.4 * var(--line-size) + 16px + var(--call-h));
+    --tag-box: calc(var(--tag-halves, 4) * 0.8 + 0.27);
+    --tag-fit: min(
+      calc((100vw - 2 * var(--edge)) / (var(--tag-w2, 5.6) + 0.06)),
+      calc((61.5 * var(--stage-1) - 26px - var(--lede-top) - var(--pitch-h)) / var(--tag-box)),
+      128px
+    );
+    --art-h: min(
+      calc((100vw - 2 * var(--edge)) / 0.56),
+      calc((100 * var(--stage-1) - 26px - var(--lede-top) - var(--pitch-h) - var(--tag-box) * var(--tag-fit)) / 0.802)
+    );
+    --door-top: calc(100 * var(--stage-1) - 0.58 * var(--art-h));
+  }
+  .journey[data-layout='right'] .lede {
+    display: block; position: absolute; left: var(--lead-in); right: var(--lead-in); top: var(--lede-top);
+    transform: translate3d(0, calc((1 - var(--in, 1)) * 20px), 0);
+  }
+  .journey[data-layout='right'][data-gate='exchange']:not([data-wave]) .tagline { --tag-size: var(--tag-fit); position: static; transform: none; }
+  .journey[data-layout='right'] .pitch { display: block; }
+  .journey[data-layout='right'] .line { margin: calc(0.2 * var(--tag-fit) + 14px) 0 0; max-width: none; font-size: var(--line-size); line-height: 1.2; }
+  .journey[data-layout='right'] .lineRow { display: block; }
+  .journey[data-layout='right'] .launch { --launch-height: var(--call-h); --launch-pad: calc(0.46 * var(--call-h)); --launch-type: calc(0.34 * var(--call-h)); margin-top: 16px; }
+}
+/* (a short upright screen: the column ends with the line, and the bar has the call to action) */
+@media (max-aspect-ratio: 1/1) and (max-height: 600px), (max-width: 560px) and (max-height: 600px) {
+  .journey[data-layout='right'][data-gate='exchange']:not([data-wave]) { --pitch-h: calc(14px + 2.4 * var(--line-size)); }
+  .journey[data-layout='right'] .launch { display: none; }
+}

@@ -7,17 +7,24 @@
  * call to action (as the reference has it: its first screen carries them, and past it only its button stays).
  * With the mark as hero (`only` left out) it is as it was: links, the mark in the middle, the call to action,
  * coming in with the hero.
+ *
+ * `row`: the hero has a bar across its top (the exchange at the right), and on a screen with room for the bar's
+ * row the call to action is the last thing in it: it then stands there, in the row's measures, for the whole page
+ * (header.module.css; the bar keeps its place: Journey.tsx). On a screen without the row it gives way at the hero
+ * to the button that opens the way around (timeline.ts). It is the softer button there (ui/LaunchLink.tsx).
  */
 import type { Ref } from 'react'
 import { BRAND, home } from '../content.home'
 import { LaunchLink } from '../ui/LaunchLink'
 import s from './header.module.css'
 
-export function Header({ ref, only }: { ref: Ref<HTMLElement>; only?: 'launch' }) {
+export function Header({ ref, only, row }: { ref: Ref<HTMLElement>; only?: 'launch'; row?: boolean }) {
   if (only === 'launch')
     return (
-      <header ref={ref} className={s.bar} inert>
-        <LaunchLink href={home.launch.href}>{home.launch.label}</LaunchLink>
+      <header ref={ref} className={s.bar} data-row={row ? '' : undefined} inert>
+        <LaunchLink href={home.launch.href} soft={row}>
+          {home.launch.label}
+        </LaunchLink>
       </header>
     )
   return (

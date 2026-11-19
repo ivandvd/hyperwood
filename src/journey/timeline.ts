@@ -33,10 +33,11 @@ import { milestone } from '../utils/milestone'
 import type { OpeningSource } from '../ui/opening'
 import wordmarkFile from '../assets/brand/hyperwood-wordmark-neon.svg?raw'
 import type { FilmStackHandle } from '../film/FilmStack'
-import { FRAGMENT, FRAGMENT_ROOM, FRAGMENT_ROOM_EXCHANGE, VERTEX } from './shader'
+import { FRAGMENT, FRAGMENT_ROOM, FRAGMENT_ROOM_EXCHANGE, VERTEX, roomFragmentWith } from './shader'
 import { EXCHANGE_PICTURES } from './exchange.pictures'
-import { buildMarkField, type MarkField } from './markField'
+import { buildMarkField, MARK_FLOW, type MarkField } from './markField'
 import { markTiming, roomTiming } from './timing'
+import { ROW } from './row'
 
 const clamp = (x: number, a = 0, b = 1) => Math.max(a, Math.min(b, x))
 /** GLSL's smoothstep. */
@@ -137,6 +138,15 @@ export function startJourney(parts: JourneyParts): () => void {
   /** The gate as the doorway of a stock exchange of our own, when the address asks for it (?gate=exchange): its
    *  pictures stand in for the guide's (exchange.ts, shader.ts "the exchange"). Only with the films. */
   const exchanged = !!films && new URLSearchParams(window.location.search).get('gate') === 'exchange'
+  /** A try beside it (?gate=exchange&layout=right): the exchange stands at the right of the screen (Journey.tsx
+   *  and journey.module.css lay it out). Its pictures then end within the screen, so their light is thinned out
+   *  towards their sides (shader.ts). */
+  const sided = exchanged && new URLSearchParams(window.location.search).get('layout') === 'right'
+  /** Another (?drop=mark): the light goes to the gate as the mark (shader.ts, "the beats of the light ... the
+   *  mark"). It needs the mark's outline, which is worked out once the opening words stand still: it is not
+   *  wanted before the films are past. */
+  const viaMark = !!films && new URLSearchParams(window.location.search).get('drop') === 'mark'
+  let markAsked = false
   // (the exchange keeps the guide's river: it runs on from the foot of the exchange's steps)
   let pictured = asked !== 'old' && asked !== 'traced'
   if (!pictured && !exchanged) journey.dataset.wave = traced ? 'traced' : 'old'
@@ -211,7 +221,7 @@ export function startJourney(parts: JourneyParts): () => void {
   const buildMark = () => {
     if (disposed) return
     const began = performance.now()
-    markField = buildMarkField()
+    markField = buildMarkField(viaMark)
     if (import.meta.env.DEV) performance.measure('hw:mark-field', { start: began, end: performance.now() })
     milestone('mark-there')
     whole()
@@ -251,6 +261,12 @@ export function startJourney(parts: JourneyParts): () => void {
       g.texImage2D(g.TEXTURE_2D, 0, g.RGBA, field.width, field.height, 0, g.RGBA, g.UNSIGNED_BYTE, bytes)
     }
     g.useProgram(program)
+    // (the mark as one stroke, where the light runs along it: shader.ts)
+    if (field.flow) {
+      g.uniform3fv(u.markTail, field.flow.tail)
+      g.uniform3fv(u.markHead, field.flow.head)
+      g.uniform3fv(u.markPath, field.flow.path)
+    }
     g.uniform1f(u.markReady, 1)
   }
 
@@ -320,7 +336,7 @@ export function startJourney(parts: JourneyParts): () => void {
     const corner = g.getAttribLocation(program, 'corner')
     g.enableVertexAttribArray(corner)
     g.vertexAttribPointer(corner, 2, g.FLOAT, false, 0, 0)
-    for (const name of ['res', 'time', 'progress', 'pointer', 'pointerActive', 'typeTex', 'typeReady', 'markTex', 'markReady', 'body', 'gate', 'course', 'traced', 'pieces', 'gateX', 'flow', 'picture', 'portalTex', 'cInk', 'cNeon', 'cHot', 'cLime', 'cMoss', 'cDeep', 'lamp', 'room', 'drop', 'roomSide', 'lens', 'exchange', 'exBase', 'exDoor', 'exGlow', 'exSpace'])
+    for (const name of ['res', 'time', 'progress', 'pointer', 'pointerActive', 'typeTex', 'typeReady', 'markTex', 'markReady', 'body', 'gate', 'course', 'traced', 'pieces', 'gateX', 'flow', 'picture', 'portalTex', 'cInk', 'cNeon', 'cHot', 'cLime', 'cMoss', 'cDeep', 'lamp', 'room', 'drop', 'roomSide', 'lens', 'exchange', 'exBase', 'exDoor', 'exGlow', 'exSpace', 'markTail', 'markHead', 'markPath'])
       u[name] = g.getUniformLocation(program, name)
     const P = J.palette
     g.uniform3fv(u.cInk, rgb(P.ink))
@@ -345,6 +361,11 @@ export function startJourney(parts: JourneyParts): () => void {
         g.uniform1i(u[name], 3 + i)
       })
     }
+    // (the mark's stroke, as it was measured, until the page has measured it itself: markField.ts)
+    if (viaMark) {
+      g.uniform3fv(u.markTail, MARK_FLOW.tail)
+      g.uniform3fv(u.markHead, MARK_FLOW.head)
+    }
     // (the address ?drop=lens: the drop as the films' lamp out of focus, grainy: shader.ts, "the lamp")
     g.uniform1f(u.lens, new URLSearchParams(window.location.search).get('drop') === 'lens' ? 1 : 0)
     journey.dataset.shader = ''
@@ -364,7 +385,8 @@ export function startJourney(parts: JourneyParts): () => void {
 
   if (gl) {
     const g = gl
-    const source = films ? (exchanged ? FRAGMENT_ROOM_EXCHANGE : FRAGMENT_ROOM) : FRAGMENT
+    const tried = sided || viaMark
+    const source = films ? (tried ? roomFragmentWith(exchanged, { thinned: sided, mark: viaMark }) : exchanged ? FRAGMENT_ROOM_EXCHANGE : FRAGMENT_ROOM) : FRAGMENT
     const had = built.get(canvas)
     if (had && had.source === source && !g.isContextLost()) {
       // (this canvas has the program already, built or being built: see `built`)
@@ -558,6 +580,10 @@ export function startJourney(parts: JourneyParts): () => void {
   /** Whether the column at the gate is shown (there is room for it): it has the call to action then, and the
    *  header's own goes while the gate stands. */
   let sideShown = false
+  /** With the exchange at the right: whether the screen has the bar's row (the header's call to action is the
+   *  last thing in it, and stays), or only the button that opens the way around (the header's gives way to it). */
+  const row = window.matchMedia(ROW)
+  let gives = false
   /** Which film is in the box (-1: none, the box is not to be seen), and whether the films have been asked for. */
   let filmIn = -1
   let filmsAsked = false
@@ -572,7 +598,9 @@ export function startJourney(parts: JourneyParts): () => void {
       1 - (sculpture.offsetTop + sculpture.offsetHeight / 2) / sh,
       sculpture.offsetWidth / 2 / sh,
     ]
-    sideShown = !!side && getComputedStyle(side).display !== 'none'
+    // (a column that is no longer in the page is not shown: the page can be built anew under the journey)
+    sideShown = !!side && side.isConnected && getComputedStyle(side).display !== 'none'
+    gives = sided ? !row.matches : sideShown
     if (films?.box) {
       // the films' box is laid where the hero's layout has its place, under the canvas
       const box = films.box
@@ -901,8 +929,10 @@ export function startJourney(parts: JourneyParts): () => void {
       // With the films the header is the call to action alone. It comes with the first film and stays for the
       // rest of the page, but for the gate: there the column at the right has the call to action, where the
       // header's would stand, so the header's goes as the gate comes to stand and is back when the journey's
-      // last picture goes out. (On a screen with no room for the column it simply stays.)
-      const forGate = films && sideShown ? smooth(beats.stand[0], beats.stand[1], s) * (1 - smooth(0.3, 0.6, dusk)) : 0
+      // last picture goes out. (On a screen with no room for the column it simply stays. With the exchange at the
+      // right it stays where the bar has its row, being the last thing in it; where the bar has only the button
+      // that opens the way around, it gives way to that button, which stands in its place.)
+      const forGate = films && gives ? smooth(beats.stand[0], beats.stand[1], s) * (1 - smooth(0.3, 0.6, dusk)) : 0
       const headerIn = smooth(beats.header[0], beats.header[1], s) * (1 - forGate)
       header.style.opacity = String(headerIn)
       header.style.pointerEvents = headerIn > 0.6 ? 'auto' : 'none'
@@ -964,13 +994,19 @@ export function startJourney(parts: JourneyParts): () => void {
         filmsAsked = true
         films.fetch()
       }
+      // (the mark's outline, where the light goes to the gate as the mark: worked out in a quiet moment after that)
+      if (viaMark && !markAsked && state.opened && now - state.openedAt > J.intro.delay + J.intro.focus + 900) {
+        markAsked = true
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(() => buildMark(), { timeout: 2000 })
+        else window.setTimeout(buildMark, 0)
+      }
     }
 
     if (ready && active && gl && program) {
       if (!drawing && mayBegin(now)) begin()
       if (drawing) {
         // (fields that were not there for the first picture go with the next)
-        if (!markSent && !films) sendMark()
+        if (!markSent && (!films || viaMark)) sendMark()
         if (pictureSource && (target === current || s > B.heroOut[0])) sendPicture()
         if (pictureSent && pictureIn < 1) pictureIn = Math.min(1, pictureIn + dt / 240)
         if (exchanged && exchangeSent < 4 && (target === current || s > B.heroOut[0])) sendExchange()

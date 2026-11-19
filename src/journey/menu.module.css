@@ -1,0 +1,66 @@
+/* The way around the site on a screen with no room for the bar's row (Menu.tsx): the button at the bar's right,
+   and the sheet behind it. A screen that has the row has neither. The button is as tall as the header's call
+   to action, whose place it has at the hero (42 px, at the header's top). */
+.open, .close {
+  display: none; place-items: center; width: 42px; height: 42px;
+  margin: 0; padding: 0; border: 0; background: none; color: var(--hw-white); cursor: pointer;
+  /* (the closing takes no pointer but on its links: journey.module.css) */
+  pointer-events: auto; -webkit-tap-highlight-color: transparent;
+}
+/* two lines: side by side they open, crossed they close (drawn from the button's right edge inwards, so they end
+   where the page's edge is) */
+.open span, .close span { grid-area: 1 / 1; justify-self: end; display: block; width: 22px; height: 1.5px; background: currentColor; }
+.open span:first-child { transform: translate3d(0, -3.5px, 0); }
+.open span:last-child { transform: translate3d(0, 3.5px, 0); }
+.close span:first-child { transform: rotate(45deg); }
+.close span:last-child { transform: rotate(-45deg); }
+.open:focus-visible, .close:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 2px; }
+
+/* The sheet: Ink over the whole screen. Its parts stand one under the other, the call to action at its foot. */
+.sheet {
+  position: fixed; inset: 0; z-index: 9; display: none; flex-direction: column; overflow-y: auto; overscroll-behavior: contain;
+  padding: calc(var(--header-top) + 42px + 30px) var(--edge) max(28px, env(safe-area-inset-bottom));
+  background: var(--hw-ink); color: var(--hw-white);
+  opacity: 0; visibility: hidden; transition: opacity 0.22s ease, visibility 0s linear 0.22s;
+}
+.sheet[data-open] { opacity: 1; visibility: visible; transition: opacity 0.22s ease; }
+.sheet > * { flex: none; }
+/* the logo where the hero has it (its sizes are the hero's: journey.module.css), and the button to close where
+   the one that opened the sheet stands */
+.logo { position: absolute; left: var(--edge); top: calc(var(--header-top) + (42px - 20px) / 2); display: block; height: 20px; width: auto; }
+.close { position: absolute; right: var(--edge); top: var(--header-top); }
+
+/* the site's parts as rows between hairlines, in the bar's capitals; the channels under them */
+.rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(244, 245, 240, 0.26); }
+.rows li { border-bottom: 1px solid rgba(244, 245, 240, 0.26); }
+.rows a {
+  display: flex; align-items: center; justify-content: space-between; height: 58px; color: inherit; text-decoration: none;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1;
+  transition: color 0.2s linear;
+}
+.rows a:hover, .rows a:focus-visible, .rows a:active { color: var(--hw-neon); }
+.rows a:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: -2px; }
+.rows svg { flex: none; width: 17px; height: 17px; opacity: 0.55; }
+.channels { display: flex; gap: 28px; list-style: none; margin: 30px 0 0; padding: 0; }
+.channels a { display: block; width: 22px; height: 22px; color: inherit; transition: color 0.2s linear; }
+.channels a:hover, .channels a:focus-visible, .channels a:active { color: var(--hw-neon); }
+.channels a:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 5px; }
+.channels svg { display: block; width: 100%; height: 100%; }
+/* the call to action: at the sheet's foot where the sheet is taller than its parts, as broad as the sheet */
+.call { display: grid; margin-top: auto; padding-top: 36px; --launch-height: 54px; --launch-pad: 24px; --launch-type: 17px; }
+.call > a { width: 100%; }
+/* as the sheet opens, its parts come up one after another; as it closes, they go with it */
+.rows li, .channels, .call { opacity: 0; transform: translate3d(0, 12px, 0); transition: opacity 0.2s linear, transform 0s linear 0.22s; }
+.sheet[data-open] .rows li, .sheet[data-open] .channels, .sheet[data-open] .call {
+  opacity: 1; transform: none;
+  transition: opacity 0.34s ease calc(70ms + var(--i) * 36ms), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) calc(70ms + var(--i) * 36ms);
+}
+
+@media (max-width: 1023px), (max-aspect-ratio: 1/1), (max-height: 520px) {
+  .open, .close { display: grid; }
+  .sheet { display: flex; }
+}
+@media (max-width: 480px) { .logo { height: 17px; top: calc(var(--header-top) + (42px - 17px) / 2); } }
+@media (prefers-reduced-motion: reduce) {
+  .rows li, .channels, .call, .sheet[data-open] .rows li, .sheet[data-open] .channels, .sheet[data-open] .call { transform: none; transition: opacity 0.2s linear; }
+}

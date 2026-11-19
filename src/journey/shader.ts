@@ -46,6 +46,7 @@
 import { config } from '../config'
 import { markTiming, roomTiming } from './timing'
 import { EXCHANGE as EX } from './exchange'
+import { PATH } from './stroke'
 
 /** A number as GLSL wants a float written. */
 const f = (n: number) => (Number.isInteger(n) ? n.toFixed(1) : String(n))
@@ -377,6 +378,160 @@ ${RT.turns.map((turn) => `  reach *= 1. - ss( ${beat(turn.shut)}, s ) * ( 1. - s
   float bodyShown = 0.;
 `
 
+/* A try beside the drop's way to the gate (the address ?drop=mark): the light goes to the gate as the mark, which
+   is one stroke from its tail (the round at its left end) to its head (the curl at its right end). The lamp draws
+   into a drop, which goes over to where the mark's tail will lie. The light runs out of the drop along the mark,
+   from tail to head, until the mark stands whole. The mark swims over to the gate's place, head first, its body
+   waving as it goes, and comes to rest with its head on the gate's arch. There the light runs on into the gate:
+   it leaves the mark from the tail on, and at the head a drop as broad as the gate grows, which is drawn down to
+   the floor and squared off into the gate, as before. */
+
+/** The rounds about a stretch of the stroke's middle line: how far a point is from them. The stretch runs from
+ *  "from" to "to" along the stroke (0 at the tail's end, 1 at the head's). Between two points of the line the
+ *  rounds are a tube from the one's radius to the other's; `step` says how many points apart those two are (1:
+ *  every round; more is coarser and quicker, for where only the light's glow on the air is wanted). */
+const rounds = (name: string, step: number) => /* glsl */ `float ${name}( vec2 q, float from, float to ) {
+  float best = 9.;
+  float first = clamp( from, 0., 1. ) * ${f(PATH - 1)};
+  float last = clamp( to, 0., 1. ) * ${f(PATH - 1)};
+  for ( int i = 0; i < ${PATH - step}; i += ${step} ) {
+    float t0 = clamp( ( first - float( i ) ) / ${f(step)}, 0., 1. );
+    float t1 = clamp( ( last - float( i ) ) / ${f(step)}, 0., 1. );
+    if ( t1 > t0 ) {
+      vec3 p0 = mix( markPath[ i ], markPath[ i + ${step} ], t0 );
+      vec3 p1 = mix( markPath[ i ], markPath[ i + ${step} ], t1 );
+      vec2 ab = p1.xy - p0.xy;
+      float h = clamp( dot( q - p0.xy, ab ) / max( dot( ab, ab ), 1e-8 ), 0., 1. );
+      best = min( best, length( q - p0.xy - ab * h ) - mix( p0.z, p1.z, h ) );
+    }
+  }
+  return best;
+}
+`
+/** (a coarser walk has to end on the line's last point) */
+const FAR_STEP = [4, 3, 2, 1].find((n) => (PATH - 1) % n === 0)!
+
+/** The mark as that try reads it: how far a point is from its outline (negative inside), where the mark is 2 wide
+ *  and stands in the middle (markTex, as the hero as the mark has it: markField.ts). And what the page tells the
+ *  picture about the mark as a stroke (markField.ts, `MarkFlow`): the round at either end, and its middle line,
+ *  point by point, each with the radius of the round about it. */
+const ROOM_MARK = /* glsl */ `uniform vec3 markTail;
+uniform vec3 markHead;
+uniform vec3 markPath[${PATH}];
+float markOutline( vec2 q ) {
+  return texture2D( markTex, clamp( q / vec2( 2.4, 1.2 ) + .5, 0., 1. ) ).g * .42 - .08 + length( max( abs( q ) - vec2( 1.2, .6 ), 0. ) );
+}
+${rounds('markRounds', 1)}${rounds('markRoundsFar', FAR_STEP)}
+`
+
+/** How the mark goes, for that try: how wide it is where it shows whole (half its width, as a share of half the
+ *  films' box) and at the gate's place (in gate half-widths); how far its body waves as it swims at its tail, what
+ *  share of that at its head, and how long that wave is (where the mark is 2 wide); and how far its way bows. */
+const SWIM = { shown: 0.7, atGate: 3, wave: 0.13, head: 0.35, waveLength: 1.3, bow: 0.2 }
+
+/** When the parts of that try's gathering happen, as shares of it (it runs from the journey's own gathering until
+ *  the gate stands), and how far along the stroke the light has got at either end of its run (a little beyond the
+ *  stroke's ends, so it begins and ends out of sight). */
+const MARK_GOES = {
+  swell: [0.055, 0.15],
+  spread: [0.15, 0.34],
+  swim: [0.42, 0.68],
+  draw: [0.66, 0.86],
+  pour: [0.73, 0.93],
+  square: [0.87, 1],
+  run: [-0.04, 1.04],
+} as const
+const MARK_GATHER = [TR.gather[0], TR.stand[1]] as const
+
+/** The beats of the light and its shape, for that try: a drop, the lamp, a drop again, the mark, the gate. */
+const ROOM_LIGHT_MARK = /* glsl */ `  // ---------------- the beats of the light: a drop, the lamp of the room, a drop again, the mark, the gate
+  float arrive = ss( ${beat(TR.drop)}, s );
+  // (the drop rises to where the bulb hangs and draws in to its size: it is the lamp)
+  float hang = ss( ${beat(TR.morph)}, s );
+  // How far the lamp's light reaches: all the way while a room stands open. Between two films it draws back
+  // to the lamp and comes out again (in the dark between, the page puts the next film in the box and moves
+  // the lamp to where that film's bulb hangs: timeline.ts).
+  float reach = ss( ${beat(RT.open)}, s ) * ( 1. - ss( ${beat(RT.shut)}, s ) );
+${RT.turns.map((turn) => `  reach *= 1. - ss( ${beat(turn.shut)}, s ) * ( 1. - ss( ${beat(turn.open)}, s ) );\n`).join('')}  // (The gathering, which here runs on until the gate stands. The lamp draws into a drop and goes over to where
+  // the mark's tail will lie; the light runs out of the drop along the mark; the mark swims over to the gate's
+  // place; the light runs on into the gate, where a drop grows; the drop is drawn down to the floor; its lower end
+  // is squared off into the gate's foot.)
+  float gather = clamp( ( s - ${f(MARK_GATHER[0])} ) / ${f(MARK_GATHER[1] - MARK_GATHER[0])}, 0., 1. );
+  float swell = ss( ${beat(MARK_GOES.swell)}, gather );
+  float spread = ss( ${beat(MARK_GOES.spread)}, gather );
+  float swim = ss( ${beat(MARK_GOES.swim)}, gather );
+  float draw = ss( ${beat(MARK_GOES.draw)}, gather );
+  float rise = swim;
+  float pour = ss( ${beat(MARK_GOES.pour)}, gather );
+  float square = ss( ${beat(MARK_GOES.square)}, gather );
+  float stand = ss( ${beat(TR.stand)}, s );
+  // the gate's outline: an arch, its shaft, cut off at the foot
+  vec2 archAt = vec2( gateX, gate.y - gate.x );
+  float gateD = max( length( vec2( a.x - gateX, max( a.y - archAt.y, 0. ) ) ) - gate.x, gate.z - a.y );
+
+  // ---------------- the shape of light. A drop in the opening eye. It rises to the bulb's place and draws in
+  // to the bulb's size; later it is a drop again, and the mark runs out of it.
+  // (before the hero, or after it)
+  float early = step( s, ${f((TR.word[1] + TR.heroOut[0]) / 2)} );
+  float asLamp = mix( 1. - swell, ss( .15, 1., hang ), early );
+  float shaped = ss( 0., .6, asLamp );
+  float filmWide = max( lamp.z, .0001 );
+  // The mark: half as wide as this. Where it shows whole it stands in the middle of the films' box; at the gate's
+  // place it is a few gates wide, and stands with its head's round on the middle of the gate's arch.
+  float markShown = room.z * ${f(SWIM.shown)};
+  float markAtGate = gate.x * ${f(SWIM.atGate)};
+  float markWide = mix( markShown, markAtGate, swim );
+  // (the drop it runs out of is as large as its tail's own round, and lies where that round will lie)
+  float dropR = markTail.z * markShown;
+  vec2 tailAt = room.xy + markTail.xy * markShown;
+  vec2 lightAt = mix( mix( lamp.xy, tailAt, swell ), mix( vec2( 0., .5 ), lamp.xy, hang ), early );
+  float radius = mix( mix( dropR, drop * arrive, early ), filmWide * ${f(HALF)}, shaped );
+  vec2 fromLight = a - lightAt;
+  float lightAway = length( fromLight );
+  float shape = lightAway - radius;
+  // (once the gate stands it is the gate and nothing else: the mark is not worked out any more)
+  if ( square >= 1. ) shape = gateD;
+  else if ( spread > 0. ) {
+    // Where the mark is: on its way from the middle of the box to the gate, along a shallow bow. Its body waves as
+    // it swims, the wave running back from its head and wider towards its tail, as a swimmer's is. There is none
+    // of either where it shows whole and none where it arrives: there it is the mark as it is drawn.
+    float going = sin( 3.14159 * swim );
+    vec2 markAt = mix( room.xy, archAt - markHead.xy * markAtGate, swim ) + vec2( 0., going * markWide * ${f(SWIM.bow)} * sin( swim * 6.2832 ) );
+    vec2 q = ( a - markAt ) / markWide;
+    q.y += going * ${f(SWIM.wave)} * mix( 1., ${f(SWIM.head)}, ss( -1., 1., q.x ) ) * sin( q.x * ${f((2 * Math.PI) / SWIM.waveLength)} + time * 2.6 + swim * 14. );
+    // The light runs along the stroke: out of the drop from the tail on, as far as "lit"; and at the gate on into
+    // the gate, so that it is gone as far as "left". What is lit is the mark, as far as it lies within the rounds
+    // about that stretch of its middle line: so the light's front and its end are each a round as broad as the
+    // stroke is there, as a liquid's are, and between them the stroke is the mark as it is drawn.
+    // (First a round was cut off the mark, growing from its middle: its arms ended in stumps. Then the drop's
+    // outline and the mark's were balanced against one another: the mark's stroke is flat inside, so its arms
+    // ended blurred. Then every point of the mark was given a measure of how far along the stroke it lies, and the
+    // stroke was cut where the light had got to: in a bend, and in the tail's round, that cut is no round front,
+    // and it left notches and bites.)
+    float lit = mix( ${beat(MARK_GOES.run)}, spread );
+    float left = mix( ${beat(MARK_GOES.run)}, draw );
+    // (near the mark the rounds one by one; further off, where only the light's glow on the air reaches, a few)
+    float around = max( abs( q.x ) - 1.3, abs( q.y ) - .8 ) < 0. ? markRounds( q, left, lit ) : markRoundsFar( q, left, lit );
+    float stroke = cutBy( markOutline( q ), around, .02 ) * markWide;
+    // (until the page has the mark, a round stands in for it)
+    stroke = mix( ( length( q ) - .4 ) * markWide + ( 1. - spread * ( 1. - draw ) ), stroke, markReady );
+    // the drop the light runs out of, which dwindles as it empties
+    float melt = .07 * markWide;
+    // (and is gone once the mark stands whole: its trace would glow where the tail was, after the light has left it)
+    float dropOut = length( a - ( markAt + markTail.xy * markWide ) ) - mix( dropR, -melt, ss( .12, .7, spread ) ) + step( 1., spread );
+    // the drop it runs into at the gate, on the arch's middle: it grows as the light comes, and is drawn down by as
+    // much as it has poured: a pill
+    vec2 fromDrop = a - ( markAt + markHead.xy * markWide );
+    fromDrop.y -= clamp( fromDrop.y, -pour * max( archAt.y - gate.z - gate.x, 0. ), 0. );
+    float dropIn = length( fromDrop ) - mix( -.06, gate.x, ss( 0., .7, draw ) ) + 1. - step( .0001, draw );
+    shape = mix( joined( joined( stroke, dropOut, melt ), dropIn, melt ), gateD, square );
+  }
+  float flatShown = step( .001, arrive );
+  // (what the picture's later parts ask of the mark as a body: here the light is the only shape, and there is none)
+  float markD = shape;
+  float bodyShown = 0.;
+`
+
 /** The lamp: the drop, drawn as the films draw their bulb. */
 const ROOM_LAMP = /* glsl */ `  // ---------------- the lamp. Until the drop pours it is one round of light, drawn here in place of the shape
   // above: crisp and with its glow on the air while it is the drop (the same picture as above); smaller and
@@ -456,7 +611,12 @@ float exLight( float v ) { return ( exp2( v * ${f(Math.log2(1 + EX.encode))} ) -
 /** The exchange, in place of the guide's gate. Its moments are the picture's: as the picture would take over, the
  *  doors open (the doorway's light reaches out); as its river would arrive, the river pours: down the steps first,
  *  then over the street, where it is the guide's river as the page had it. */
-const exchangeScene = (PT: Omit<typeof config.journey.picture, 'mix' | 'arrive' | 'out' | 'copy'> & { mix: readonly [number, number]; arrive: readonly [number, number] }) => {
+const exchangeScene = (
+  PT: Omit<typeof config.journey.picture, 'mix' | 'arrive' | 'out' | 'copy'> & { mix: readonly [number, number]; arrive: readonly [number, number] },
+  /** the pictures' light thins out towards their own sides (where the building stands to one side of the screen,
+   *  the pictures end within it: the layout ?layout=right) */
+  thinned = false,
+) => {
   const span = PT.arrive[1] - PT.arrive[0]
   const open: [number, number] = [PT.mix[0], PT.mix[1] + span * 0.3]
   const steps: [number, number] = [PT.arrive[0] - span * 0.1, PT.arrive[0] + span * 0.25]
@@ -480,7 +640,9 @@ const exchangeScene = (PT: Omit<typeof config.journey.picture, 'mix' | 'arrive' 
     float exH = ( gate.y - gate.z ) / ${f(EX.doorway.top - EX.doorway.foot)};
     vec2 exAt = vec2( .5 + ( a.x - gateX ) / ( exH * ${f(EX.aspect)} ), ${f(EX.doorway.foot)} + ( a.y - gate.z ) / exH );
     float within = step( 0., exAt.x ) * step( exAt.x, 1. ) * step( 0., exAt.y ) * step( exAt.y, 1. );
-    float exV = exAt.y;
+${thinned ? `    // (towards the pictures' own sides their light thins out into the page's Ink, so no edge shows where they end)
+    within *= ss( 0., .14, exAt.x ) * ss( 0., .14, 1. - exAt.x );
+` : ''}    float exV = exAt.y;
     exAt.y = 1. - exAt.y;
     float stoneL = exLight( texture2D( exBase, exAt ).r ) * within;
     float doorL = exLight( texture2D( exDoor, exAt ).r ) * within;
@@ -584,7 +746,19 @@ const exchangeScene = (PT: Omit<typeof config.journey.picture, 'mix' | 'arrive' 
 `
 }
 
-const fragment = (room: boolean, exchange = false) => {
+/** What a try beside the page's own picture asks of it (each has its address: Journey.tsx, timeline.ts). */
+interface Tries {
+  /** the exchange's pictures thin out towards their sides: the exchange at the right (?layout=right) */
+  thinned?: boolean
+  /** the light goes to the gate as the mark (?drop=mark) */
+  mark?: boolean
+}
+/** (the lamp is drawn as one round until the drop pours; in that try, until the mark begins to run out of it) */
+const LAMP_UNTIL = 'if ( pour < .0001 ) {'
+if (!ROOM_LAMP.includes(LAMP_UNTIL)) throw new Error('the lamp: its condition has changed')
+const lampUntilTheMark = ROOM_LAMP.replace(LAMP_UNTIL, 'if ( spread < .0001 ) {')
+
+const fragment = (room: boolean, exchange = false, tries: Tries = {}) => {
   // (what both heroes have in common reads its moments from the journey it is in: timing.ts)
   const when = room ? roomTiming : markTiming
   const L = { ...config.journey.lids, ...when.lids }
@@ -643,7 +817,7 @@ vec3 tone( float v ) {
   return mix( c, cHot, ss( .9, 1., v ) );
 }
 
-${room ? ROOM_UNIFORMS : MARK_FUNCS}${exchange ? EXCHANGE_UNIFORMS : ''}// ---------------------------------------------------------------- the current
+${room ? ROOM_UNIFORMS + (tries.mark ? ROOM_MARK : '') : MARK_FUNCS}${exchange ? EXCHANGE_UNIFORMS : ''}// ---------------------------------------------------------------- the current
 // (the error function, to three places and without an exponential: the light of a soft band over a length of it)
 float erf_( float x ) {
   float ax = abs( x );
@@ -666,7 +840,7 @@ void main() {
   float lid = ss( aperture - ${f(L.feather)}, aperture + ${f(L.feather)}, abs( uv.y - .5 ) ) * ss( ${beat(L.appear)}, s );
   vec3 lidColor = mix( cLime, cNeon, ss( .04, .5, abs( uv.y - .5 ) ) );
 
-${room ? ROOM_LIGHT : MARK_LIGHT}  float riverIn = ss( ${f(T.river[0] - when.span(0.01))}, ${f(T.river[0] + when.span(0.015))}, s ) * flow;
+${room ? (tries.mark ? ROOM_LIGHT_MARK : ROOM_LIGHT) : MARK_LIGHT}  float riverIn = ss( ${f(T.river[0] - when.span(0.01))}, ${f(T.river[0] + when.span(0.015))}, s ) * flow;
   // its light on the air around it
   float outline = max( mix( markD, shape, flatShown ), 0. );
   // (the gate glows more than the mark did: a rim of the deeper green all round it. Where the guide's picture
@@ -697,7 +871,7 @@ ${room ? ROOM_LIGHT : MARK_LIGHT}  float riverIn = ss( ${f(T.river[0] - when.spa
     result = mix( result, mix( cNeon, door, ss( .3, 1., pour ) ), inside * flatShown );
   }
 
-${room ? ROOM_LAMP : ''}  // ---------------- the floor before the gate: the gate's light spills over it
+${room ? (tries.mark ? lampUntilTheMark : ROOM_LAMP) : ''}  // ---------------- the floor before the gate: the gate's light spills over it
   if ( stand > .001 && a.y < gate.z + .012 ) {
     // the floor: 1 away at the gate's foot, nearer and nearer down the screen
     float away = ${f(F.rise)} / max( gate.z + ${f(F.rise)} - a.y, .001 );
@@ -802,7 +976,7 @@ ${room ? ROOM_LAMP : ''}  // ---------------- the floor before the gate: the gat
     }
   }
 
-${exchange ? exchangeScene(PT) : `  // ---------------- the gate and the river, as the guide draws them: one painted picture. It is laid by the gate
+${exchange ? exchangeScene(PT, tries.thinned) : `  // ---------------- the gate and the river, as the guide draws them: one painted picture. It is laid by the gate
   // (its doorway on the gate, at the gate's size), takes the screen over from the gate drawn above, and is
   // revealed from the gate downward. Below the gate it ripples, so the river runs. Its colours are read as
   // the brand's one light: Neon where the picture is light, Ink where it is dark.
@@ -870,3 +1044,5 @@ export const FRAGMENT = fragment(false)
 export const FRAGMENT_ROOM = fragment(true)
 /** The same, with the gate as the doorway of a stock exchange (?gate=exchange). */
 export const FRAGMENT_ROOM_EXCHANGE = fragment(true, true)
+/** The room's journey with a try or two in it (put together only when an address asks for one). */
+export const roomFragmentWith = (exchange: boolean, tries: Tries) => fragment(true, exchange, tries)

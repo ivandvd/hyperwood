@@ -10,6 +10,10 @@
  *     the button keeps its width;
  *   - the button lightens (here: Neon turns white).
  *
+ * `soft`: the button as a second reference has its own (hyperliquid's): its corners rounded by a fifth of its
+ * height, and its arrow pointing up and to the right. That arrow stays after the words: under the pointer it
+ * leaves through its own corner while another comes in from the opposite one, on the letters' curve.
+ *
  * The words are in the page once, whole, for those who do not see it. Under reduced motion nothing rolls or
  * slides. Its measures come from where it stands (--launch-height, --launch-pad, --launch-type).
  */
@@ -22,12 +26,21 @@ const arrow = (
   </svg>
 )
 
-export function LaunchLink({ href, children, className }: { href: string; children: string; className?: string }) {
+/** The softer button's arrow: up and to the right. */
+const up = (
+  <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+    <path d="M2.3 9.7 9.5 2.5M3.7 2.5h5.8v5.8" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="square" strokeLinejoin="miter" />
+  </svg>
+)
+
+export function LaunchLink({ href, children, className, soft }: { href: string; children: string; className?: string; soft?: boolean }) {
   return (
-    <a className={className ? `${s.launch} ${className}` : s.launch} href={href}>
-      <span className={s.lead} aria-hidden="true">
-        {arrow}
-      </span>
+    <a className={[s.launch, soft && s.soft, className].filter(Boolean).join(' ')} href={href}>
+      {!soft && (
+        <span className={s.lead} aria-hidden="true">
+          {arrow}
+        </span>
+      )}
       <span className={s.words}>
         <span className={s.said}>{children}</span>
         <span className={s.letters} aria-hidden="true">
@@ -47,9 +60,16 @@ export function LaunchLink({ href, children, className }: { href: string; childr
           )}
         </span>
       </span>
-      <span className={s.trail} aria-hidden="true">
-        {arrow}
-      </span>
+      {soft ? (
+        <span className={s.up} aria-hidden="true">
+          {up}
+          {up}
+        </span>
+      ) : (
+        <span className={s.trail} aria-hidden="true">
+          {arrow}
+        </span>
+      )}
     </a>
   )
 }

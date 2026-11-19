@@ -8,6 +8,8 @@
   position: relative; width: 100%; overflow: hidden; background: #1d1e1b; isolation: isolate;
   content-visibility: auto; contain-intrinsic-size: auto 400px;
 }
+/* (once it has been laid out at a still moment, Reel.tsx: it stays laid out) */
+.reel[data-laid] { content-visibility: visible; }
 .far, .near { position: absolute; inset: 0; perspective: calc(var(--k) * 1150px); perspective-origin: 50% 50%; }
 /* behind: out of focus, and not there at all where the lens is focused (a soft copy under a sharp one would
    show round it as a halo) */

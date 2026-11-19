@@ -34,7 +34,20 @@
 .launch:hover .lead, .launch:focus-visible .lead { width: var(--arrow); margin-right: var(--between); opacity: 1; transform: none; }
 .launch:hover .trail, .launch:focus-visible .trail { width: 0; margin-left: 0; opacity: 0; transform: translate3d(20px, 0, 0); }
 
+/* The softer button (LaunchLink.tsx, `soft`): corners rounded by a fifth of its height, and an arrow up and to
+   the right, which is in the button twice, in one small window: one in its place, one a window's breadth down and
+   to the left. Under the pointer both go up and to the right by that much, so the one leaves through its corner
+   as the other comes in. */
+.soft { border-radius: calc(var(--launch-height, 51px) * 0.2); }
+.up { --up: 0.7em; position: relative; display: inline-flex; flex: none; overflow: hidden; width: var(--up); height: var(--up); margin-left: 0.62em; }
+.up svg { display: block; flex: none; width: var(--up); height: var(--up); transition: transform 450ms var(--roll); }
+.up svg + svg { position: absolute; left: 0; top: 0; transform: translate3d(-115%, 115%, 0); }
+.launch:hover .up svg:first-child, .launch:focus-visible .up svg:first-child { transform: translate3d(115%, -115%, 0); }
+.launch:hover .up svg + svg, .launch:focus-visible .up svg + svg { transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .launch:hover .roll, .launch:focus-visible .roll { transform: none; transition: none; }
   .lead, .trail { transition: opacity 0.2s linear; }
+  .up svg, .launch:hover .up svg:first-child, .launch:focus-visible .up svg:first-child { transform: none; transition: none; }
+  .up svg + svg, .launch:hover .up svg + svg, .launch:focus-visible .up svg + svg { transform: translate3d(-115%, 115%, 0); transition: none; }
 }

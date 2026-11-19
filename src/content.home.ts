@@ -84,13 +84,18 @@ export const home = {
    *  in, as the reference sets the two lines of its own. It is as large as the reference's where the room
    *  beside the gate allows: the shorter its widest line, the larger it can be (the page measures it:
    *  Journey.tsx). Each sentence is given in its two halves: on an upright screen, with no room beside the
-   *  gate, the halves stand one under the other, four lines across the screen. */
+   *  gate, the halves stand one under the other, four lines across the screen. The line is given as its two
+   *  lines: where it stands under the tagline (the exchange at the right) each is a line, as the reference
+   *  sets its own in two; in the column beside the gate they run on. */
   gate: {
     title: [
       ['Trade', 'the market.'],
       ['Privately,', 'anytime.'],
     ],
-    line: 'A confidential network for stocks and indices, designed for you to trade privately.',
+    line: ['A confidential network for stocks and indices,', 'designed for you to trade privately.'],
+    /** Where the bar across the top has the call to action (the exchange at the right), the column's own, under
+     *  the line, says this. It opens what the bar's opens, until the client names another place. */
+    call: { label: 'Trade now', href: '#app' },
   },
 
   /** At the gate: what leaves the engine, and what does not. The two sentences are one title; each stands on
@@ -115,6 +120,9 @@ export const home = {
   ],
   /** (no app is live: until the client names a destination the button shows the preview) */
   launch: { label: 'Launch App', href: '#app' },
+  /** On a screen with no room for the bar's links: what the button that opens them and the one that closes them
+   *  are called, and the sheet they are on. */
+  menu: { label: 'Menu', open: 'Open the menu', close: 'Close the menu' },
 
   /* ------------------------------------------------------------ after the journey (all of it a draft for approval)
      What the papers say Hyperwood does, as capabilities: no dates, as the client asked. The speed figures are

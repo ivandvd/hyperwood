@@ -40,3 +40,22 @@
 @media (max-width: 760px) {
   .nav a:not(:first-child):not(:last-child) { display: none; }
 }
+
+/* The call to action as the last thing in the bar across the hero (the exchange at the right: Header.tsx, `row`),
+   on a screen that has the bar's row (wider than tall, 1024 px and up). It stands there for the whole page: with
+   the films before the hero, in the row at the hero, over everything after. Its middle is the row's, 40 of the
+   design's pixels down, and its right edge as far from the screen's as the logo's left is from the other
+   (--row-u is one pixel of the 1440 design, as the closing's --u). Its measures are told to the whole page,
+   since the bar keeps a place of the same size for it at its row's end (`.spare` in journey.module.css).
+   (On any other screen it is as it is without the row; at the hero it gives way to the button that opens the way
+   around, whose sheet has it: timeline.ts, Menu.tsx.) */
+@media (min-aspect-ratio: 1001/1000) and (min-width: 1024px) and (min-height: 521px) {
+  :root {
+    --row-u: max(1px, calc(100vw / 1440));
+    --row-call-height: calc(38 * var(--row-u)); --row-call-pad: calc(17 * var(--row-u)); --row-call-type: calc(14 * var(--row-u));
+  }
+  .bar[data-row] {
+    --launch-height: var(--row-call-height); --launch-pad: var(--row-call-pad); --launch-type: var(--row-call-type);
+    top: calc(40 * var(--row-u) - var(--row-call-height) / 2); right: calc(39 * var(--row-u));
+  }
+}
