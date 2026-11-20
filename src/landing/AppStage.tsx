@@ -36,6 +36,7 @@ import shotClose1200 from '../assets/product/shot-close-1200.webp'
 import { cardsUnder, phonesShot } from './flags'
 import { grain } from './grain'
 import { DropScene } from './soar/DropScene'
+import { RiverScene } from './soar/RiverScene'
 import { whenStill } from './still'
 import s from './appStage.module.css'
 
@@ -72,10 +73,13 @@ const DUST: [x: number, y: number, size: number, soft: number, bright: number, d
 ]
 
 /** `sky`: over the stage, the gate's arch and its halo; or (with &flow=soar, under the light ground) the light that
- *  hangs into the dark as a drop (soar/DropScene.tsx), entered from the light above by a gradient. */
-export function AppStage({ sky = 'gate' }: { sky?: 'gate' | 'drop' }) {
+ *  hangs into the dark as a drop (soar/DropScene.tsx), entered from the light above by a gradient; or (with
+ *  &ground=ink, all on the Ink) the journey's river, coming out of the dark under the headline and winding to the
+ *  monitor, which stands in it (soar/RiverScene.tsx). */
+export function AppStage({ sky = 'gate' }: { sky?: 'gate' | 'drop' | 'river' }) {
   const A = home.appStage
   const root = useRef<HTMLElement>(null)
+  const title = useRef<HTMLHeadingElement>(null)
   // (the lights' grain: made once, in the page)
   useEffect(() => {
     root.current?.style.setProperty('--grain', grain())
@@ -95,7 +99,8 @@ export function AppStage({ sky = 'gate' }: { sky?: 'gate' | 'drop' }) {
   return (
     <section ref={root} id="app" className={s.stage} aria-labelledby="app-title" data-sky={sky}>
       {sky === 'drop' && <DropScene className={s.scene} />}
-      <div className={s.sky} aria-hidden="true" hidden={sky === 'drop'}>
+      {sky === 'river' && <RiverScene className={s.river} head={title} />}
+      <div className={s.sky} aria-hidden="true" hidden={sky !== 'gate'}>
         <div className={s.halo} />
         <div className={s.gate}>
           <i />
@@ -110,7 +115,7 @@ export function AppStage({ sky = 'gate' }: { sky?: 'gate' | 'drop' }) {
         ))}
       </div>
 
-      <h2 id="app-title" className={s.title}>
+      <h2 ref={title} id="app-title" className={s.title}>
         <span>{A.title[0]}</span> <b>{A.title[1]}</b>
       </h2>
 

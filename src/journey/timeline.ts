@@ -138,6 +138,10 @@ export function startJourney(parts: JourneyParts): () => void {
    *  (The scroll is eased first and then carried over the gap: `along`.) The header's call to action comes as the
    *  light runs into the mark, not with a first film. */
   const filmsAfter = !!films && new URLSearchParams(window.location.search).get('films') === 'after'
+  /** (&flow=soar&dawn=river: the river stays lit while the morning comes up over it, its light pouring into the
+   *  morning's, and goes out only once the morning has covered it: soar/Daybreak.tsx) */
+  const pour =
+    filmsAfter && new URLSearchParams(window.location.search).get('flow') === 'soar' && new URLSearchParams(window.location.search).get('dawn') === 'river'
   const skipped = filmsAfter ? roomShut[1] - roomOpen[0] : 0
   const along = (eased: number) => {
     const s = eased * (1 - skipped)
@@ -879,7 +883,7 @@ export function startJourney(parts: JourneyParts): () => void {
       if (Math.abs(duskAim - dusk) < 0.0005) dusk = duskAim
       // (with the films after the hero, the light goes out sooner: within the first quarter of the hold, so the river
       // is dark before the films' box comes up across it)
-      stage.style.setProperty('--dusk', (filmsAfter ? smooth(0, 0.26, dusk) : smooth(0.1, 0.66, dusk)).toFixed(3))
+      stage.style.setProperty('--dusk', (pour ? smooth(0.62, 0.96, dusk) : filmsAfter ? smooth(0, 0.26, dusk) : smooth(0.1, 0.66, dusk)).toFixed(3))
       // (the closing words go first: see below)
       drawnS = -1
     }

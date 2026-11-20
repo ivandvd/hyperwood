@@ -81,12 +81,13 @@ function Seal({ on }: { on: boolean }) {
   )
 }
 
-/** The public queue: what anyone sees of the requests before this one. */
-const QUEUE: [id: string, at: string][] = [
-  ['0x6b02…19fa', '14:32:05'],
-  ['0xd4e7…8a03', '14:32:06'],
-  ['0x2a90…c7e5', '14:32:06'],
-  ['0x81fc…3b6d', '14:32:07'],
+/** The public queue: what anyone sees of the requests before this one, as the architecture has it public: the
+ *  request id, what kind of request it is, and when it came. */
+const QUEUE: [id: string, kind: string, at: string][] = [
+  ['0x6b02…19fa', 'open', '14:32:05'],
+  ['0xd4e7…8a03', 'close', '14:32:06'],
+  ['0x2a90…c7e5', 'manage', '14:32:06'],
+  ['0x81fc…3b6d', 'open', '14:32:07'],
 ]
 
 function Queue({ on }: { on: boolean }) {
@@ -94,19 +95,21 @@ function Queue({ on }: { on: boolean }) {
     <div className={h.panel}>
       <p className={h.head}>
         <span>Public queue</span>
-        <span>Request · time</span>
+        <span>Request · kind · time</span>
       </p>
       <div className={h.queue}>
         <ul data-on={on ? '' : undefined}>
-          {QUEUE.map(([id, at]) => (
+          {QUEUE.map(([id, kind, at]) => (
             <li key={id}>
               <span>{id}</span>
+              <span>{kind}</span>
               <span>{at}</span>
-              <span>Sealed</span>
+              <span />
             </li>
           ))}
           <li data-mine="">
             <span>{request.id}</span>
+            <span>open</span>
             <span>{request.stages[0].at}</span>
             <span>Accepted</span>
           </li>

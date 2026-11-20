@@ -85,7 +85,7 @@
 .queue ul { margin: 0; padding: 0; list-style: none; transition: transform 700ms var(--curve); }
 .queue ul[data-on] { transform: translateY(calc(-1 * var(--row))); }
 .queue li {
-  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 1vw; align-items: center; height: var(--row);
+  display: grid; grid-template-columns: minmax(0, 1fr) 6ch 8ch 8ch; gap: 1vw; align-items: center; height: var(--row);
   border-top: 1px solid rgba(244, 245, 240, 0.07); color: rgba(244, 245, 240, 0.5); white-space: nowrap;
 }
 .queue li span:last-child { text-align: right; }
@@ -173,7 +173,8 @@
   .head { margin-bottom: 10px; font-size: 10.5px; }
   .rows > div { padding: 8px 0; }
   .sealed, .receipt { margin-top: 12px; }
-  .queue li { gap: 10px; }
+  .queue li { gap: 9px; }
+  .queue li span:first-child { overflow: hidden; text-overflow: ellipsis; }
   .pair { margin-top: 8px; }
   .proof { gap: 14px; }
   .verified { margin-top: 5px; }

@@ -28,6 +28,32 @@ export function paperGrain(size = 200, most = 0.075): string {
   return (paper = `url(${canvas.toDataURL('image/png')})`)
 }
 
+let film: string | null = null
+/** `url(...)` of a tile of grey noise, every pixel opaque: laid over a surface by `mix-blend-mode: overlay`, it is a
+ *  film grain (How it works' glass, soar/how). Drawn once, where an SVG noise filter would be drawn again whenever the
+ *  surface changes size. */
+export function filmGrain(size = 180): string {
+  if (film) return film
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = size
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return (film = 'none')
+  const image = ctx.createImageData(size, size)
+  let seed = 0x6a3c19
+  const random = () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) | 0
+    return (seed >>> 8) / 16777216
+  }
+  for (let i = 0; i < image.data.length; i += 4) {
+    // (two draws averaged: a grain that sits round the middle grey, as a fractal noise does)
+    const v = Math.round(255 * (random() + random()) * 0.5)
+    image.data[i] = image.data[i + 1] = image.data[i + 2] = v
+    image.data[i + 3] = 255
+  }
+  ctx.putImageData(image, 0, 0)
+  return (film = `url(${canvas.toDataURL('image/png')})`)
+}
+
 /** `url(...)` of a tile of noise: every pixel opaque black let through between `low` and fully. */
 export function grain(size = 192, low = 0.56): string {
   if (made) return made

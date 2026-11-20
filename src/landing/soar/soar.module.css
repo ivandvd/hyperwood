@@ -29,6 +29,23 @@
 
 .lit { position: absolute; left: 0; right: 0; bottom: 0; height: 40%; }
 
+/* (with &dawn=river: no Ink between the held river and the morning. The morning comes up as a mist over the held
+   picture: what is behind it is softened (a blur of the backdrop, so the river's own light spreads into it, where the
+   river is and in its shape, with nothing painted on), and the mist thickens into the Paper. No glow of its own.) */
+.daybreak[data-pour] { height: 30vw; background: none; }
+.daybreak[data-pour]::before, .daybreak[data-pour]::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+.daybreak[data-pour]::before {
+  backdrop-filter: blur(26px) brightness(1.18) saturate(1.08);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 34%, #000 70%, transparent 86%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 34%, #000 70%, transparent 86%);
+}
+.daybreak[data-pour]::after {
+  background:
+    var(--paper-grain, none),
+    linear-gradient(180deg, rgba(244, 245, 240, 0) 0, rgba(244, 245, 240, 0) 24%, rgba(232, 234, 226, 0.14) 34%, rgba(225, 227, 219, 0.36) 44%, rgba(229, 231, 223, 0.66) 54%, rgba(236, 237, 231, 0.88) 64%, #f0f1ec 74%, #f3f4ef 86%, var(--hw-paper) 100%);
+}
+.daybreak[data-pour] .lit { z-index: 1; }
+
 /* ---------------------------------------------------------------- the statement (Opening.tsx): at the left, 64 px in,
    a line in two tones at 2.3 hundredths of the width, a sentence, the outlined pill */
 .opening { padding: 4.2vw clamp(28px, 3.36vw, 72px) 6vw; }
@@ -213,6 +230,7 @@
    in a row moved by the finger; the last screen the line, the phone and the pill one under another */
 @media (max-width: 1023px), (max-aspect-ratio: 1/1) {
   .daybreak { height: 34vw; }
+  .daybreak[data-pour] { height: 68vw; }
   .opening { padding: 12vw var(--edge) 16vw; }
   .two { max-width: none; font-size: clamp(28px, 7.4vw, 46px); }
   .sentence { margin-top: 16px; max-width: 30em; font-size: 15.5px; }
@@ -260,3 +278,41 @@
   .footLockup { width: 86%; }
   .foot[data-card] .footBottom { flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 14px; }
 }
+
+/* ---------------------------------------------------------------- with &ground=ink ([data-night] on the page's root):
+   every part that stood on the Paper stands on the hero's Ink, its words in the Paper's colours, the white cards
+   turned to a faint light with a hairline, and Neon only as light (the call to action, the mark) */
+:global([data-night]) .paper { background: var(--hw-ink); color: var(--hw-paper); }
+:global([data-night]) .panel { background: #151514; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.09); }
+:global([data-night]) .panelTitle span + span { color: rgba(244, 245, 240, 0.46); }
+:global([data-night]) .panelText { color: rgba(244, 245, 240, 0.6); }
+:global([data-night]) .panelText b { color: var(--hw-white); }
+:global([data-night]) .middle span,
+:global([data-night]) .detailHead .two span,
+:global([data-night]) .tryLine span { color: rgba(244, 245, 240, 0.5); }
+:global([data-night]) .middle b,
+:global([data-night]) .detailHead .two b,
+:global([data-night]) .tryLine b { color: var(--hw-white); }
+:global([data-night]) .arrows button { background: rgba(244, 245, 240, 0.08); color: var(--hw-paper); }
+@media (hover: hover) {
+  :global([data-night]) .arrows button:hover { background: rgba(244, 245, 240, 0.16); }
+}
+:global([data-night]) .whitePill { background: var(--hw-neon); color: var(--hw-ink); box-shadow: none; }
+:global([data-night]) .foot a,
+:global([data-night]) .follow a { color: var(--hw-paper); }
+:global([data-night]) .footTop,
+:global([data-night]) .footInfo,
+:global([data-night]) .footBottom { border-color: rgba(244, 245, 240, 0.12); }
+:global([data-night]) .footCols a { color: rgba(244, 245, 240, 0.7); }
+:global([data-night]) .footInfo p { color: rgba(244, 245, 240, 0.58); }
+:global([data-night]) .footInfo p:first-child,
+:global([data-night]) .footInfo b,
+:global([data-night]) .footLine b { color: var(--hw-white); }
+:global([data-night]) .footBottom { color: rgba(244, 245, 240, 0.5); }
+:global([data-night]) .footMark { background: var(--hw-neon); }
+/* (the foot with its card has darker words of its own: turned here as well) */
+:global([data-night]) .foot[data-card] .footCols a { color: rgba(244, 245, 240, 0.74); }
+:global([data-night]) .foot[data-card] .footInfo p { color: rgba(244, 245, 240, 0.6); }
+:global([data-night]) .foot[data-card] .footInfo p:first-child,
+:global([data-night]) .foot[data-card] .footInfo b { color: var(--hw-white); }
+:global([data-night]) .foot[data-card] .footBottom { color: rgba(244, 245, 240, 0.5); }

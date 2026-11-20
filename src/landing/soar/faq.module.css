@@ -47,3 +47,12 @@
 @media (prefers-reduced-motion: reduce) {
   .faq *, .faq *::before, .faq *::after { transition: none !important; }
 }
+
+/* ---------------------------------------------------------------- with &ground=ink: on the Ink */
+:global([data-night]) .title span { color: rgba(244, 245, 240, 0.5); }
+:global([data-night]) .title b { color: var(--hw-white); }
+:global([data-night]) .list,
+:global([data-night]) .item { border-color: rgba(244, 245, 240, 0.12); }
+:global([data-night]) .item button { color: var(--hw-paper); }
+:global([data-night]) .item button:focus-visible { outline-color: var(--hw-neon); }
+:global([data-night]) .answer p { color: rgba(244, 245, 240, 0.62); }

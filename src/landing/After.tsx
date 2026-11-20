@@ -17,6 +17,12 @@
  * three close views of it, then the app on phones), each from one edge of the screen to the other, and a last screen
  * of its own (Finale.tsx): a line, the app on a standing phone, the call to action. The hairlines, their columns, the markets, the network and the app's three short films
  * are not shown.
+ *
+ * With &flow=soar as well, the page after the hero is laid out part for part as trysoar.com lays out its own (soar/),
+ * light and dark by turns; with &ground=ink, all of it on the Ink: the statement, the three films, what Hyperwood is
+ * building (soar/Building.tsx), the app's stage under the journey's river (soar/RiverScene.tsx), why no one can trade
+ * ahead of an order (soar/Ahead.tsx), how a trade goes as one glass that becomes each stage (soar/how/HowMorph.tsx),
+ * then the sizes, the detail, the questions and the last screen.
  */
 import { useEffect, useRef } from 'react'
 import { home } from '../content.home'
@@ -26,9 +32,11 @@ import { Reel } from './reel/Reel'
 import { orderFilm, payoutFilm, phonesFilm, sealedFilm } from './reel/films'
 import { OrderSet, PayoutSet, PhonesSet, SealedSet } from './reel/sets'
 import { AppStage } from './AppStage'
+import { Ahead } from './soar/Ahead'
+import { Building } from './soar/Building'
 import { FilmBlock } from './FilmBlock'
 import { Finale } from './Finale'
-import { filmsAfter, flowSoar } from './flags'
+import { filmsAfter, flowSoar, groundInk } from './flags'
 import { paperGrain } from './grain'
 import { Reveal } from './Reveal'
 import { Daybreak } from './soar/Daybreak'
@@ -36,11 +44,11 @@ import { Detail } from './soar/Detail'
 import { Faq } from './soar/Faq'
 import { Features } from './soar/Features'
 import { HowItWorks } from './soar/HowItWorks'
+import { HowMorph } from './soar/how/HowMorph'
 import { Opening } from './soar/Opening'
 import { Sizes } from './soar/Sizes'
 import { TryIt } from './soar/TryIt'
 import { watchTone } from './soar/tone'
-import { WhoSees } from './soar/WhoSees'
 import { Statement } from './Statement'
 import { useSeen } from './useSeen'
 import s from './after.module.css'
@@ -58,6 +66,12 @@ export function After() {
   useEffect(() => {
     const root = soarRoot.current
     if (!flowSoar || !root) return
+    // (with &ground=ink everything stays on the Ink: the page's root says so, for the foot, which stands outside
+    // this, and there is no light part for the top of the screen to turn to)
+    if (groundInk) {
+      document.documentElement.setAttribute('data-night', '')
+      return () => document.documentElement.removeAttribute('data-night')
+    }
     // (on the page's root: the foot, which stands outside this, has it too)
     document.documentElement.style.setProperty('--paper-grain', paperGrain())
     const foot = document.querySelector('footer[data-light]')
@@ -141,14 +155,33 @@ export function After() {
 
   if (flowSoar)
     return (
-      <div ref={soarRoot} className={s.after} data-films="after" data-flow="soar">
-        <Daybreak from="river" />
-        <Opening />
-        <Features />
-        <AppStage sky="drop" />
-        <HowItWorks />
-        <WhoSees />
-        <Daybreak from="ink" />
+      <div ref={soarRoot} className={s.after} data-films="after" data-flow="soar" data-night={groundInk ? '' : undefined}>
+        {groundInk ? (
+          <Statement />
+        ) : (
+          <>
+            <Daybreak from="river" />
+            <Opening />
+          </>
+        )}
+        {groundInk ? (
+          <>
+            <FilmBlock />
+            <Building />
+          </>
+        ) : (
+          <Features />
+        )}
+        <AppStage sky={groundInk ? 'river' : 'drop'} />
+        {groundInk ? (
+          <>
+            <Ahead />
+            <HowMorph />
+          </>
+        ) : (
+          <HowItWorks />
+        )}
+        {!groundInk && <Daybreak from="ink" />}
         <Sizes />
         <Detail />
         <Faq />
