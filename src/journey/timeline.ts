@@ -40,6 +40,7 @@ import { buildMarkField, MARK_FLOW, type MarkField } from './markField'
 import { markTiming, roomTiming } from './timing'
 import { ROW } from './row'
 import { callLate } from '../landing/flags'
+import { asked as address } from '../address'
 
 const clamp = (x: number, a = 0, b = 1) => Math.max(a, Math.min(b, x))
 /** GLSL's smoothstep. */
@@ -138,11 +139,11 @@ export function startJourney(parts: JourneyParts): () => void {
    *  journey goes on from the one end of it to the other as one picture, and its section is that much shorter.
    *  (The scroll is eased first and then carried over the gap: `along`.) The header's call to action comes as the
    *  light runs into the mark, not with a first film. */
-  const filmsAfter = !!films && new URLSearchParams(window.location.search).get('films') === 'after'
+  const filmsAfter = !!films && address.get('films') === 'after'
   /** (&flow=soar&dawn=river: the river stays lit while the morning comes up over it, its light pouring into the
    *  morning's, and goes out only once the morning has covered it: soar/Daybreak.tsx) */
   const pour =
-    filmsAfter && new URLSearchParams(window.location.search).get('flow') === 'soar' && new URLSearchParams(window.location.search).get('dawn') === 'river'
+    filmsAfter && address.get('flow') === 'soar' && address.get('dawn') === 'river'
   const skipped = filmsAfter ? roomShut[1] - roomOpen[0] : 0
   const along = (eased: number) => {
     const s = eased * (1 - skipped)
@@ -157,19 +158,19 @@ export function startJourney(parts: JourneyParts): () => void {
    *  picture). Or, when the address ends in ?wave=traced or ?wave=old, one of the two earlier currents, which
    *  the shader draws itself: the wave traced from the reference frame, or the first course. The traced wave
    *  also stands in if the picture does not come. (journey.module.css gives each its gate and its words.) */
-  const asked = new URLSearchParams(window.location.search).get('wave')
+  const asked = address.get('wave')
   const traced = asked !== 'old'
   /** The gate as the doorway of a stock exchange of our own, when the address asks for it (?gate=exchange): its
    *  pictures stand in for the guide's (exchange.ts, shader.ts "the exchange"). Only with the films. */
-  const exchanged = !!films && new URLSearchParams(window.location.search).get('gate') === 'exchange'
+  const exchanged = !!films && address.get('gate') === 'exchange'
   /** A try beside it (?gate=exchange&layout=right): the exchange stands at the right of the screen (Journey.tsx
    *  and journey.module.css lay it out). Its pictures then end within the screen, so their light is thinned out
    *  towards their sides (shader.ts). */
-  const sided = exchanged && new URLSearchParams(window.location.search).get('layout') === 'right'
+  const sided = exchanged && address.get('layout') === 'right'
   /** Another (?drop=mark): the light goes to the gate as the mark (shader.ts, "the beats of the light ... the
    *  mark"). It needs the mark's outline, which is worked out once the opening words stand still: it is not
    *  wanted before the films are past. */
-  const viaMark = !!films && new URLSearchParams(window.location.search).get('drop') === 'mark'
+  const viaMark = !!films && address.get('drop') === 'mark'
   let markAsked = false
   // (the exchange keeps the guide's river: it runs on from the foot of the exchange's steps)
   let pictured = asked !== 'old' && asked !== 'traced'
@@ -391,7 +392,7 @@ export function startJourney(parts: JourneyParts): () => void {
       g.uniform3fv(u.markHead, MARK_FLOW.head)
     }
     // (the address ?drop=lens: the drop as the films' lamp out of focus, grainy: shader.ts, "the lamp")
-    g.uniform1f(u.lens, new URLSearchParams(window.location.search).get('drop') === 'lens' ? 1 : 0)
+    g.uniform1f(u.lens, address.get('drop') === 'lens' ? 1 : 0)
     journey.dataset.shader = ''
     ready = true
     state.scene = true

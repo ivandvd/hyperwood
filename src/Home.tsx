@@ -7,6 +7,7 @@
  * was before them: the mark as a body of black liquid.
  */
 import { useEffect } from 'react'
+import { asked } from './address'
 import { Journey } from './journey/Journey'
 import { startGlide } from './journey/glide'
 import { After } from './landing/After'
@@ -15,7 +16,7 @@ import { Footer } from './landing/Footer'
 import { MegaFooter } from './landing/soar/MegaFooter'
 import { LiquidFoot } from './landing/soar/foot/LiquidFoot'
 
-const films = new URLSearchParams(window.location.search).get('hero') !== 'mark'
+const films = asked.get('hero') !== 'mark'
 
 export function Home() {
   useEffect(() => startGlide(), [])

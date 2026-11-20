@@ -27,6 +27,7 @@ node scripts/product/fetch-market.cjs   # the prices the app shows (src/product/
 
 The pictures of the app on the landing page are taken of the app's own markup on the studio page (`studio.html`, not linked; what it shows is listed at the top of `src/product/Studio.tsx`): `scripts/product/shots.js` takes them from the dev server, then `bake.py` and `bake-standing.py` make them into `src/assets/product/` (how to run each is at its top). Made again from the same markup, they come out the same to the pixel. The pictures that are photographs of a phone (the three phone shots, and the phone standing on the last screen) are a model of the phone drawn in the browser, with the app's own screen under its glass (`scripts/product/shot.html`, `shot.js`); the takes make those too.
 
+- **The plain address shows the page as it now stands.** It was built as a row of tries, each behind a word in the address (all named below). The ones that were taken are the defaults (`src/address.ts`): `gate=exchange&layout=right&drop=mark&films=after&logo=swim&flow=soar&phones=shot&cards=under&foot=neon&ground=ink`. A word given in the address still wins over its default (`&ground=paper`, `&foot=ink`, and the tries that were not taken: `&how=cards`, `&arc=plain`, `&name=solid`, `&call=late`), and `?page=before` shows the landing page as it was before any of them.
 - `?hero=mark` shows the journey with the hero it had before the films: the mark as a body of black liquid.
 - `?drop=lens` shows the drop of light with the films' texture (see "The drop through the lens" below), for comparison with the plain drop the page shows.
 - `?demo=1` plays the hero's whole scroll as a timed take, with no scrolling.
@@ -343,9 +344,8 @@ The pictures in the page took 800 samples at that size, about 3.5 minutes on a d
 
 - **Copy is a draft.** It follows the architecture paper; it needs sign-off.
 - **The call to action** has no destination yet: it opens the note that the app is not open (`launch` in `src/content.home.ts`; put the app's address there when it has one).
-- **What the site knows about itself** (`site.json`) is empty: its address (without it there is no sitemap, no canonical address, and the share picture is named by a relative address, which some programs do not follow), a contact address, the analytics id and the form's endpoint.
+- **What the site knows about itself** (`site.json`): its address is the Vercel one (`https://hyperwood.vercel.app`), for the sitemap, the canonical addresses and the share picture; change it there when the site has its own domain. A contact address, the analytics id and the form's endpoint are still to come.
 - **The legal pages are drafts.** They need the company's legal name, a contact address and the law they stand under, and a lawyer's reading, before the site is public.
-- **The plain address** still shows the landing page as it was before the parts that are behind addresses. Which of them the plain address shows is to be decided.
 - **A real phone** has not been tried: the phone's and the tablet's screens were checked in a desktop browser set to their sizes, with the processor slowed.
 - **Stake and the channels' addresses** (X, Discord, Telegram) are still to come: the gate's links to them point nowhere until they are set (nothing in the papers describes staking), and Learn and Docs open the Architecture page until there are guides and docs (`panel` in `src/content.home.ts`).
 - **The gate's words** ("Trade the market. Privately, anytime." and its line) are a draft. "Anytime" has to agree with the papers, which give each market its own sessions. The approved line stands in the page's description and in the journey before the films (`?hero=mark`), no longer at the gate.

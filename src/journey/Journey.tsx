@@ -24,6 +24,7 @@
  */
 import { Fragment, useCallback, useEffect, useRef, type CSSProperties, type Ref } from 'react'
 import { createPortal } from 'react-dom'
+import { asked } from '../address'
 import { BRAND, home } from '../content.home'
 import lockup from '../assets/brand/hyperwood-lockup-neon.svg'
 import { FilmStack, type FilmStackHandle } from '../film/FilmStack'
@@ -48,7 +49,6 @@ const shows = Object.fromEntries(home.films.map((film) => [film.film, film.shows
  *  An upright screen has the column across it, the exchange under it, and at the bar's right a button that opens
  *  the way around and the call to action (Menu.tsx). The buttons are the softer ones (ui/LaunchLink.tsx).
  *  (journey.module.css, "the hero with the exchange at the right".) */
-const asked = new URLSearchParams(window.location.search)
 const sided = asked.get('gate') === 'exchange' && asked.get('layout') === 'right'
 /** Another (the address ?films=after): the films come after the hero (landing/FilmBlock.tsx), and the journey goes
  *  from the opening eye straight on to the gate. Its box for the films stays, empty: the light still counts by it

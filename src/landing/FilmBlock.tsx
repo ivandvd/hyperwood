@@ -23,6 +23,7 @@
  * Where everything stands: filmBlock.module.css. The words: `filmsAfter` in content.home.ts.
  */
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { asked } from '../address'
 import { home } from '../content.home'
 import { films, SHAPE, type FilmName } from '../film/reel'
 import { MarkTile } from './MarkTile'
@@ -34,7 +35,6 @@ import s from './filmBlock.module.css'
 const story = home.filmsAfter
 /** With the logo that stays at the upper left (a try: the address &logo=swim, journey/SwimLogo.tsx), the swimming
  *  mark is the logo's, and the third column has no card. */
-const asked = new URLSearchParams(window.location.search)
 const swimLogo = asked.get('gate') === 'exchange' && asked.get('layout') === 'right' && asked.get('logo') === 'swim'
 /** What each film shows, for those who cannot see it (the journey's own words for them). */
 const shows = Object.fromEntries(home.films.map((one) => [one.film, one.shows])) as Record<FilmName, string>

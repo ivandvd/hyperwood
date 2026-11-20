@@ -1,5 +1,6 @@
-/** The tries the landing page's address can ask for, read once. */
-const asked = new URLSearchParams(window.location.search)
+/** The tries the landing page's address can ask for, read once (through address.ts, where the ones that were taken
+ *  are the defaults: the plain address shows the page with them). */
+import { asked } from '../address'
 
 /** ?films=after: the films after the hero, the statement, the band, the app's stage and the last screen (After.tsx).
  *  Only with the films' hero. */
