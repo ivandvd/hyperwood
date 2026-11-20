@@ -208,6 +208,199 @@ export const home = {
     },
   ],
 
+  /** A try, &flow=soar (with ?films=after): the page after the hero laid out part for part as trysoar.com lays out
+   *  its own, light and dark by turns (landing/soar). The words of its parts; only what the papers say. A draft. */
+  soar: {
+    /** the statement on the light ground, under the hero: a line in two tones, a sentence, the call to action */
+    opening: {
+      dim: 'Private trading for public markets.',
+      bright: 'Sealed. Matched. Proven.',
+      body: 'We combine a confidential trading engine with settlement anyone can verify. Built for traders who keep their book closed.',
+    },
+    /** under the app's stage: two cards, each who it is for and why (the Investor Overview's own reasons) */
+    sizes: {
+      title: ['Built for', 'every size.'],
+      cards: [
+        { lead: 'For traders.', rest: 'Size stops being a liability. A position no one can see is a position no one can hunt.', film: 'booth' },
+        { lead: 'For funds and desks.', rest: 'Hedge without showing the book to competitors, or the order to a rival before the market.', film: 'board' },
+      ],
+    },
+    /** a row of cards, each one part of the exchange, moved along by the arrows or the finger */
+    detail: {
+      title: ['The exchange', 'in detail.'],
+      cards: [
+        { lead: 'Sealed orders', rest: 'Encrypted on your device and signed as one instruction.', picture: 'ticket' },
+        { lead: 'Private matching', rest: 'A confidential engine matches orders. There is no public book.', picture: 'booth' },
+        { lead: 'Proofs', rest: 'A zero-knowledge proof checks every batch on a public contract.', picture: 'request' },
+        { lead: 'Settlement', rest: 'A Layer 3 that settles to Robinhood Chain, and through it to Ethereum.', picture: 'seal' },
+        { lead: 'Open listings', rest: 'Anyone can list a market with an ETH bond and an approved template.', picture: 'board' },
+        { lead: 'Payouts', rest: 'Close into collateral, or into an equity tracker you can hold or export.', picture: 'payout' },
+      ],
+    },
+    /** How a trade goes, from the device to the chain (soar/HowItWorks.tsx): the request's four stages as the papers
+     *  name them, after the sealing on the device. Each: the stage, what happens there, and, where the papers give
+     *  one, the development target for it (`figure`, `of`; the section says once that these are targets). Only what
+     *  the papers say. A draft for approval. */
+    how: {
+      title: ['How it works.', 'From your device to the chain.'],
+      steps: [
+        {
+          name: 'Sealed',
+          text: 'Your device encrypts the order and signs it as one instruction. Market, direction, size and leverage stay inside it.',
+          figure: '1',
+          of: 'signed instruction',
+        },
+        {
+          name: 'Accepted',
+          text: 'The sequencer adds it to a public queue and returns a request id. The queue shows that a request arrived and when, not what it says.',
+          figure: '<1 s',
+          of: 'feedback on an accepted order',
+        },
+        {
+          name: 'Matched',
+          text: 'A sealed engine matches orders in batches. There is no public order book and no public tape.',
+          figure: '250 ms',
+          of: 'blocks',
+        },
+        {
+          name: 'Proven',
+          text: 'A zero-knowledge proof shows that the batch followed the rules, without showing the orders. A public contract checks it.',
+          figure: '5–12 s',
+          of: 'to a verified proof',
+        },
+        {
+          name: 'Settled',
+          text: 'The batch settles to Robinhood Chain, and through it to Ethereum. Your fill comes back as a receipt only your key opens.',
+          figure: '~30 s',
+          of: 'to Robinhood Chain at low load',
+        },
+      ],
+      targets: 'Times are development targets, not measurements.',
+      /** what the pictures beside the stages show, for those who cannot see them */
+      shows: [
+        'An order being sealed: market NVDA-PERP, long, size 10, leverage 2.5 times and margin $603.48 turn into ciphertext, signed as one instruction.',
+        'The public queue: request ids and times, and this request, 0x3fa9…c2d1, accepted at 14:32:07.',
+        'The sealed engine: two sealed orders meet inside it and are filled in one batch.',
+        'The proof of the batch, checked on the public contract.',
+        'The batch going down from Hyperwood to Robinhood Chain and Ethereum, and the receipt coming back.',
+      ],
+    },
+    /** The same position as its owner sees it and as the network does (soar/WhoSees.tsx): the Investor Overview's
+     *  list of what is hidden and what is still visible. A draft for approval. */
+    who: {
+      title: ['Who sees what.', 'The same trade, two views.'],
+      views: ['You', 'The network'],
+      hidden: {
+        label: 'Hidden',
+        list: ['Market', 'Direction', 'Size', 'Leverage', 'Collateral', 'Entry', 'Profit and loss'],
+      },
+      visible: {
+        label: 'Still visible',
+        list: ['Your address', 'When you send', 'Deposits and withdrawals', 'Total open interest', 'That batches run', 'Market specifications'],
+      },
+      note: 'Privacy holds within a defined threat model. It is not anonymity.',
+    },
+    /** Questions, each answered only with what the papers say (soar/Faq.tsx). A draft for approval. */
+    faq: {
+      title: ['Questions.', 'Straight answers.'],
+      items: [
+        {
+          q: 'What is Hyperwood?',
+          a: 'A proposed network for private perpetual futures on stocks and equity indices. It is a Layer 3 that settles to Robinhood Chain, and through it to Ethereum.',
+        },
+        {
+          q: 'What is an equity perpetual?',
+          a: 'A future on the price of a stock or an index, with no expiry date. You go long or short with margin, and close when you choose.',
+        },
+        {
+          q: 'What stays private?',
+          a: 'The market you trade, your direction, size, leverage, collateral, entry, and profit or loss. Your fills come back as encrypted receipts that only your key opens.',
+        },
+        {
+          q: 'What can others still see?',
+          a: 'That your address sent a request and when, deposits and withdrawals, total open interest, that batches run, and each market’s specifications. Privacy holds within a defined threat model; it is not anonymity.',
+        },
+        {
+          q: 'How do I know a batch was matched fairly?',
+          a: 'Each batch comes with a zero-knowledge proof that it followed the rules. A public contract checks the proof before the batch settles.',
+        },
+        {
+          q: 'Do I own the shares?',
+          a: 'No. Markets give synthetic price exposure, not shareholder ownership or issuer permission. When you close, you can take your proceeds as an equity tracker: a separately backed, unlevered long you can hold, or export as a public token.',
+        },
+        {
+          q: 'What do I pay gas in?',
+          a: 'ETH. It is the network’s gas, and the bond for listing a market.',
+        },
+        {
+          q: 'Who can list a market?',
+          a: 'Anyone, with an ETH bond and an approved template. A market goes through a warmup before it is active, and follows its stock’s sessions, holidays and halts.',
+        },
+        {
+          q: 'Is Hyperwood live?',
+          a: 'Not yet. It is a proposed network. The plan runs through an integrated devnet and a public testnet to a first mainnet stage, about seven months from its start.',
+        },
+        {
+          q: 'Is Hyperwood affiliated with Robinhood?',
+          a: 'No. It is built to settle on Robinhood Chain, which does not establish an affiliation with Robinhood.',
+        },
+      ],
+    },
+    /** the last screen: its line is the dark last screen's (`finale`); what its picture shows */
+    ending: {
+      shows: 'The Hyperwood mobile app on an iPhone: the NVDA perpetual with its chart, the account’s position, and the buttons to go long or short.',
+    },
+  },
+
+  /** With the films after the hero (the address ?films=after), the app on its stage (landing/AppStage.tsx): the
+   *  headline over the monitor, in its two lines, the first dim and the second bright; what the monitor's picture
+   *  shows, for those who cannot see it; and the three cards under it, each a claim (`lead`) and what it means
+   *  (`rest`) under a close view of that part of the app (`shows`). Only what the papers say. A draft for approval. */
+  appStage: {
+    title: ['Everything on your screen.', 'Only you can see it.'],
+    shows:
+      'The Hyperwood web app on a monitor: a list of stock and index markets with their prices, the chart of the NVDA perpetual with the account’s entry and its waiting order marked on it, the account’s two positions, a ticket that signs a sealed order, an order book whose prices and sizes are sealed, and the last request, accepted, matched and proven, settling.',
+    cards: [
+      {
+        lead: 'Trade sealed.',
+        rest: 'Your order is encrypted before it leaves your device.',
+        shows: 'The order ticket: long or short, size, limit price, leverage, and the button that signs the sealed order.',
+      },
+      {
+        lead: 'Proof on every fill.',
+        rest: 'Matched in a sealed engine, checked by a public contract.',
+        shows: 'A request on its way: accepted by the sequencer, matched in the sealed engine, proven by a zero-knowledge proof, settling on Robinhood Chain.',
+      },
+      {
+        lead: 'Close into the stock.',
+        rest: 'Keep the collateral, or take the equity tracker.',
+        shows: 'Closing a position: its cleared equity, and the choice to be paid out as collateral or as units of the stock’s tracker.',
+      },
+    ],
+    /** Under the cards, the mobile app on three phones, standing before the horizon the stage ends on: its two
+     *  lines, a sentence, and what the picture shows. */
+    pocket: {
+      title: ['The same account.', 'In your pocket.'],
+      body: 'Open, manage and close positions from your phone. Encrypted receipts, a private history and key recovery keep the account yours.',
+      shows:
+        'The Hyperwood mobile app on three phones: a receipt for a sealed order, accepted, matched and proven; the NVDA perpetual with its chart, the account’s position and the buttons to go long or short; and a position being closed, paid out as units of the stock’s tracker.',
+      shots: [
+        'The Hyperwood mobile app on an iPhone, seen close: the NVDA perpetual at 156.31 with its chart.',
+        'The receipt for a sealed order on an iPhone: accepted, matched and proven.',
+        'A position being closed on an iPhone: the cleared equity, paid out as units of the NVDA tracker.',
+      ],
+    },
+  },
+
+  /** With the films after the hero, the page's last screen before its foot (landing/Finale.tsx): a line in two
+   *  tones, the first dim and the second bright, beside the app on a standing phone, and the call to action
+   *  (`launch`, below). The second sentence is the Investor Overview's own line; whether it is said in public is the
+   *  client's to decide. A draft for approval. */
+  finale: {
+    title: ['Trade the market.', 'Show them nothing.'],
+    shows: 'The Hyperwood mobile app on a phone standing on the ground, lit from behind, its long shadow running out before it.',
+  },
+
   markets: {
     line: 'Stocks and indices.',
     body: 'Perpetuals on stock prices and equity indices, each with its own sessions and risk limits. Listing a market takes a bond in ETH.',
@@ -256,6 +449,8 @@ export const home = {
       'Privacy holds within a defined threat model. Transaction timing and the sender can still be visible.',
       'Deployment on Robinhood Chain does not establish an affiliation with Robinhood.',
     ],
+    /** (with &foot=: a few words in bold before each note, as the reference leads its own) */
+    leads: ['Not yet live.', 'Synthetic exposure.', 'Private within limits.', 'No affiliation.'],
     rights: '© 2026 Hyperwood',
   },
 }

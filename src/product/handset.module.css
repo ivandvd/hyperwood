@@ -1,0 +1,31 @@
+/* The phones (Handset.tsx). A phone is its screen (390 by 844: phoneApp.module.css) in a frame 12 px broad with
+   round corners, a cut-out at the screen's top. Three stand in a row laid out at their own size (1620 by 900) and
+   scaled to the width asked for; the eye is level with their feet, so they stand on one line however far back, far enough away (2400 px) that the turn of the
+   outer two reads without their far edges shrinking much. */
+.row { position: relative; }
+.rig { position: absolute; left: 0; top: 0; width: 1620px; height: 900px; transform-origin: 0 0; display: flex; justify-content: center; align-items: center; gap: 96px; perspective: 2400px; perspective-origin: 50% 96.5%; transform-style: preserve-3d; }
+.phone { position: relative; flex: none; width: 414px; height: 868px; transform-style: preserve-3d; }
+.frame {
+  position: absolute; inset: 0; padding: 12px; border-radius: 62px; background: #050505;
+  box-shadow: inset 0 0 0 1.5px rgba(244, 245, 240, 0.2), inset 0 0 0 5px #111210, 0 0 0 1px #000;
+}
+.glass { position: relative; width: 390px; height: 844px; border-radius: 50px; overflow: hidden; background: #0a0a0a; }
+/* (a breath of the room's light across the glass) */
+.glass::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, rgba(244, 245, 240, 0.04), rgba(244, 245, 240, 0) 36%); }
+.island { position: absolute; left: 50%; top: 23px; width: 118px; height: 34px; margin-left: -59px; border-radius: 18px; background: #000; }
+
+/* One phone standing on the ground (Standing.tsx), laid out at its own size (1700 by 1500) and scaled. The eye is
+   above it, far away (4200 px); the whole world is tipped towards it, so the ground is seen. The phone stands on the
+   ground's middle; the ground is a flat sheet laid down at its foot. */
+.standRig { position: absolute; left: 0; top: 0; width: 1700px; height: 1500px; transform-origin: 0 0; perspective: 4200px; perspective-origin: 50% 40%; }
+.world { position: absolute; left: 50%; top: 170px; width: 414px; height: 868px; margin-left: -80px; transform-style: preserve-3d; transform-origin: 50% 100%; }
+.ground { position: absolute; left: 50%; top: 100%; transform: rotateX(90deg); }
+/* (the pool: Hyper Neon about the phone's foot, --light, set on the ground. Its fall: 0.92 exp(-(r / 0.32)^1.3),
+   let go to nothing between 0.6 and 0.9 of the radius, at sixteen stops, so it bends nowhere. Smooth: a grain in it
+   made the picture four times as heavy) */
+.pool { position: absolute; width: 1560px; height: 1560px; margin: -780px 0 0 -780px; border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--light), 0.9200), rgba(var(--light), 0.8786) 3%, rgba(var(--light), 0.8009) 7%, rgba(var(--light), 0.6957) 12%, rgba(var(--light), 0.5731) 18%, rgba(var(--light), 0.4454) 25%, rgba(var(--light), 0.3384) 32%, rgba(var(--light), 0.2417) 40%, rgba(var(--light), 0.1691) 48%, rgba(var(--light), 0.1161) 56%, rgba(var(--light), 0.0801) 63%, rgba(var(--light), 0.0429) 70%, rgba(var(--light), 0.0191) 76%, rgba(var(--light), 0.0054) 82%, rgba(var(--light), 0.0007) 87%, rgba(var(--light), 0.0000) 90%); }
+.shade { position: absolute; inset: 0; filter: blur(16px); }
+.shade i { position: absolute; inset: 0; }
+.stand { position: absolute; inset: 0; transform-style: preserve-3d; }
+/* (the body: the frame's shape, one behind another every 2 px, in the frame's metal) */
+.layer { position: absolute; inset: 0; border-radius: 62px; background: #2f302d; box-shadow: inset 0 0 0 2px #4b4c46; }

@@ -208,13 +208,27 @@ export function FilmBlock() {
     })
     if (box.current) sized.observe(box.current)
 
+    // Where the block is, read when the page has been scrolled (or resized, or the block comes into reach): then the
+    // page is as it was last drawn and reading it costs nothing. The frame only writes. (Read in the frame, after
+    // the app's films further down had written their styles, a reading made the browser work the page's styles out
+    // again.)
+    // (the window's height too: in this browser reading it in the frame works the page's layout out as well)
+    let travel = 1
+    let top = 0
+    let boxH = 0
+    let vh = 1
+    const read = () => {
+      travel = Math.max(1, el.offsetHeight - held.offsetHeight)
+      top = el.getBoundingClientRect().top
+      boxH = box.current?.clientHeight ?? 0
+      vh = Math.max(1, innerHeight)
+    }
+
     const update = () => {
       raf = 0
-      const travel = Math.max(1, el.offsetHeight - held.offsetHeight)
-      const top = el.getBoundingClientRect().top
       const along = clamp(-top / travel)
       // (how far the block has come up the screen: the first film's words come in by it, ENTER, and the card)
-      const come = clamp(1 - top / Math.max(1, innerHeight))
+      const come = clamp(1 - top / vh)
       const card = easeOut(clamp((come - ENTER.tile[0]) / (ENTER.tile[1] - ENTER.tile[0])))
       put(tile.current, 'opacity', card.toFixed(3))
       put(tile.current, 'transform', card < 1 ? `translate3d(0, ${((1 - card) * ENTER.tile[2]).toFixed(3)}em, 0)` : 'none')
@@ -227,13 +241,14 @@ export function FilmBlock() {
       const from = Math.min(story.length - 2, Math.floor(at))
       const f = at - from
       if (light && bulbs[from + 1]) {
-        const drift = (box.current?.clientHeight ?? 0) * 0.07
+        const drift = boxH * 0.07
         const a = bulbs[from]
         const b = bulbs[from + 1]
         const go = smooth(0.25, 0.75, f)
         const x = a.x + (b.x - a.x) * go
         const y = a.y - f * drift + (b.y + (1 - f) * drift - (a.y - f * drift)) * go
-        const half = (light.offsetWidth || a.w * 0.3) / 2
+        // (the lamp is as wide as measure() makes it)
+        const half = (a.w * 0.3) / 2
         const bright = 1 - Math.max(1 - smooth(0, 0.5, f), 1 - smooth(0, 0.5, 1 - f))
         put(light, 'visibility', bright > 0.002 ? 'visible' : 'hidden')
         if (bright > 0.002) {
@@ -280,7 +295,9 @@ export function FilmBlock() {
         factLists.current.forEach((f, i) => f?.setAttribute('aria-hidden', i === shown ? 'false' : 'true'))
       }
     }
+    // (each time the frame is asked for, the block is read first: see `read`)
     const later = () => {
+      read()
       if (!raf) raf = requestAnimationFrame(update)
     }
     const watch = new IntersectionObserver(([entry]) => {
@@ -289,6 +306,7 @@ export function FilmBlock() {
     })
     watch.observe(el)
     measure()
+    read()
     update()
     addEventListener('scroll', later, { passive: true })
     addEventListener('resize', later)

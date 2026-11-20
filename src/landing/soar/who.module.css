@@ -1,0 +1,91 @@
+/* Who sees what (WhoSees.tsx), on the Ink under how a trade goes: the headline in two lines as the others in the dark,
+   then in the page's middle column the position card at the left and the two lists at the right. */
+.who {
+  --curve: cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative; margin: 0 calc(-1 * var(--edge)); padding: 2vw 0 11vw;
+  background: var(--hw-ink); color: var(--hw-white); font-family: var(--font-text); font-synthesis: none;
+}
+.title {
+  margin: 0 auto; width: fit-content; max-width: calc(100vw - 2 * var(--edge)); text-align: center;
+  font-family: var(--font-display); font-size: clamp(32px, 3.6vw, 88px); font-weight: 600; line-height: 1.03; letter-spacing: -0.042em;
+}
+.title span { display: block; color: rgba(244, 245, 240, 0.56); }
+.title b { display: block; font-weight: 600; color: var(--hw-white); }
+.body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.86fr); gap: 4.6vw; align-items: center; width: 56.43vw; margin: 5.4vw auto 0; }
+
+/* ---------------------------------------------------------------- the card */
+.card {
+  position: relative; padding: 1.25vw 1.35vw 1.1vw; border-radius: 18px; background: rgba(244, 245, 240, 0.035);
+  box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1); font-family: var(--font-mono); font-size: clamp(12.5px, 0.84vw, 16px); line-height: 1.3;
+  will-change: transform;
+}
+/* (the switch: two halves of a pill, a thumb under the chosen one) */
+.switch {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border-radius: 999px;
+  background: rgba(244, 245, 240, 0.06); box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.08);
+}
+.switch button {
+  position: relative; z-index: 1; padding: 0.62em 0; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  font: 500 clamp(13px, 0.84vw, 16px) / 1 var(--font-text); letter-spacing: -0.01em; color: rgba(244, 245, 240, 0.6);
+  transition: color 300ms ease;
+}
+.switch button[aria-pressed='true'] { color: var(--hw-ink); }
+.switch button:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 2px; }
+.thumb {
+  position: absolute; left: 4px; top: 4px; bottom: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--hw-paper);
+  transition: transform 450ms var(--curve), background-color 450ms ease;
+}
+.card[data-view='network'] .thumb { transform: translateX(100%); background: var(--hw-neon); }
+.head { display: flex; justify-content: space-between; gap: 12px; margin: 1.1vw 0 0.5vw; font-size: clamp(10px, 0.6vw, 12px); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 245, 240, 0.44); }
+
+.rows { margin: 0; }
+.rows > div { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 0.5vw 0; border-top: 1px solid rgba(244, 245, 240, 0.07); }
+.rows dt { color: rgba(244, 245, 240, 0.5); transition: color 300ms ease; }
+.rows dd { position: relative; margin: 0; color: var(--hw-white); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rows dd > span:first-child { position: relative; display: inline-block; padding: 0 2px; transition: color 300ms ease; }
+/* (a hidden value, in the network's view: its ciphertext dim under a bar drawn across it from the right) */
+.bar {
+  position: absolute; inset: -3px -2px; border-radius: 4px; transform-origin: 100% 50%; transform: scaleX(0);
+  background: repeating-linear-gradient(135deg, rgba(204, 255, 0, 0.32) 0 2px, rgba(204, 255, 0, 0.1) 2px 6px);
+  transition: transform 300ms ease; will-change: transform;
+}
+.card[data-view='network'] .rows > div:not([data-seen]) dd > span:first-child { color: rgba(204, 255, 0, 0.45); }
+.card[data-view='network'] .bar { transform: none; transition: transform 520ms var(--curve) 260ms; }
+/* (what the network still sees, marked in Neon in its view) */
+.rows > div[data-seen]::before {
+  content: ''; position: absolute; left: -0.72vw; top: 22%; bottom: 22%; width: 2px; background: var(--hw-neon);
+  transform: scaleY(0); transition: transform 300ms ease;
+}
+.card[data-view='network'] .rows > div[data-seen]::before { transform: none; transition: transform 500ms var(--curve) 400ms; }
+.card[data-view='network'] .rows > div[data-seen] dt { color: rgba(244, 245, 240, 0.86); }
+.card[data-view='network'] .rows > div[data-seen] dd { color: var(--hw-neon); }
+.away { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------------------------------------------------------------- the lists */
+.lists { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.6vw 2.2vw; align-content: center; }
+.list p { margin: 0 0 0.7vw; font-family: var(--font-mono); font-size: clamp(10.5px, 0.64vw, 13px); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 245, 240, 0.44); }
+.list ul { margin: 0; padding: 0; list-style: none; }
+.list li { display: flex; align-items: center; gap: 10px; padding: 0.55vw 0; border-top: 1px solid rgba(244, 245, 240, 0.08); font-size: clamp(14px, 0.9vw, 18px); letter-spacing: -0.012em; color: rgba(244, 245, 240, 0.86); }
+.list li::before { content: ''; width: 7px; height: 7px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.4); }
+.list[data-kind='visible'] li::before { background: var(--hw-neon); box-shadow: none; }
+.note { grid-column: 1 / -1; margin: 0.4vw 0 0; font-family: var(--font-mono); font-size: clamp(11px, 0.66vw, 13px); line-height: 1.5; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(244, 245, 240, 0.42); }
+
+/* ---------------------------------------------------------------- an upright or narrow screen: the card, then the
+   lists side by side */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .who { padding: 6vw 0 24vw; }
+  .title { font-size: clamp(30px, 8.6vw, 56px); padding: 0 var(--edge); text-wrap: balance; }
+  .body { grid-template-columns: minmax(0, 1fr); gap: 34px; width: auto; margin: 12vw var(--edge) 0; }
+  .card { padding: 14px 16px 12px; border-radius: 16px; font-size: 13px; }
+  .switch button { font-size: 14px; }
+  .head { margin: 14px 0 6px; font-size: 10.5px; }
+  .rows > div { padding: 7px 0; }
+  .rows > div[data-seen]::before { left: -9px; }
+  .lists { gap: 26px 18px; }
+  .list p { margin-bottom: 8px; font-size: 10.5px; }
+  .list li { padding: 8px 0; font-size: 14.5px; }
+  .note { margin-top: 4px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .who *, .who *::before, .who *::after { transition: none !important; }
+}

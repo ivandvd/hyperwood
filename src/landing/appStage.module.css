@@ -1,0 +1,182 @@
+/* The app's stage (AppStage.tsx), laid out as the reference lays out its own (trysoar.com, measured on that page at
+   1905 by 949): everything in the middle; the headline at 4.3 hundredths of the width (there 31.5 hundredths of the screen's
+   height down; here a fifth of the screen under the gate's crown, where the arch is broad enough for it); the monitor under it, 66 hundredths of the width wide; the three cards in a row 56.4
+   hundredths wide, 12 px apart, each 3 by 4 with corners of 18 px and a line of 1.4 hundredths of the width at its
+   foot; the horizon at the stage's end 15 hundredths of the width tall.
+
+   It reaches from one edge of the screen to the other (the page's own margins are taken back), on the page's Ink, and
+   begins a fifth of a screen under the statement's steps, so that they end before the arch's light begins. */
+.stage {
+  --inner: 56.43vw;
+  --arch: 82vw;
+  /* (the room over the gate's crown: its halo reaches three tenths of the arch's radius up, and must end within it) */
+  --room: max(12vh, 13.5vw);
+  --r: calc(var(--arch) / 2);
+  position: relative; z-index: 0; margin: clamp(120px, 19vh, 240px) calc(-1 * var(--edge)) 0; padding-top: var(--room); overflow: clip;
+  color: var(--hw-white); font-family: var(--font-text); font-synthesis: none;
+}
+
+/* ------------------------------------------------------------------ the light: the gate's arch, the air under it,
+   the dust. All of it Hyper Neon on Ink, let through a grain (--grain, set by the page) */
+.sky { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+/* The halo: light from behind the gate, about its crown. It is brightest on the arch and is gone three tenths of the
+   arch's radius out, so over the crown the page's Ink turns to light and back by degrees, with no edge: what the
+   reference has between its page and its stage, in the page's own colour. Down the sides it is lost as the arch is. */
+.halo {
+  position: absolute; left: 0; right: 0; top: 0; height: calc(var(--room) + 64vh);
+  background: radial-gradient(circle at 50% calc(var(--room) + var(--r)), rgba(204, 255, 0, 0) calc(var(--r) - 1px), rgba(204, 255, 0, 0.5) var(--r), rgba(204, 255, 0, 0.22) calc(var(--r) * 1.054), rgba(204, 255, 0, 0.08) calc(var(--r) * 1.134), rgba(204, 255, 0, 0.022) calc(var(--r) * 1.22), rgba(204, 255, 0, 0) calc(var(--r) * 1.29));
+  -webkit-mask-image: var(--grain, linear-gradient(#000, #000)), linear-gradient(180deg, #000 0, #000 calc(var(--room) + 6vh), rgba(0, 0, 0, 0.5) calc(var(--room) + 22vh), transparent calc(var(--room) + 44vh));
+  mask-image: var(--grain, linear-gradient(#000, #000)), linear-gradient(180deg, #000 0, #000 calc(var(--room) + 6vh), rgba(0, 0, 0, 0.5) calc(var(--room) + 22vh), transparent calc(var(--room) + 44vh));
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+/* The gate: its arch and the upper part of its sides, a hairline that glows a little. It is brightest at its crown
+   and is lost in the dark on its way down the sides. (The box is larger than the arch by 80 px every way, so the
+   glow is not cut where the box ends.) */
+.gate {
+  position: absolute; left: 50%; top: calc(var(--room) - 80px); width: calc(var(--arch) + 160px); height: 190vh; margin-left: calc(var(--arch) / -2 - 80px);
+  -webkit-mask-image: var(--grain, linear-gradient(#000, #000)), linear-gradient(180deg, #000 0, rgba(0, 0, 0, 0.82) 14%, rgba(0, 0, 0, 0.42) 30%, rgba(0, 0, 0, 0.14) 46%, transparent 62%);
+  mask-image: var(--grain, linear-gradient(#000, #000)), linear-gradient(180deg, #000 0, rgba(0, 0, 0, 0.82) 14%, rgba(0, 0, 0, 0.42) 30%, rgba(0, 0, 0, 0.14) 46%, transparent 62%);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+.gate i {
+  position: absolute; inset: 80px 80px 0; border: 1.5px solid #ccff00; border-bottom: 0;
+  border-radius: calc(var(--arch) / 2) calc(var(--arch) / 2) 0 0;
+  box-shadow: 0 0 18px rgba(204, 255, 0, 0.3), 0 0 64px rgba(204, 255, 0, 0.12), inset 0 0 22px rgba(204, 255, 0, 0.2), inset 0 0 110px rgba(204, 255, 0, 0.07);
+}
+/* the air under the crown: the gate's light, a little way in */
+.veil {
+  position: absolute; left: 50%; top: var(--room); width: var(--arch); height: 62vh; margin-left: calc(var(--arch) / -2);
+  border-radius: calc(var(--arch) / 2) calc(var(--arch) / 2) 0 0;
+  background: radial-gradient(ellipse 52% 100% at 50% 0, rgba(204, 255, 0, 0.11), rgba(204, 255, 0, 0.045) 34%, rgba(204, 255, 0, 0.012) 62%, transparent 84%);
+  -webkit-mask-image: var(--grain, linear-gradient(#000, #000)); mask-image: var(--grain, linear-gradient(#000, #000));
+}
+/* the dust in the air: specks that drift, slowly, each its own way */
+.dust {
+  position: absolute; width: var(--d); height: var(--d); border-radius: 50%; background: rgba(244, 245, 240, var(--bright)); filter: blur(var(--soft));
+  animation: drift var(--t) ease-in-out infinite alternate;
+}
+@keyframes drift {
+  to { transform: translate3d(var(--dx), var(--dy), 0); }
+}
+
+/* ------------------------------------------------------------------ the headline: two lines, the first dim */
+.title {
+  position: relative; margin: 19.5vh auto 0; width: fit-content; max-width: calc(100vw - 2 * var(--edge)); text-align: center;
+  font-family: var(--font-display); font-size: clamp(34px, 4.3vw, 104px); font-weight: 600; line-height: 1.03; letter-spacing: -0.042em;
+}
+.title span { display: block; color: rgba(244, 245, 240, 0.56); }
+.title b { display: block; font-weight: 600; color: var(--hw-white); }
+
+/* ------------------------------------------------------------------ the monitor: a picture, whole, on its stand;
+   the stand is lost in the dark at its foot in the picture itself (its lowest corner is 93.4 hundredths of the
+   picture's height down, the stand gone at 98) */
+.monitor { position: relative; width: 66vw; margin: 1.6vw auto 0; left: 1.2vw; }
+.monitor img { display: block; width: 100%; height: auto; }
+
+/* ------------------------------------------------------------------ the cards: a close view each, and its line.
+   They stand clear of the monitor, as the reference's do: their tops 6.9 hundredths of the width under its lowest
+   corner, the stand showing between and gone 4.4 hundredths above them */
+.cards { position: relative; list-style: none; margin: 3.2vw auto 0; padding: 0; width: var(--inner); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.63vw; }
+/* (each card is a layer of its own: drawn in one with the others, the three come to one task of 5 to 7 ms as they
+   near the screen, too long for a frame at 120 Hz; apart, three of 2 or 3) */
+.card { position: relative; aspect-ratio: 350 / 467; border-radius: 0.945vw; overflow: hidden; background: var(--hw-ink); will-change: transform; }
+.card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* (the picture goes dark under the line; and a hairline about the card, which is as dark as the page) */
+.card::before { content: ''; position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 46%; background: linear-gradient(0deg, #0a0a0a 0, #0a0a0a 62%, rgba(10, 10, 10, 0.86) 74%, rgba(10, 10, 10, 0.45) 88%, rgba(10, 10, 10, 0)); }
+.card::after { content: ''; position: absolute; z-index: 3; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1); pointer-events: none; }
+.card p { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; margin: 0; padding: 1.26vw; font-size: 1.4vw; font-weight: 400; line-height: 1.12; letter-spacing: -0.03em; color: rgba(244, 245, 240, 0.6); text-wrap: pretty; }
+.card b { font-weight: 600; color: var(--hw-white); }
+
+/* ------------------------------------------------------------------ the mobile app: its two lines, a sentence, and
+   three phones standing before the horizon the stage ends on (the gate's threshold): light that rises towards a
+   line, brightest in the middle, behind the phones' feet; under the line, the page's Ink again */
+.pocket { position: relative; margin-top: 12vw; padding-bottom: 4.6vw; }
+.pocket .title { margin-top: 0; }
+.lede { margin: 1.5vw auto 0; max-width: 33em; padding: 0 var(--edge); text-align: center; font-size: clamp(15px, 1.15vw, 26px); line-height: 1.42; letter-spacing: -0.012em; color: rgba(244, 245, 240, 0.6); text-wrap: balance; }
+.phones { position: relative; width: 62vw; margin: 4.2vw auto 0; }
+.phones img { display: block; width: 100%; height: auto; }
+.dawn { position: absolute; left: 0; right: 0; bottom: 7.4vw; height: 24vw; }
+.dawn::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 34% 30% at 50% 100%, rgba(204, 255, 0, 0.9), rgba(204, 255, 0, 0.42) 34%, rgba(204, 255, 0, 0.1) 70%, transparent 100%),
+    radial-gradient(ellipse 62% 100% at 50% 100%, rgba(204, 255, 0, 0.34), rgba(204, 255, 0, 0.16) 24%, rgba(204, 255, 0, 0.06) 50%, rgba(204, 255, 0, 0.016) 74%, transparent 94%);
+  -webkit-mask-image: var(--grain, linear-gradient(#000, #000)); mask-image: var(--grain, linear-gradient(#000, #000));
+}
+.dawn::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, rgba(204, 255, 0, 0) 2%, rgba(204, 255, 0, 0.7) 22%, #ccff00 40%, #ccff00 60%, rgba(204, 255, 0, 0.7) 78%, rgba(204, 255, 0, 0) 98%); }
+/* (with &phones=shot: the phones as close shots, as the reference shows its own (trysoar.com: a card 487 by 625 with
+   corners of 40 at 1905 wide), three side by side; each a layer of its own, as the cards above are, and a hairline
+   about it) */
+.shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.05vw; width: 88vw; margin: 4.2vw auto 0; padding: 0; list-style: none; }
+.shot { position: relative; aspect-ratio: 4 / 5; border-radius: 2.1vw; overflow: hidden; background: var(--hw-ink); will-change: transform; }
+.shot img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.shot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1); pointer-events: none; }
+.shots > li { min-width: 0; }
+/* (no cards between the monitor and the title: the title comes nearer the monitor's foot) */
+.pocket[data-lines] { margin-top: 6.5vw; }
+/* (with &cards=under: under each shot the line of the card it stands for, as the cards had it: its first words
+   bright; the three begin on one line) */
+.shotLine { margin: 1.2vw 0.2vw 0; max-width: 24em; font-size: clamp(16px, 1.3vw, 26px); font-weight: 400; line-height: 1.16; letter-spacing: -0.025em; color: rgba(244, 245, 240, 0.6); text-wrap: pretty; }
+.shotLine b { font-weight: 600; color: var(--hw-white); }
+
+/* ------------------------------------------------------------------ a screen with no room for three cards in a row
+   (upright, or narrower than 1024 px): the monitor is drawn larger than the screen and shown by its near side, the
+   one in focus; the cards stand in a row that is pushed along by the finger */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .stage { --arch: 150vw; --room: max(11vh, 24vw); --inner: 100%; margin-top: clamp(90px, 14vh, 140px); }
+  .gate { height: 150vh; }
+  .title { margin-top: 12vh; font-size: clamp(30px, 8.6vw, 64px); padding: 0 var(--edge); text-wrap: balance; }
+  .monitor { width: 165vw; margin: 7vw 0 0 -62vw; left: 0; }
+  .cards {
+    margin-top: 4.8vw; width: auto; display: flex; gap: 10px; padding: 0 var(--edge); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cards::-webkit-scrollbar { display: none; }
+  .card { flex: 0 0 min(78vw, 380px); border-radius: 16px; scroll-snap-align: center; }
+  .card p { padding: 18px; font-size: clamp(19px, 5.4vw, 26px); }
+  .pocket { margin-top: 26vw; padding-bottom: 12vw; }
+  .lede { margin-top: 14px; font-size: 15.5px; }
+  .phones { width: 170vw; margin: 9vw 0 0 -35vw; }
+  .dawn { bottom: 26vw; height: 44vw; }
+  /* (the shots one above another, across the screen, as the reference stacks its own on a phone) */
+  .shots { grid-template-columns: 1fr; gap: 12px; width: auto; margin: 9vw var(--edge) 0; }
+  .shot { border-radius: 22px; }
+  .pocket[data-lines] { margin-top: 16vw; }
+  .pocket[data-lines] .shots { gap: 34px; }
+  .shotLine { margin: 14px 4px 0; font-size: 18px; }
+}
+/* (a tablet held upright: the three shots side by side again, a third of the width each) */
+@media (min-width: 600px) and (max-width: 1023px), (min-width: 600px) and (max-aspect-ratio: 1/1) {
+  .shots, .pocket[data-lines] .shots { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .shot { border-radius: 18px; }
+  .shotLine { margin-top: 12px; font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dust { animation: none; }
+}
+
+/* ------------------------------------------------------------------ with &flow=soar: the stage under the light
+   ground, entered as the reference enters its dark part (trysoar.com, measured at 1905 by 949): the Paper turns to Ink
+   over 285 px (15 hundredths of the width) by the reference's own curve, and the scene (soar/DropScene.tsx) is let in
+   over the same stretch by the same curve, held, and let go over its last 30 hundredths; the headline a sixth of the
+   width down, at the foot of the drop. */
+.stage[data-sky="drop"] {
+  --fade: 14.95vw;
+  margin-top: 0; padding-top: 15.7vw;
+  /* (the light ground's grain goes on into it, so the Paper above does not end in a line) */
+  background: var(--paper-grain, none), linear-gradient(180deg, #f4f5f0 calc(var(--fade) * 0.000), #eaebe6 calc(var(--fade) * 0.125), #cfd0cc calc(var(--fade) * 0.250), #a9a9a6 calc(var(--fade) * 0.375), #7f807d calc(var(--fade) * 0.500), #555554 calc(var(--fade) * 0.625), #30302f calc(var(--fade) * 0.750), #141414 calc(var(--fade) * 0.875), #0a0a0a calc(var(--fade) * 1.000));
+}
+/* (the headline at the reference's size, 3.6 hundredths of the width, so that the drop's round stands about it and passes
+   behind its second line; a soft dark about the letters keeps them in front of the light) */
+.stage[data-sky="drop"] > .title { margin-top: 0; font-size: clamp(30px, 3.6vw, 88px); text-shadow: 0 0 22px rgba(10, 10, 10, 0.55), 0 0 4px rgba(10, 10, 10, 0.35); }
+.scene {
+  position: absolute; left: 0; top: 0; z-index: -1; display: block; width: 100%; height: 64vw; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent calc(var(--fade) * 0.000), rgba(0, 0, 0, 0.043) calc(var(--fade) * 0.125), rgba(0, 0, 0, 0.157) calc(var(--fade) * 0.250), rgba(0, 0, 0, 0.32) calc(var(--fade) * 0.375), rgba(0, 0, 0, 0.5) calc(var(--fade) * 0.500), rgba(0, 0, 0, 0.68) calc(var(--fade) * 0.625), rgba(0, 0, 0, 0.843) calc(var(--fade) * 0.750), rgba(0, 0, 0, 0.957) calc(var(--fade) * 0.875), #000 calc(var(--fade) * 1.000), #000 70%, rgba(0, 0, 0, 0.5) 85%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent calc(var(--fade) * 0.000), rgba(0, 0, 0, 0.043) calc(var(--fade) * 0.125), rgba(0, 0, 0, 0.157) calc(var(--fade) * 0.250), rgba(0, 0, 0, 0.32) calc(var(--fade) * 0.375), rgba(0, 0, 0, 0.5) calc(var(--fade) * 0.500), rgba(0, 0, 0, 0.68) calc(var(--fade) * 0.625), rgba(0, 0, 0, 0.843) calc(var(--fade) * 0.750), rgba(0, 0, 0, 0.957) calc(var(--fade) * 0.875), #000 calc(var(--fade) * 1.000), #000 70%, rgba(0, 0, 0, 0.5) 85%, transparent 100%);
+}
+/* (an upright or narrow screen: the drop is drawn as for a screen 1.9 times as wide, so the stage's top is too) */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .stage[data-sky="drop"] { --fade: 28.4vw; padding-top: 31vw; }
+  .stage[data-sky="drop"] > .title { font-size: clamp(28px, 8vw, 56px); }
+  .scene { height: 150vw; }
+}

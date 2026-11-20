@@ -11,15 +11,36 @@
  *   Ethereum), what each is, and the papers' speed targets.
  *
  * It begins under the journey's held river (journey.module.css): its first lines come up over it.
+ *
+ * With the films after the hero (a try: the address ?films=after) it begins otherwise: the three films
+ * (FilmBlock.tsx), the statement (Statement.tsx), and the app on its stage (AppStage.tsx: the web app on a monitor,
+ * three close views of it, then the app on phones), each from one edge of the screen to the other, and a last screen
+ * of its own (Finale.tsx): a line, the app on a standing phone, the call to action. The hairlines, their columns, the markets, the network and the app's three short films
+ * are not shown.
  */
+import { useEffect, useRef } from 'react'
 import { home } from '../content.home'
 import { MarketsBoard } from '../app/MarketsBoard'
 import { CloseScreen, Phone, TradeScreen } from '../app/Phone'
 import { Reel } from './reel/Reel'
 import { orderFilm, payoutFilm, phonesFilm, sealedFilm } from './reel/films'
 import { OrderSet, PayoutSet, PhonesSet, SealedSet } from './reel/sets'
+import { AppStage } from './AppStage'
 import { FilmBlock } from './FilmBlock'
+import { Finale } from './Finale'
+import { filmsAfter, flowSoar } from './flags'
+import { paperGrain } from './grain'
 import { Reveal } from './Reveal'
+import { Daybreak } from './soar/Daybreak'
+import { Detail } from './soar/Detail'
+import { Faq } from './soar/Faq'
+import { Features } from './soar/Features'
+import { HowItWorks } from './soar/HowItWorks'
+import { Opening } from './soar/Opening'
+import { Sizes } from './soar/Sizes'
+import { TryIt } from './soar/TryIt'
+import { watchTone } from './soar/tone'
+import { WhoSees } from './soar/WhoSees'
 import { Statement } from './Statement'
 import { useSeen } from './useSeen'
 import s from './after.module.css'
@@ -30,25 +51,124 @@ const films = [
   { film: payoutFilm, set: <PayoutSet /> },
 ]
 
-/** A try (the address ?films=after): the three films come after the hero, as the reference shows its own
- *  (FilmBlock.tsx), then the statement (Statement.tsx), and the journey has none (timeline.ts). Only with the
- *  films' hero. */
-const filmsAfter = new URLSearchParams(window.location.search).get('films') === 'after'
-
 export function After() {
   const [board, boardSeen] = useSeen<HTMLDivElement>(0.02)
+  // (with &flow=soar: the light ground's grain, made once in the page)
+  const soarRoot = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const root = soarRoot.current
+    if (!flowSoar || !root) return
+    // (on the page's root: the foot, which stands outside this, has it too)
+    document.documentElement.style.setProperty('--paper-grain', paperGrain())
+    const foot = document.querySelector('footer[data-light]')
+    const stop = watchTone(root, foot)
+    return () => {
+      stop()
+      document.documentElement.style.removeProperty('--paper-grain')
+    }
+  }, [])
   const M = home.markets
   const P = home.mobile
   const N = home.network
-  return (
-    <div className={s.after} data-films={filmsAfter ? 'after' : undefined}>
-      {filmsAfter && <FilmBlock />}
-      {filmsAfter && <Statement />}
-      <div className={s.rules} aria-hidden="true">
-        <i />
-        <i />
-        <i />
+
+  const rules = (
+    <div className={s.rules} aria-hidden="true">
+      <i />
+      <i />
+      <i />
+    </div>
+  )
+  const markets = (
+    <section id="markets" className={s.block} aria-labelledby="markets-title">
+      <Reveal className={s.head}>
+        <h2 id="markets-title" className={s.line}>
+          {M.line}
+        </h2>
+        <p className={s.body}>{M.body}</p>
+      </Reveal>
+      <Reveal>
+        <div ref={board} className={s.board}>
+          <MarketsBoard live={boardSeen} />
+        </div>
+      </Reveal>
+    </section>
+  )
+  const network = (
+    <section id="network" className={s.block} aria-labelledby="network-title">
+      <Reveal className={s.head}>
+        <h2 id="network-title" className={s.line}>
+          {N.line}
+        </h2>
+        <p className={s.body}>
+          {N.body}{' '}
+          <a href={N.more.href}>
+            {N.more.label} <span aria-hidden="true">↗</span>
+          </a>
+        </p>
+      </Reveal>
+      <Reveal className={s.network}>
+        <div className={s.gates} aria-hidden="true">
+          <i />
+          <i data-ours="" />
+          <i data-lit="" />
+        </div>
+        <ol className={s.layers}>
+          {N.layers.map(([tag, name, role]) => (
+            <li key={tag} data-ours={tag === 'L3' ? '' : undefined}>
+              <i>{tag}</i>
+              <b>{name}</b>
+              <span>{role}</span>
+            </li>
+          ))}
+        </ol>
+        <div className={s.targets}>
+          <p>{N.targets.label}</p>
+          <dl>
+            {N.targets.list.map(([value, unit, what]) => (
+              <div key={what}>
+                <dd>
+                  {value}
+                  <small>{unit}</small>
+                </dd>
+                <dt>{what}</dt>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </Reveal>
+    </section>
+  )
+
+  if (flowSoar)
+    return (
+      <div ref={soarRoot} className={s.after} data-films="after" data-flow="soar">
+        <Daybreak from="river" />
+        <Opening />
+        <Features />
+        <AppStage sky="drop" />
+        <HowItWorks />
+        <WhoSees />
+        <Daybreak from="ink" />
+        <Sizes />
+        <Detail />
+        <Faq />
+        <TryIt />
       </div>
+    )
+
+  if (filmsAfter)
+    return (
+      <div className={s.after} data-films="after">
+        <FilmBlock />
+        <Statement />
+        <AppStage />
+        <Finale />
+      </div>
+    )
+
+  return (
+    <div className={s.after}>
+      {rules}
 
       <section id="app" className={s.films} aria-label="The app">
         {home.app.map((item, i) => (
@@ -64,19 +184,7 @@ export function After() {
         ))}
       </section>
 
-      <section id="markets" className={s.block} aria-labelledby="markets-title">
-        <Reveal className={s.head}>
-          <h2 id="markets-title" className={s.line}>
-            {M.line}
-          </h2>
-          <p className={s.body}>{M.body}</p>
-        </Reveal>
-        <Reveal>
-          <div ref={board} className={s.board}>
-            <MarketsBoard live={boardSeen} />
-          </div>
-        </Reveal>
-      </section>
+      {markets}
 
       <section id="mobile" className={`${s.block} ${s.mobile}`} aria-labelledby="mobile-title">
         <Reveal className={s.aside}>
@@ -102,49 +210,7 @@ export function After() {
         </Reveal>
       </section>
 
-      <section id="network" className={s.block} aria-labelledby="network-title">
-        <Reveal className={s.head}>
-          <h2 id="network-title" className={s.line}>
-            {N.line}
-          </h2>
-          <p className={s.body}>
-            {N.body}{' '}
-            <a href={N.more.href}>
-              {N.more.label} <span aria-hidden="true">↗</span>
-            </a>
-          </p>
-        </Reveal>
-        <Reveal className={s.network}>
-          <div className={s.gates} aria-hidden="true">
-            <i />
-            <i data-ours="" />
-            <i data-lit="" />
-          </div>
-          <ol className={s.layers}>
-            {N.layers.map(([tag, name, role]) => (
-              <li key={tag} data-ours={tag === 'L3' ? '' : undefined}>
-                <i>{tag}</i>
-                <b>{name}</b>
-                <span>{role}</span>
-              </li>
-            ))}
-          </ol>
-          <div className={s.targets}>
-            <p>{N.targets.label}</p>
-            <dl>
-              {N.targets.list.map(([value, unit, what]) => (
-                <div key={what}>
-                  <dd>
-                    {value}
-                    <small>{unit}</small>
-                  </dd>
-                  <dt>{what}</dt>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </Reveal>
-      </section>
+      {network}
     </div>
   )
 }

@@ -953,11 +953,18 @@ export function startJourney(parts: JourneyParts): () => void {
       // (with the films the closing has links in it: they can be used only while it is there)
       if (films) closing.inert = closingThere < 0.6
       closing.style.setProperty('--in', closingIn.toFixed(4))
-      // (the logo that stays comes with the closing, where the closing's own would be, and stays)
+      // (the logo that stays comes with the closing, where the closing's own would be, and stays. After the hero it
+      // is its mark alone, a little larger: its word goes as the closing's words go, and comes back with them;
+      // SwimLogo.tsx is told, and draws the mark at its size)
       if (logo) {
         logo.style.opacity = String(closingIn)
         logo.style.pointerEvents = closingIn > 0.6 ? 'auto' : 'none'
         logo.inert = closingIn < 0.6
+        const after = (filmsAfter ? smooth(0, 0.12, dusk) : smooth(0.02, 0.3, dusk)).toFixed(4)
+        if (logo.style.getPropertyValue('--after') !== after) {
+          logo.style.setProperty('--after', after)
+          logo.dispatchEvent(new Event('after'))
+        }
       }
       // With the films the header is the call to action alone. It comes with the first film and stays for the
       // rest of the page, but for the gate: there the column at the right has the call to action, where the

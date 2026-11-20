@@ -1,12 +1,17 @@
 /**
  * The landing page's footer: the tagline, the way around the page, the call to action, and what the papers
- * insist on being said.
+ * insist on being said. (With the films after the hero, ?films=after, the page has no markets and no network: the
+ * way around it leaves them out.)
  */
 import { BRAND, home } from '../content.home'
+import { filmsAfter } from './flags'
 import s from './footer.module.css'
+
+const notHere = filmsAfter ? ['#markets', '#network'] : []
 
 export function Footer() {
   const F = home.footer
+  const links = F.links.filter((link) => !notHere.includes(link.href))
   return (
     <footer className={s.footer}>
       <div className={s.wrap}>
@@ -17,7 +22,7 @@ export function Footer() {
             ))}
           </p>
           <nav className={s.links} aria-label="Footer">
-            {F.links.map((link) => (
+            {links.map((link) => (
               <a key={link.href} href={link.href}>
                 {link.label}
               </a>

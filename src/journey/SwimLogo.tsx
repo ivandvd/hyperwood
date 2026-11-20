@@ -13,6 +13,11 @@
  *
  * The word is the lockup's own, its mark covered; the mark is drawn in a canvas from the master's outline, each
  * point moved by the wave, so the outline stays smooth and, standing, is the mark. Under reduced motion it stands.
+ *
+ * After the hero the logo is its mark alone, a little larger (GROW): the word goes as the hero's words go, and the
+ * mark grows from its left edge and its middle, so it stays where it was, level with the call to action. Scrolled
+ * back to the hero, the word comes back and the mark is the lockup's again. timeline.ts says how far (`--after`,
+ * 0 at the hero, 1 after it) and tells the logo when that changes (an `after` event).
  */
 import { useEffect, useRef, type Ref } from 'react'
 import { BRAND } from '../content.home'
@@ -21,6 +26,7 @@ import { fillOutline, markOutline } from '../brand/markOutline'
 import s from './swimLogo.module.css'
 
 const NEON = '#ccff00'
+const INK = '#0a0a0a'
 /** The canvas is the mark's box with this much room about it, in the mark's heights: up and down (for the wave),
  *  and to either side. (The lockup's mark is 2.2373 of its height wide: swimLogo.module.css.) */
 const ROOM = { y: 0.3, x: 0.1, wide: 2.2373 }
@@ -28,6 +34,8 @@ const ROOM = { y: 0.3, x: 0.1, wide: 2.2373 }
  *  (radians), and at most how fast (radians a second); how fast the page must go for the full swim (pixels a
  *  second); and how quickly the swim comes and goes (seconds). */
 const SWIM = { wave: 0.13, head: 0.35, length: 1.3, perPixel: 0.0055, fastest: 9, full: 700, come: 0.1, go: 0.45 }
+/** How much larger the mark is after the hero, alone, than in the lockup (swimLogo.module.css has it too). */
+const GROW = 0.3
 
 const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
@@ -37,6 +45,8 @@ const smooth = (a: number, b: number, x: number) => {
 export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
   const link = useRef<HTMLAnchorElement | null>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
+  /** the soft fall of Ink across the top of the screen after the hero (swimLogo.module.css: .fall) */
+  const fall = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const c = canvas.current
@@ -65,23 +75,31 @@ export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
     let high = 0
     let speed = 0
     let lastY = scrollY
+    /** where the page was at the last scroll event */
+    let seenY = lastY
     let lastT = 0
+    /** how large the mark is: 1 in the lockup, 1 + GROW alone after the hero (`--after`, from timeline.ts) */
+    const size = () => 1 + GROW * (Number(a.style.getPropertyValue('--after')) || 0)
+    let grown = size()
     /** what the last picture was drawn with (a picture that would not differ by a hair is not drawn again) */
-    let drawn = { phase: NaN, high: NaN, w: 0, h: 0 }
+    let drawn = { phase: NaN, high: NaN, grown: NaN, w: 0, h: 0 }
     /** The canvas laid on the screen's own pixels (`laid`): its corners on whole pixels of the screen, at the
      *  screen's own pixel ratio, so its picture is never stretched or shifted by a part of a pixel (it was, and the
      *  mark looked bolder than the word beside it, and soft on a phone); and where the mark's middle falls in it and
      *  how wide it is, to a part of a pixel, exactly where the lockup has its own. */
-    let laid = { w: 1, h: 1, cx: 0, cy: 0, S: 1 }
+    // (laid for the mark at its largest, so it has room at any size between: the mark's left edge and middle, where
+    // it grows from, and half its width in the lockup, in the canvas's pixels)
+    let laid = { w: 1, h: 1, left: 0, cy: 0, half: 1 }
     const lay = () => {
       const dpr = Math.min(3, devicePixelRatio || 1)
       const box = a.getBoundingClientRect()
       const L = box.height
+      const G = 1 + GROW
       // (the room about the mark, on the screen, and the screen's pixels it covers)
-      const x0 = Math.floor((box.left - ROOM.x * L) * dpr)
-      const y0 = Math.floor((box.top - ROOM.y * L) * dpr)
-      const x1 = Math.ceil((box.left + (ROOM.wide + ROOM.x) * L) * dpr)
-      const y1 = Math.ceil((box.top + (1 + ROOM.y) * L) * dpr)
+      const x0 = Math.floor((box.left - ROOM.x * L * G) * dpr)
+      const y0 = Math.floor((box.top + L / 2 - (0.5 + ROOM.y) * L * G) * dpr)
+      const x1 = Math.ceil((box.left + (ROOM.wide + ROOM.x) * L * G) * dpr)
+      const y1 = Math.ceil((box.top + L / 2 + (0.5 + ROOM.y) * L * G) * dpr)
       const w = Math.max(1, x1 - x0)
       const h = Math.max(1, y1 - y0)
       c.style.left = `${x0 / dpr - box.left}px`
@@ -92,17 +110,19 @@ export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
         c.width = w
         c.height = h
       }
-      // (the lockup's mark is its first 2.2373 heights across and its whole height: its middle, and half its width)
-      laid = { w, h, cx: (box.left + (ROOM.wide / 2) * L) * dpr - x0, cy: (box.top + L / 2) * dpr - y0, S: (ROOM.wide / 2) * L * dpr }
+      // (the lockup's mark is its first 2.2373 heights across and its whole height)
+      laid = { w, h, left: box.left * dpr - x0, cy: (box.top + L / 2) * dpr - y0, half: (ROOM.wide / 2) * L * dpr }
       drawn = { ...drawn, w: 0 }
     }
 
     const draw = () => {
-      const { w, h, cx, cy, S } = laid
+      const { w, h, left, cy, half } = laid
+      const S = half * grown
+      const cx = left + S
       // (the most a point moves between this picture and the last, in the canvas's pixels)
-      const change = (Math.abs(high - drawn.high) + high * Math.abs(phase - drawn.phase)) * SWIM.wave * S
+      const change = (Math.abs(high - drawn.high) + high * Math.abs(phase - drawn.phase)) * SWIM.wave * S + Math.abs(grown - drawn.grown) * half
       if (w === drawn.w && h === drawn.h && change < 0.05) return
-      drawn = { phase, high, w, h }
+      drawn = { phase, high, grown, w, h }
       const sp = Math.sin(phase)
       const cp = Math.cos(phase)
       for (let i = 0; i < count; i++) {
@@ -112,7 +132,8 @@ export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
       }
       ctx.setTransform(1, 0, 0, 1, 0, 0)
       ctx.clearRect(0, 0, w, h)
-      ctx.fillStyle = NEON
+      // (Ink over the light ground, &flow=soar: soar/tone.ts)
+      ctx.fillStyle = document.documentElement.hasAttribute('data-tone') ? INK : NEON
       fillOutline(ctx, moved)
     }
 
@@ -120,7 +141,9 @@ export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
       raf = 0
       const dt = lastT ? Math.min(0.1, (now - lastT) / 1000) : 1 / 60
       lastT = now
-      const y = scrollY
+      // (where the page is, as the last scroll event found it: read in the frame, it would work the page's layout
+      // out again after what other parts of the page have written)
+      const y = seenY
       const dy = y - lastY
       lastY = y
       // (how fast the page goes, a little smoothed; the swim follows it, coming quickly and going slowly)
@@ -140,9 +163,10 @@ export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
       raf = requestAnimationFrame(frame)
     }
     const scrolled = () => {
+      seenY = scrollY
       // (not while it is not shown: before the hero, timeline.ts keeps it out of sight)
       if (raf || calm.matches || document.hidden || Number(a.style.opacity || 0) < 0.01) {
-        if (!raf) lastY = scrollY
+        if (!raf) lastY = seenY
         return
       }
       raf = requestAnimationFrame(frame)
@@ -160,12 +184,27 @@ export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
       relay()
     }
     ratio.addEventListener('change', reratio)
+    // (the hero going or coming back: the mark's size follows it, and the fall behind the top of the screen)
+    const regrow = () => {
+      grown = size()
+      if (fall.current) fall.current.style.opacity = a.style.getPropertyValue('--after') || '0'
+      if (!raf) draw()
+    }
+    a.addEventListener('after', regrow)
+    // (the ground under the top of the screen changing: the mark is drawn again in its colour)
+    const retone = () => {
+      drawn = { ...drawn, w: 0 }
+      if (!raf) draw()
+    }
+    addEventListener('hw-tone', retone)
     addEventListener('resize', relay)
     addEventListener('scroll', scrolled, { passive: true })
     lay()
     draw()
     return () => {
       ratio.removeEventListener('change', reratio)
+      a.removeEventListener('after', regrow)
+      removeEventListener('hw-tone', retone)
       removeEventListener('resize', relay)
       removeEventListener('scroll', scrolled)
       if (raf) cancelAnimationFrame(raf)
@@ -173,19 +212,22 @@ export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
   }, [])
 
   return (
-    <a
-      ref={(node) => {
-        link.current = node
-        if (typeof ref === 'function') ref(node)
-        else if (ref) ref.current = node
-      }}
-      className={s.logo}
-      href="#top"
-      aria-label={`${BRAND} home`}
-      inert
-    >
-      <img className={s.word} src={lockup} alt="" />
-      <canvas ref={canvas} className={s.swim} aria-hidden="true" />
-    </a>
+    <>
+      <div ref={fall} className={s.fall} aria-hidden="true" />
+      <a
+        ref={(node) => {
+          link.current = node
+          if (typeof ref === 'function') ref(node)
+          else if (ref) ref.current = node
+        }}
+        className={s.logo}
+        href="#top"
+        aria-label={`${BRAND} home`}
+        inert
+      >
+        <img className={s.word} src={lockup} alt="" />
+        <canvas ref={canvas} className={s.swim} aria-hidden="true" />
+      </a>
+    </>
   )
 }

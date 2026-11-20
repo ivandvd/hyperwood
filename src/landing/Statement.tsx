@@ -70,11 +70,22 @@ export function Statement() {
     const held = frame.current
     if (!el || !held) return
     let raf = 0
+    // Where it is, read when the page has been scrolled (then the page is as it was last drawn, and reading it costs
+    // nothing); the frame only writes. (Read in the frame, after the app's films below had written their styles,
+    // the reading made the browser work the page's styles out again with every frame.)
+    // (the window's height too: in this browser reading it in the frame works the page's layout out as well)
+    let top = 0
+    let frameH = 1
+    let vh = 1
+    const measure = () => {
+      top = el.getBoundingClientRect().top
+      frameH = Math.max(1, held.offsetHeight)
+      vh = Math.max(1, innerHeight)
+    }
     const update = () => {
       raf = 0
-      const top = el.getBoundingClientRect().top
-      const rise = (innerHeight - top) / Math.max(1, innerHeight)
-      const past = -top / Math.max(1, held.offsetHeight)
+      const rise = (vh - top) / vh
+      const past = -top / frameH
       lines.current.forEach((line, i) => {
         const [from, to] = LINE(i)
         const k = easeOut(clamp((rise - from) / (to - from)))
@@ -90,20 +101,28 @@ export function Statement() {
     // date once more as it goes out of that, so it is left as it should be)
     let near = false
     const scrolled = () => {
-      if (near) ask()
+      if (!near) return
+      measure()
+      ask()
+    }
+    const sized = () => {
+      measure()
+      ask()
     }
     const watch = new IntersectionObserver(([entry]) => {
       near = entry.isIntersecting
+      measure()
       ask()
     }, { rootMargin: '50% 0px' })
     watch.observe(el)
+    measure()
     update()
     addEventListener('scroll', scrolled, { passive: true })
-    addEventListener('resize', ask)
+    addEventListener('resize', sized)
     return () => {
       watch.disconnect()
       removeEventListener('scroll', scrolled)
-      removeEventListener('resize', ask)
+      removeEventListener('resize', sized)
       if (raf) cancelAnimationFrame(raf)
     }
   }, [])

@@ -1,0 +1,38 @@
+/* The sheet that closes a position (CloseSheet.tsx), over the Trade screen: the screen dimmed under it, the sheet
+   in the middle, in the app's own colours (terminal.module.css gives them). */
+.veil { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; background: rgba(6, 6, 6, 0.72); }
+.sheet { width: 432px; padding: 22px 22px 20px; border-radius: 16px; background: #0d0e0c; border: 1px solid var(--line-2); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); }
+.head { display: flex; justify-content: space-between; align-items: flex-start; }
+.head div { display: grid; gap: 4px; }
+.head b { font-size: 19px; letter-spacing: -0.02em; }
+.head span { font-family: var(--font-mono); font-size: 11.5px; color: var(--t2); }
+.head i { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line-2); color: var(--t2); }
+
+.sums { display: grid; grid-template-columns: repeat(3, 1fr); margin: 20px 0 0; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.sums div { display: grid; gap: 5px; }
+.sums dt { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--t3); }
+.sums dd { margin: 0; font-family: var(--font-mono); font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.sums dd[data-up] { color: var(--neon); }
+.sums dd span { font-size: 11px; opacity: 0.75; margin-left: 2px; }
+.equity { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 0 4px; }
+.equity span { font-size: 13px; color: var(--t2); }
+.equity b { font-family: var(--font-mono); font-size: 26px; font-weight: 500; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+
+.ask { margin: 16px 0 9px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--t3); }
+.choice { display: grid; gap: 8px; }
+.option { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: center; column-gap: 12px; padding: 13px 14px; border-radius: 11px; border: 1px solid var(--line-2); background: var(--lift); }
+.option > i { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line-2); display: grid; place-items: center; }
+.option div { display: grid; gap: 2px; }
+.option b { font-size: 14px; }
+.option span { font-size: 11.5px; color: var(--t3); }
+.option em { font-family: var(--font-mono); font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--t2); }
+.option small { font-size: 10.5px; color: var(--t3); }
+.option[data-on] { border-color: var(--neon); background: rgba(204, 255, 0, 0.06); }
+.option[data-on] > i { border-color: var(--neon); }
+.option[data-on] > i::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--neon); }
+.option[data-on] em { color: var(--neon); }
+.option[data-on] small { color: rgba(204, 255, 0, 0.7); }
+
+.sign { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 46px; margin-top: 16px; border-radius: 10px; background: var(--neon); color: #0a0a0a; font-family: var(--font-text); font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+.sign svg { width: 15px; height: 15px; }
+.note { margin: 10px 2px 0; font-size: 11px; line-height: 1.4; color: var(--t3); text-align: center; }

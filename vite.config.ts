@@ -43,6 +43,8 @@ export default defineConfig({
         architecture: resolve(import.meta.dirname, 'architecture/index.html'),
         classic: resolve(import.meta.dirname, 'classic.html'),
         film: resolve(import.meta.dirname, 'film.html'),
+        // (the app's screens by themselves: for looking at them and for taking the landing page's pictures)
+        studio: resolve(import.meta.dirname, 'studio.html'),
       },
     },
   },

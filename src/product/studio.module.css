@@ -1,0 +1,14 @@
+/* The page that shows the app's screens by themselves (Studio.tsx). */
+.studio { min-height: 100vh; background: #0a0a0a; }
+.studio[data-fit] { display: grid; place-items: center; height: 100vh; overflow: hidden; }
+.board { width: 1280px; height: 820px; flex: none; }
+.studio[data-fit] .board { transform-origin: center; }
+/* (a screen on the monitor: room about it for its turn) */
+.scene { min-height: 100vh; display: grid; place-items: center; padding: 60px 90px 140px; background: #0a0a0a; }
+.scene[data-clear] { background: transparent; }
+.scene[data-black] { background: #000; }
+/* (a close view in a card's shape: 700 by 934, twice the card on the landing page, on the app's Ink) */
+.cardScene { min-height: 100vh; background: #050505; display: grid; place-items: start; }
+.card { position: relative; width: 700px; height: 934px; overflow: hidden; background: #0a0a0a; }
+/* (the phone's screen alone, at the top left, nothing about it) */
+.screenScene { width: 402px; height: 874px; overflow: hidden; background: #0a0a0a; }

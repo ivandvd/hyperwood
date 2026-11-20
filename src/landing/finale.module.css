@@ -1,0 +1,30 @@
+/* The page's last screen (Finale.tsx), laid out as the reference lays out its own (trysoar.com, measured at 1905 by
+   949): one screen tall; the line at the left, where the page's middle column begins (21.8 hundredths of the width
+   in), level with the screen's middle, at 3.36 hundredths of the width; the phone in the middle of the screen; the
+   call to action at its right. From one edge of the screen to the other, on the page's Ink. */
+.finale {
+  position: relative; margin: clamp(60px, 10vh, 140px) calc(-1 * var(--edge)) 0; min-height: 100vh; min-height: 100svh; overflow: clip;
+  display: flex; align-items: center; color: var(--hw-white);
+}
+.line {
+  position: relative; z-index: 1; margin: 0 0 0 21.8vw;
+  font-family: var(--font-display); font-size: clamp(30px, 3.36vw, 84px); font-weight: 600; line-height: 1.05; letter-spacing: -0.042em;
+}
+.line span { display: block; color: rgba(244, 245, 240, 0.56); }
+.line b { display: block; font-weight: 600; color: var(--hw-white); }
+/* (the picture: the phone a little right of the screen's middle, its light and shadow running out towards the line;
+   the picture holds only the lit ground, so it begins at the light's left edge and its middle is a little above the
+   screen's) */
+.picture { position: absolute; left: 45.71vw; top: calc(50% - 2.07vw); width: 41.16vw; transform: translateY(-50%); pointer-events: none; }
+.picture img { display: block; width: 100%; height: auto; }
+.go { position: absolute; z-index: 1; left: 78vw; top: 50%; transform: translateY(-50%); --launch-height: clamp(40px, 2.7vw, 58px); --launch-pad: clamp(18px, 1.3vw, 28px); --launch-type: clamp(14px, 0.95vw, 19px); }
+
+/* An upright or narrow screen: the line and the call to action at the top, the phone under them, larger than the
+   screen and shown by its phone. */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .finale { min-height: 0; display: grid; justify-items: start; align-content: start; row-gap: 22px; padding: max(14vh, 116px) var(--edge) 12vh; }
+  .line { margin: 0; font-size: clamp(34px, 9.6vw, 64px); }
+  .go { position: relative; left: 0; top: 0; transform: none; --launch-height: 48px; --launch-pad: 22px; --launch-type: 16px; }
+  /* (the phone stands at 0.62 of the picture's width: at the screen's middle) */
+  .picture { position: relative; left: 0; top: 0; transform: none; width: 128vw; margin: -4vw 0 0 -34.72vw; }
+}

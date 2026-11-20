@@ -1,0 +1,186 @@
+/* How a trade goes (HowItWorks.tsx), on the page's Ink after the app's stage, from one edge of the screen to the other:
+   the headline in two lines as the stage's own, then the stages in the page's middle column (56.43 hundredths of the
+   width, the reference's), each a row of two: what happens (the stage's name, a sentence, a figure) and the part of
+   the app that does it. The line runs down the left, 3.4 hundredths of the width outside the column. Everything that
+   moves uses the brand's one curve. */
+.how {
+  --curve: cubic-bezier(0.22, 1, 0.36, 1);
+  --rail: -3.4vw;
+  position: relative; margin: 0 calc(-1 * var(--edge)); padding: 10vw 0 9vw;
+  background: var(--hw-ink); color: var(--hw-white); font-family: var(--font-text); font-synthesis: none;
+}
+
+.title {
+  margin: 0 auto; width: fit-content; max-width: calc(100vw - 2 * var(--edge)); text-align: center;
+  font-family: var(--font-display); font-size: clamp(32px, 3.6vw, 88px); font-weight: 600; line-height: 1.03; letter-spacing: -0.042em;
+}
+.title span { display: block; color: rgba(244, 245, 240, 0.56); }
+.title b { display: block; font-weight: 600; color: var(--hw-white); }
+
+/* ---------------------------------------------------------------- the line, its lit part and the drop */
+.path { position: relative; width: 56.43vw; margin: 6.4vw auto 0; }
+.line { position: absolute; left: var(--rail); width: 1px; margin-left: -0.5px; background: rgba(244, 245, 240, 0.16); }
+.lit { position: absolute; inset: 0; background: var(--hw-neon); transform-origin: 50% 0; transform: scaleY(0); will-change: transform; }
+.drop {
+  position: absolute; left: 50%; top: 0; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 50%;
+  background: var(--hw-neon); box-shadow: 0 0 0 4px var(--hw-ink); will-change: transform;
+}
+
+/* ---------------------------------------------------------------- the stages */
+.steps { margin: 0; padding: 0; list-style: none; }
+.step {
+  display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 4.2vw; align-items: start;
+  padding: 3.4vw 0; border-top: 1px solid rgba(244, 245, 240, 0.08);
+}
+.step:first-child { border-top: 0; padding-top: 0; }
+.say h3 {
+  position: relative; margin: 0; font-family: var(--font-display); font-size: clamp(26px, 2.3vw, 52px); font-weight: 600;
+  line-height: 1.05; letter-spacing: -0.035em; color: rgba(244, 245, 240, 0.36); transition: color 600ms var(--curve);
+}
+.step[data-on] .say h3 { color: var(--hw-white); }
+/* (the stage's place on the line: a ring, filled with Neon once the drop has passed) */
+.station {
+  position: absolute; left: var(--rail); top: 0.55em; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 50%;
+  background: var(--hw-ink); box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.34); transition: background-color 300ms ease, box-shadow 300ms ease;
+}
+.step[data-on] .station { background: var(--hw-neon); box-shadow: inset 0 0 0 1px var(--hw-neon); }
+.say p { margin: 1.1vw 0 0; max-width: 25em; font-size: clamp(15px, 0.95vw, 19px); line-height: 1.45; letter-spacing: -0.012em; color: rgba(244, 245, 240, 0.62); }
+.say .figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-top: 1.7vw; font-family: var(--font-mono); }
+.figure b { font-size: clamp(19px, 1.35vw, 30px); font-weight: 500; letter-spacing: -0.02em; color: var(--hw-white); }
+.figure span { font-size: clamp(11px, 0.66vw, 14px); letter-spacing: 0.06em; text-transform: uppercase; color: rgba(244, 245, 240, 0.48); }
+.targets { margin: 3.4vw 0 0; font-family: var(--font-mono); font-size: clamp(11px, 0.66vw, 13px); letter-spacing: 0.06em; text-transform: uppercase; color: rgba(244, 245, 240, 0.4); }
+
+/* ---------------------------------------------------------------- the parts of the app beside them */
+.show { min-width: 0; }
+.panel {
+  position: relative; padding: 1.15vw 1.25vw 1.25vw; border-radius: 16px; background: rgba(244, 245, 240, 0.035);
+  box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1); font-family: var(--font-mono); font-size: clamp(12px, 0.8vw, 15px);
+  line-height: 1.3; color: rgba(244, 245, 240, 0.86);
+  /* (a layer of its own: drawn with the others they come to one long task as they near the screen) */
+  will-change: transform;
+}
+.head { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 0.85vw; font-size: clamp(10px, 0.6vw, 12px); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 245, 240, 0.44); }
+.rows { margin: 0; display: grid; }
+.rows > div { display: flex; justify-content: space-between; gap: 16px; padding: 0.56vw 0; border-top: 1px solid rgba(244, 245, 240, 0.07); }
+.rows dt { color: rgba(244, 245, 240, 0.5); }
+.rows dd { margin: 0; color: var(--hw-white); font-variant-numeric: tabular-nums; white-space: nowrap; transition: color 400ms ease; }
+.step[data-on] .rows:not([data-two]) dd { color: rgba(204, 255, 0, 0.9); }
+.rows[data-two] { margin-top: 0.9vw; }
+.rows[data-two] dd { white-space: normal; text-align: right; }
+
+/* sealed: the order turns into ciphertext, then is signed */
+.sealed {
+  display: flex; align-items: center; gap: 8px; margin: 0.95vw 0 0; color: var(--hw-neon);
+  opacity: 0; transform: translateY(8px); transition: opacity 300ms ease, transform 300ms ease;
+}
+.sealed svg { width: 14px; height: 14px; flex: none; }
+.step[data-on] .sealed { opacity: 1; transform: none; transition: opacity 600ms var(--curve) 720ms, transform 600ms var(--curve) 720ms; }
+
+/* accepted: the queue moves up a row and the request takes the last */
+.queue {
+  --row: 2.35em;
+  position: relative; height: calc(4 * var(--row)); overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 26%); mask-image: linear-gradient(180deg, transparent 0, #000 26%);
+}
+.queue ul { margin: 0; padding: 0; list-style: none; transition: transform 700ms var(--curve); }
+.queue ul[data-on] { transform: translateY(calc(-1 * var(--row))); }
+.queue li {
+  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 1vw; align-items: center; height: var(--row);
+  border-top: 1px solid rgba(244, 245, 240, 0.07); color: rgba(244, 245, 240, 0.5); white-space: nowrap;
+}
+.queue li span:last-child { text-align: right; }
+.queue li[data-mine] { padding-left: 10px; color: var(--hw-white); box-shadow: inset 2px 0 0 var(--hw-neon); opacity: 0; transition: opacity 300ms ease; }
+.queue li[data-mine] span:last-child { color: var(--hw-neon); }
+.queue ul[data-on] li[data-mine] { opacity: 1; transition: opacity 500ms ease 260ms; }
+
+/* matched: two sealed orders meet in the engine and are one fill */
+.engine svg {
+  display: block; width: 100%; height: auto; border-radius: 10px;
+  background-image: radial-gradient(rgba(244, 245, 240, 0.11) 1px, transparent 1.3px); background-size: 10px 10px;
+}
+.engine circle, .neck { fill: rgba(244, 245, 240, 0.86); transition: transform 1100ms var(--curve), fill 300ms ease; }
+.engine[data-on] .mine { transform: translateX(98px); }
+.engine[data-on] .theirs { transform: translateX(-98px); }
+.engine[data-on] circle, .engine[data-on] .neck { fill: var(--hw-neon); transition: transform 1100ms var(--curve), fill 500ms ease 820ms; }
+/* (the neck between the drops: none while they are apart, full as they touch, drawn into them as they become one) */
+.neck { transform-box: fill-box; transform-origin: 50% 50%; transform: scale(0, 0.5); }
+.engine[data-on] .neck { animation: neck 1100ms linear both; }
+@keyframes neck {
+  0%, 12% { transform: scale(0, 0.5); }
+  22% { transform: scale(1, 0.9); }
+  34% { transform: scale(0.62, 1.25); }
+  100% { transform: scale(0.34, 1.5); }
+}
+.pair { display: flex; justify-content: space-between; margin: 0.6vw 0 0; font-size: 0.86em; color: rgba(244, 245, 240, 0.44); transition: opacity 400ms ease; }
+.engine[data-on] .pair { opacity: 0; }
+.filled { margin: -1.15em 0 0; text-align: center; color: var(--hw-neon); opacity: 0; transition: opacity 300ms ease; }
+.engine[data-on] .filled { opacity: 1; transition: opacity 500ms ease 1000ms; }
+
+/* proven: the stamp is drawn, the proof written */
+.proof { display: flex; align-items: center; gap: 1.2vw; }
+.proof svg { flex: none; width: clamp(52px, 4.2vw, 84px); height: auto; overflow: visible; }
+.ring { fill: none; stroke: var(--hw-neon); stroke-width: 2; stroke-dasharray: 100; stroke-dashoffset: 100; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 300ms ease; }
+.tick { fill: none; stroke: var(--hw-neon); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 200ms ease; }
+.proof[data-on] .ring { stroke-dashoffset: 0; transition: stroke-dashoffset 900ms var(--curve); }
+.proof[data-on] .tick { stroke-dashoffset: 0; transition: stroke-dashoffset 500ms var(--curve) 760ms; }
+.hash { margin: 0; color: var(--hw-white); font-size: 1.08em; letter-spacing: 0.02em; white-space: nowrap; }
+.verified { margin: 0.45vw 0 0; font-size: 0.86em; color: rgba(244, 245, 240, 0.5); opacity: 0; transition: opacity 300ms ease; }
+.proof[data-on] .verified { opacity: 1; transition: opacity 500ms ease 950ms; }
+
+/* settled: down the three layers, and the receipt back */
+.layers { position: relative; margin: 0; padding: 0 0 0 22px; list-style: none; }
+.layers::before, .layers::after { content: ''; position: absolute; left: 4px; top: 1.2em; bottom: 1.2em; width: 1px; }
+.layers::before { background: rgba(244, 245, 240, 0.16); }
+.layers::after { background: var(--hw-neon); transform-origin: 50% 0; transform: scaleY(0); transition: transform 300ms ease; will-change: transform; }
+.layers[data-on]::after { transform: none; transition: transform 1200ms var(--curve) 150ms; }
+.layers li {
+  position: relative; display: grid; grid-template-columns: 2.4em minmax(0, 1fr); column-gap: 10px; padding: 0.55vw 0;
+  border-top: 1px solid rgba(244, 245, 240, 0.07);
+}
+.layers li:first-child { border-top: 0; }
+.layers li::before {
+  content: ''; position: absolute; left: -22px; top: 1.2em; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%;
+  background: var(--hw-ink); box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.34); transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+.layers[data-on] li::before { background: var(--hw-neon); box-shadow: inset 0 0 0 1px var(--hw-neon); }
+.layers[data-on] li:nth-child(1)::before { transition-delay: 150ms; }
+.layers[data-on] li:nth-child(2)::before { transition-delay: 750ms; }
+.layers[data-on] li:nth-child(3)::before { transition-delay: 1350ms; }
+.layers b { grid-row: span 2; font-weight: 500; color: rgba(244, 245, 240, 0.5); }
+.layers span { color: var(--hw-white); }
+.layers em { font-style: normal; font-size: 0.86em; color: rgba(244, 245, 240, 0.46); }
+.receipt {
+  display: inline-flex; align-items: center; gap: 8px; margin: 0.9vw 0 0; padding: 7px 12px; border-radius: 999px;
+  background: rgba(204, 255, 0, 0.1); color: var(--hw-neon); opacity: 0; transform: translateY(8px); transition: opacity 300ms ease, transform 300ms ease;
+}
+.receipt svg { width: 14px; height: 14px; flex: none; }
+.receipt[data-on] { opacity: 1; transform: none; transition: opacity 600ms var(--curve) 1450ms, transform 600ms var(--curve) 1450ms; }
+
+/* ---------------------------------------------------------------- an upright or narrow screen: the line down the
+   left, 24 px in; each stage one under another, its part of the app under its words */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .how { --rail: -22px; padding: 24vw 0 20vw; }
+  .title { font-size: clamp(30px, 8.6vw, 56px); padding: 0 var(--edge); text-wrap: balance; }
+  .path { width: auto; margin: 14vw var(--edge) 0 calc(var(--edge) + 28px); }
+  .step { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 34px 0 38px; }
+  .say h3 { font-size: clamp(28px, 7.6vw, 40px); }
+  .say p { margin-top: 10px; font-size: 15.5px; }
+  .say .figure { margin-top: 14px; }
+  .figure b { font-size: 20px; }
+  .figure span { font-size: 11px; }
+  .targets { margin-top: 26px; font-size: 11px; }
+  .panel { padding: 14px 14px 16px; border-radius: 14px; font-size: 12.5px; }
+  .head { margin-bottom: 10px; font-size: 10.5px; }
+  .rows > div { padding: 8px 0; }
+  .sealed, .receipt { margin-top: 12px; }
+  .queue li { gap: 10px; }
+  .pair { margin-top: 8px; }
+  .proof { gap: 14px; }
+  .verified { margin-top: 5px; }
+  .rows[data-two] { margin-top: 12px; }
+  .layers li { padding: 8px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .how *, .how *::before, .how *::after { transition: none !important; }
+}

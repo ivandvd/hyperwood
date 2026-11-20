@@ -1,0 +1,48 @@
+/* The monitor (Monitor.tsx). The slab is laid out at the screen's own size (--w by --h, the bezel included) and the
+   whole of it scaled to its box's width (--fit). Its turn is the reference's, read off its picture: the right edge
+   towards the camera (17 degrees about its upright), seen from below (the eye a slab's height under its foot, so its
+   upper and lower edges both rise to the right, the upper one more, and its uprights stay upright), from far enough
+   away (3600 of its own pixels) that the near edge stands a tenth taller than the far one. */
+.box { position: relative; aspect-ratio: 1306 / 846; }
+.rig {
+  position: absolute; left: 0; top: 0; width: var(--w); height: var(--h);
+  transform-origin: 0 0; transform: scale(var(--fit));
+}
+.body { position: absolute; inset: 0; transform-style: preserve-3d; }
+
+/* The front: the screen in its bezel, drawn once for each depth of focus (the copies are added to one another). */
+.front { position: absolute; inset: 0; isolation: isolate; border-radius: 18px; }
+.copy { position: absolute; inset: 0; }
+.bezel {
+  position: absolute; inset: 0; padding: var(--bezel); border-radius: 18px; background: #060606;
+  box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1), inset 0 1px 0 0 rgba(244, 245, 240, 0.16);
+}
+.screen { position: relative; width: 100%; height: 100%; border-radius: 7px; overflow: hidden; background: #0a0a0a; }
+/* (a breath of the room's light across the glass) */
+.screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, rgba(244, 245, 240, 0.035), rgba(244, 245, 240, 0) 38%); }
+
+/* The slab's right side and its underside: 26 of its pixels deep, hinged on the front's edges and turned back. The
+   right side catches the room's light; the underside is in its own shade. */
+.under, .right { position: absolute; }
+.under { left: 9px; right: 9px; top: calc(100% - 1px); height: 26px; transform-origin: 50% 0; transform: rotateX(-90deg); background: linear-gradient(90deg, #0c0c0b, #121311 70%, #191a18); }
+.right { top: 9px; bottom: 9px; left: calc(100% - 1px); width: 26px; transform-origin: 0 50%; transform: rotateY(90deg); background: linear-gradient(180deg, #45463f, #2a2b27 35%, #171816); }
+
+/* The stand: a flat plate behind the slab, under its middle, with a round hole just under the chin (the reference's
+   stand, read off its picture: a quarter of the monitor's width, the hole a fifth of the plate's). It is lit from the
+   right, soft (it is behind the plane in focus), brightest under the chin and lost in the dark a hundred and five of
+   its pixels down, by the reference's curve: (1 - t)^1.2. From the eye, the slab and its underside hide the plate
+   down to 248 of its pixels: the hole's middle. (Only the plate fades; the hole is whole, so where it is the picture
+   is the page's Ink exactly: a dark colour let through in part is rounded unevenly when the picture is taken.) */
+.neck { position: absolute; left: 37.5%; width: 25%; top: 590px; height: 356px; transform: translateZ(-60px); filter: blur(1.4px); }
+.neck::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, #181916, #1b1c19 30%, #1e1f1b 50%, #222320 75%, #262722);
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 248px, rgba(0, 0, 0, 0.905) 256px, rgba(0, 0, 0, 0.811) 265px, rgba(0, 0, 0, 0.708) 274px, rgba(0, 0, 0, 0.607) 284px, rgba(0, 0, 0, 0.509) 293px, rgba(0, 0, 0, 0.414) 303px, rgba(0, 0, 0, 0.323) 312px, rgba(0, 0, 0, 0.236) 322px, rgba(0, 0, 0, 0.154) 331px, rgba(0, 0, 0, 0.079) 340px, rgba(0, 0, 0, 0.027) 348px, transparent 353px);
+  mask-image: linear-gradient(180deg, #000 0, #000 248px, rgba(0, 0, 0, 0.905) 256px, rgba(0, 0, 0, 0.811) 265px, rgba(0, 0, 0, 0.708) 274px, rgba(0, 0, 0, 0.607) 284px, rgba(0, 0, 0, 0.509) 293px, rgba(0, 0, 0, 0.414) 303px, rgba(0, 0, 0, 0.323) 312px, rgba(0, 0, 0, 0.236) 322px, rgba(0, 0, 0, 0.154) 331px, rgba(0, 0, 0, 0.079) 340px, rgba(0, 0, 0, 0.027) 348px, transparent 353px);
+}
+/* (the hole: the page's Ink seen through it; its lower rim is the plate's edge, and catches the light) */
+.neck i {
+  position: absolute; left: 50%; top: 248px; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%;
+  background: #0a0a0a;
+  box-shadow: inset 5px -6px 5px -3px rgba(150, 152, 140, 0.36), inset 0 -1px 0 rgba(200, 202, 190, 0.1);
+}

@@ -1,0 +1,262 @@
+/* The page after the hero laid out part for part as trysoar.com lays out its own (&flow=soar), measured on that page
+   at 1905 by 949 and kept in hundredths of the width: light parts on the Paper, dark ones on the Ink, and between
+   them the reference's ways from one to the other. Everything reaches from one edge of the screen to the other (the
+   page's margins are taken back); what stands in the middle stands in a column 56.4 hundredths wide, as there. */
+
+/* ---------------------------------------------------------------- the light ground: Paper, through a grain */
+.paper {
+  position: relative; margin: 0 calc(-1 * var(--edge)); color: var(--hw-ink);
+  background: var(--paper-grain, none), var(--hw-paper);
+}
+
+/* ---------------------------------------------------------------- from a dark part into a light one (Daybreak.tsx):
+   the reference's picture of it, read down its middle and at its side: black for a fifth, warm greys rising, then a
+   horizon brighter in the middle than at the sides (theirs blue, ours Neon), then the white. 15 hundredths tall. */
+.daybreak {
+  position: relative; margin: 0 calc(-1 * var(--edge)); height: 15vw; pointer-events: none;
+  background:
+    var(--paper-grain, none),
+    radial-gradient(ellipse 46% 38% at 50% 60%, rgba(204, 255, 0, 0.16), rgba(204, 255, 0, 0.05) 55%, rgba(204, 255, 0, 0) 100%),
+    linear-gradient(180deg, #0a0a0a 0, #0a0a0a 20%, #171714 30%, #282825 40%, #3c3c3a 50%, #4f504c 55%, #7c7e77 60%, #b8bab1 65%, #cfd1c8 70%, #dddfd6 75%, #e7e8e1 80%, #edeee8 85%, #f1f2ec 90%, #f3f4ef 95%, var(--hw-paper) 100%);
+}
+/* (after the hero it comes up over the held river: its first fifth lets the river through) */
+.daybreak[data-from="river"] {
+  background:
+    var(--paper-grain, none),
+    radial-gradient(ellipse 46% 38% at 50% 60%, rgba(204, 255, 0, 0.16), rgba(204, 255, 0, 0.05) 55%, rgba(204, 255, 0, 0) 100%),
+    linear-gradient(180deg, rgba(10, 10, 10, 0) 0, #0a0a0a 20%, #171714 30%, #282825 40%, #3c3c3a 50%, #4f504c 55%, #7c7e77 60%, #b8bab1 65%, #cfd1c8 70%, #dddfd6 75%, #e7e8e1 80%, #edeee8 85%, #f1f2ec 90%, #f3f4ef 95%, var(--hw-paper) 100%);
+}
+
+.lit { position: absolute; left: 0; right: 0; bottom: 0; height: 40%; }
+
+/* ---------------------------------------------------------------- the statement (Opening.tsx): at the left, 64 px in,
+   a line in two tones at 2.3 hundredths of the width, a sentence, the outlined pill */
+.opening { padding: 4.2vw clamp(28px, 3.36vw, 72px) 6vw; }
+.two { margin: 0; max-width: 31vw; font-family: var(--font-display); font-size: clamp(30px, 2.3vw, 56px); font-weight: 500; line-height: 1.14; letter-spacing: -0.034em; text-wrap: pretty; }
+.two span { color: rgba(10, 10, 10, 0.42); }
+.two b { font-weight: 500; color: var(--hw-ink); }
+.sentence { margin: 1.3vw 0 0; max-width: 24em; font-size: clamp(15px, 0.9vw, 19px); line-height: 1.42; letter-spacing: -0.012em; color: rgba(10, 10, 10, 0.62); }
+.pill {
+  display: inline-flex; align-items: center; gap: 10px; margin-top: 1.9vw; padding: 7px 7px 7px 18px; border-radius: 999px;
+  border: 1px solid rgba(10, 10, 10, 0.16); background: rgba(255, 255, 255, 0.5); color: var(--hw-ink); text-decoration: none;
+  font-size: clamp(13px, 0.74vw, 16px); font-weight: 500; letter-spacing: -0.01em;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.pill i { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(10, 10, 10, 0.16); }
+@media (hover: hover) {
+  .pill:hover { border-color: rgba(10, 10, 10, 0.32); background: #fff; }
+}
+
+/* ---------------------------------------------------------------- the three films (Features.tsx): rows of two cards,
+   573 and 487 px by 625 with corners of 40 and 15 px between, each standing still 17 hundredths of the screen's
+   height down while the page goes 1.2 screens on, the next coming up over it */
+.features { padding: 13.4vw 0 2vw; }
+.row {
+  position: sticky; top: 17vh; display: flex; gap: 0.79vw; width: 56.48vw; height: 32.8vw; margin: 0 auto 27.4vw;
+  transform-origin: 50% 0; transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.7s ease;
+}
+.row:last-child { margin-bottom: 2vw; }
+/* (a row covered by the next steps back) */
+.row[data-under] { transform: scale(0.94); opacity: 0.35; }
+.panel {
+  flex: 0 0 30.08vw; display: flex; flex-direction: column; justify-content: space-between; padding: 2.4vw 2.3vw 2.5vw;
+  border-radius: 2.1vw; background: #fff;
+}
+.panelTitle { margin: 0; font-family: var(--font-display); font-size: clamp(28px, 2.3vw, 56px); font-weight: 500; line-height: 1.06; letter-spacing: -0.04em; }
+.panelTitle span { display: block; }
+.panelTitle span + span { color: rgba(10, 10, 10, 0.42); }
+.panelText { margin: 0; max-width: 22em; font-size: clamp(14px, 0.9vw, 19px); line-height: 1.36; letter-spacing: -0.012em; color: rgba(10, 10, 10, 0.55); }
+.panelText b { font-weight: 600; color: var(--hw-ink); }
+.media { position: relative; flex: 1; overflow: hidden; border-radius: 2.1vw; background: var(--hw-ink); }
+.media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---------------------------------------------------------------- who it is for (Sizes.tsx): a headline in the
+   middle, 2.2 hundredths of the width; two cards under it, 27.8 by 29.9 hundredths each with corners of 2.1 and 0.79
+   between, a picture each with its words at the upper left in white and a round white button at the lower right */
+.sizes { padding: 5.4vw 0 6.8vw; }
+.middle { margin: 0 auto; width: fit-content; text-align: center; font-family: var(--font-display); font-size: clamp(28px, 2.2vw, 54px); font-weight: 500; line-height: 1.12; letter-spacing: -0.034em; }
+.middle span { color: rgba(10, 10, 10, 0.42); }
+.middle b { font-weight: 500; color: var(--hw-ink); }
+.pair { display: flex; gap: 0.79vw; width: 56.43vw; margin: 3.4vw auto 0; }
+.big { position: relative; flex: 1; height: 29.9vw; overflow: hidden; border-radius: 2.1vw; background: var(--hw-ink); }
+.big img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.big::before { content: ''; position: absolute; inset: 0 0 auto; height: 50%; z-index: 1; background: linear-gradient(180deg, rgba(10, 10, 10, 0.72), rgba(10, 10, 10, 0)); }
+.big p { position: absolute; z-index: 2; left: 1.6vw; top: 1.5vw; margin: 0; max-width: 62%; font-size: clamp(14px, 0.92vw, 19px); line-height: 1.32; letter-spacing: -0.012em; color: rgba(244, 245, 240, 0.66); }
+.big p b { font-weight: 600; color: #fff; }
+.round { position: absolute; z-index: 2; right: 1.4vw; bottom: 1.4vw; display: grid; place-items: center; width: clamp(34px, 2.2vw, 48px); aspect-ratio: 1; border-radius: 50%; background: #fff; color: var(--hw-ink); transition: transform 0.2s ease; }
+@media (hover: hover) {
+  .round:hover { transform: scale(1.06); }
+}
+
+/* ---------------------------------------------------------------- the exchange in detail (Detail.tsx): the headline
+   at the left of the middle column and the arrows at its right; under them, from the column's left to beyond the
+   screen's right, cards 19.3 by 24.1 hundredths with 0.63 between, moved a card at a time */
+.detail { padding: 5.5vw 0 5.5vw; }
+.detailHead { display: flex; align-items: center; justify-content: space-between; width: 56.43vw; margin: 0 auto; }
+.detailHead .two { max-width: none; }
+.detailHead .two b { color: var(--hw-ink); font-weight: 500; }
+.detailHead .two span { color: rgba(10, 10, 10, 0.42); }
+.arrows { display: flex; gap: 8px; }
+.arrows button {
+  display: grid; place-items: center; width: clamp(32px, 2vw, 44px); aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(10, 10, 10, 0.06); color: var(--hw-ink); transition: background-color 0.2s ease;
+}
+@media (hover: hover) {
+  .arrows button:hover { background: rgba(10, 10, 10, 0.12); }
+}
+.cardsRow {
+  display: flex; gap: 0.63vw; margin: 2.6vw 0 0; padding: 0 calc((100vw - 56.43vw) / 2); list-style: none;
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-left: calc((100vw - 56.43vw) / 2); scrollbar-width: none;
+}
+.cardsRow::-webkit-scrollbar { display: none; }
+.tall { position: relative; flex: 0 0 19.32vw; height: 24.15vw; overflow: hidden; border-radius: 1.2vw; background: var(--hw-ink); scroll-snap-align: start; }
+.tall img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* (the app's close views are pictures of a dark screen with their own light; the films' stills are grey: a little
+   darker under the words for both) */
+.tall::after { content: ''; position: absolute; inset: auto 0 0; height: 46%; background: linear-gradient(0deg, rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0)); }
+.tall p { position: absolute; z-index: 1; left: 1.1vw; right: 1.1vw; bottom: 1vw; margin: 0; display: grid; gap: 4px; }
+.tall b { font-size: clamp(14px, 0.9vw, 19px); font-weight: 600; letter-spacing: -0.012em; color: #fff; }
+.tall span { font-size: clamp(12px, 0.72vw, 15px); line-height: 1.36; color: rgba(244, 245, 240, 0.62); }
+
+/* ---------------------------------------------------------------- the last screen (TryIt.tsx): one screen; the line at
+   the left of the middle column, at its middle; the iPhone standing a little right of the screen's middle, its body
+   30 hundredths of the width tall; the white pill at its right */
+.tryit { position: relative; height: 100vh; height: 100svh; min-height: 40vw; overflow: clip; }
+.tryLine {
+  position: absolute; z-index: 1; left: 21.8vw; top: 50%; margin: 0; transform: translateY(-50%);
+  font-family: var(--font-display); font-size: clamp(30px, 2.3vw, 56px); font-weight: 500; line-height: 1.12; letter-spacing: -0.034em;
+}
+.tryLine span { display: block; color: rgba(10, 10, 10, 0.42); }
+.tryLine b { display: block; font-weight: 500; color: var(--hw-ink); }
+/* (Apple's iPhone, as it is: upright, straight on, 64 hundredths of the screen tall, a little right of the middle as the
+   reference's phone stands, so the line and the pill stand clear of it on either side, as Apple asks) */
+.iphone { position: absolute; left: 54vw; top: 50%; height: 64vh; height: 64svh; width: auto; transform: translate(-50%, -50%); pointer-events: none; }
+.whitePill {
+  position: absolute; z-index: 1; left: calc(54vw + 15.7vh + 4vw); left: calc(54vw + 15.7svh + 4vw); top: 50%; transform: translateY(-50%);
+  padding: 0.8vw 1.4vw; border-radius: 999px; background: #fff; color: var(--hw-ink); text-decoration: none;
+  font-size: clamp(13px, 0.78vw, 17px); font-weight: 500; letter-spacing: -0.01em;
+  box-shadow: 0 1px 2px rgba(10, 10, 10, 0.06), 0 6px 22px rgba(10, 10, 10, 0.08);
+  transition: box-shadow 0.2s ease;
+}
+@media (hover: hover) {
+  .whitePill:hover { box-shadow: 0 1px 2px rgba(10, 10, 10, 0.08), 0 10px 28px rgba(10, 10, 10, 0.12); }
+}
+
+/* ---------------------------------------------------------------- the foot (MegaFooter.tsx): in the middle column; a
+   row over a hairline, the columns, what the papers insist on, the mark and the year */
+.foot { padding: 1.4vw 0 2.4vw; font-size: clamp(13px, 0.79vw, 16px); letter-spacing: -0.01em; }
+.foot > * { width: 56.43vw; margin-left: auto; margin-right: auto; }
+.foot a { color: var(--hw-ink); text-decoration: none; }
+@media (hover: hover) {
+  .foot a:hover { text-decoration: underline; text-underline-offset: 3px; }
+}
+.footTop { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.1vw; border-bottom: 1px solid rgba(10, 10, 10, 0.1); }
+.footTop a { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+.footTop a:first-child { text-decoration: underline; text-underline-offset: 3px; }
+.footCols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2vw; padding: 2.2vw 0 3vw; }
+.footCols div { display: grid; align-content: start; gap: 0.55vw; }
+.footCols p { margin: 0 0 0.3vw; font-weight: 600; }
+.footCols a { color: rgba(10, 10, 10, 0.62); }
+.footInfo { display: grid; gap: 0.7vw; max-width: 45vw; margin-left: 21.8vw; padding: 1.6vw 0 2.4vw; border-top: 1px solid rgba(10, 10, 10, 0.1); }
+.footInfo p { margin: 0; line-height: 1.5; color: rgba(10, 10, 10, 0.58); }
+.footInfo p:first-child { font-weight: 600; color: rgba(10, 10, 10, 0.72); }
+.footBottom { display: flex; align-items: center; justify-content: space-between; padding-top: 1.2vw; border-top: 1px solid rgba(10, 10, 10, 0.1); color: rgba(10, 10, 10, 0.5); }
+.footMark {
+  display: block; width: 40px; aspect-ratio: 428 / 191; background: var(--hw-ink);
+  -webkit-mask: url('../../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+  mask: url('../../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+}
+/* (the foot stands outside the page's column, so it has no margins to take back) */
+.foot.paper { margin: 0; }
+
+/* ---------------------------------------------------------------- with &foot=ink | neon: the words darker and
+   larger, as the reference's; the channels as icons; each note led in bold; and the logo large in a card at the end,
+   the width of the column, its corners the shots' (2.1 hundredths of the width) */
+.foot[data-card] { font-size: clamp(14px, 0.84vw, 17px); }
+.foot[data-card] .footTop { padding-bottom: 1.3vw; }
+.follow { display: inline-flex; align-items: center; gap: 14px; font-weight: 500; }
+.follow span { margin-right: 2px; }
+.follow a { display: inline-grid; place-items: center; width: 22px; height: 22px; color: var(--hw-ink); }
+.follow a svg { width: 18px; height: 18px; }
+.foot[data-card] .footCols { padding: 2.4vw 0 3.2vw; }
+.foot[data-card] .footCols div { gap: 0.72vw; }
+.foot[data-card] .footCols a { color: rgba(10, 10, 10, 0.8); }
+.foot[data-card] .footInfo p { color: rgba(10, 10, 10, 0.66); }
+.foot[data-card] .footInfo p:first-child { color: var(--hw-ink); }
+.foot[data-card] .footInfo b { font-weight: 600; color: var(--hw-ink); }
+.footCard { position: relative; display: grid; place-items: center; margin-top: 0.4vw; aspect-ratio: 1075 / 300; border-radius: 2.1vw; overflow: hidden; isolation: isolate; will-change: transform; }
+/* (Neon on Ink, on the shots' ground: the Neon mixed into the Ink at one corner, as light let through a grain) */
+.footCard[data-ground='ink'] { background: #0a0a0a; color: #ccff00; }
+.footCard[data-ground='ink']::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse 70% 120% at 96% 112%, rgba(204, 255, 0, 0.3), rgba(204, 255, 0, 0.14) 34%, rgba(204, 255, 0, 0.05) 62%, transparent 86%);
+  -webkit-mask-image: var(--grain, linear-gradient(#000, #000)); mask-image: var(--grain, linear-gradient(#000, #000));
+}
+/* (Ink on Neon: the brand's moment of recognition, flat) */
+.footCard[data-ground='neon'] { background: #ccff00; color: #0a0a0a; }
+.footLockup {
+  display: block; width: 84%; aspect-ratio: 907.45 / 113.8; background: currentColor;
+  -webkit-mask: url('../../assets/brand/hyperwood-lockup-neon.svg') center / 100% 100% no-repeat;
+  mask: url('../../assets/brand/hyperwood-lockup-neon.svg') center / 100% 100% no-repeat;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1), transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.footCard[data-shown] .footLockup { opacity: 1; transform: none; }
+.foot[data-card] .footBottom { border-top: 0; padding-top: 1.15vw; color: rgba(10, 10, 10, 0.55); }
+.footLine b { font-weight: 500; color: var(--hw-ink); }
+@media (prefers-reduced-motion: reduce) {
+  .footLockup { opacity: 1; transform: none; transition: none; }
+}
+
+/* ---------------------------------------------------------------- an upright or narrow screen: one column; the
+   features' rows stand the words over the film and still come up one over another; the cards one under another, or
+   in a row moved by the finger; the last screen the line, the phone and the pill one under another */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .daybreak { height: 34vw; }
+  .opening { padding: 12vw var(--edge) 16vw; }
+  .two { max-width: none; font-size: clamp(28px, 7.4vw, 46px); }
+  .sentence { margin-top: 16px; max-width: 30em; font-size: 15.5px; }
+  .pill { margin-top: 22px; font-size: 14px; }
+
+  .features { padding: 10vw var(--edge) 4vw; }
+  .row { flex-direction: column; gap: 8px; width: auto; height: auto; top: 11vh; top: 11svh; margin-bottom: 22vh; }
+  .panel { flex: none; gap: 34px; padding: 24px 22px 22px; border-radius: 24px; }
+  .panelTitle { font-size: clamp(26px, 7.2vw, 42px); }
+  .panelText { font-size: 15px; }
+  .media { flex: none; height: min(64vw, 38vh); border-radius: 24px; }
+
+  .sizes { padding: 12vw var(--edge) 14vw; }
+  .middle { font-size: clamp(28px, 7.4vw, 46px); }
+  .pair { flex-direction: column; gap: 10px; width: auto; margin-top: 8vw; }
+  .big { flex: none; height: min(118vw, 70vh); border-radius: 24px; }
+  .big p { left: 20px; top: 18px; max-width: 78%; font-size: 15px; }
+  .round { right: 16px; bottom: 16px; width: 40px; }
+
+  .detail { padding: 12vw 0 12vw; }
+  .detailHead { width: auto; padding: 0 var(--edge); }
+  .cardsRow { gap: 10px; margin-top: 7vw; padding: 0 var(--edge); scroll-padding-left: var(--edge); }
+  .tall { flex-basis: 72vw; height: 92vw; border-radius: 20px; }
+  .tall p { left: 16px; right: 16px; bottom: 16px; }
+  .tall b { font-size: 16px; }
+  .tall span { font-size: 13.5px; }
+
+  .tryit { height: auto; min-height: 0; padding: 16vw var(--edge) 10vw; display: grid; justify-items: start; }
+  .tryLine { position: static; transform: none; font-size: clamp(28px, 7.4vw, 46px); }
+  .iphone { position: relative; left: 0; top: 0; width: 62vw; max-width: 340px; height: auto; margin: 8vw 0 2vw; transform: none; justify-self: center; }
+  .whitePill { position: static; transform: none; margin-top: 2vw; padding: 13px 22px; font-size: 15px; }
+
+  .foot { padding: 6vw 0 8vw; font-size: 14px; }
+  .foot > * { width: auto; margin-left: var(--edge); margin-right: var(--edge); }
+  .footTop { padding-bottom: 16px; }
+  .footCols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 18px; padding: 24px 0 30px; }
+  .footCols div { gap: 8px; }
+  .footInfo { max-width: none; margin-left: var(--edge); gap: 10px; padding: 22px 0 26px; }
+  .footBottom { padding-top: 16px; }
+  .foot[data-card] { font-size: 15px; }
+  .foot[data-card] .footTop { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .foot[data-card] .footCols { padding: 26px 0 32px; }
+  .foot[data-card] .footCols div { gap: 10px; }
+  .footCard { aspect-ratio: 2.3 / 1; border-radius: 20px; margin-top: 6px; }
+  .footLockup { width: 86%; }
+  .foot[data-card] .footBottom { flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 14px; }
+}

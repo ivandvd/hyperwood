@@ -1,0 +1,24 @@
+/* The chart (Chart.tsx), in the app's colours (terminal.module.css gives them): hairlines for the prices, a dotted
+   line between two sessions, candles in Hyper Neon where the price rose and in the app's red where it fell, and
+   over them the account's own lines. */
+.chart { display: block; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.grid { stroke: var(--line); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--t3); font-size: 10.5px; }
+.session { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 2 4; shape-rendering: crispEdges; }
+.date { fill: var(--t3); font-size: 10.5px; }
+
+.up line { stroke: var(--neon); stroke-width: 1; }
+.up rect { fill: var(--neon); }
+.down line { stroke: var(--down); stroke-width: 1; }
+.down rect { fill: var(--down); }
+
+.entry line { stroke: rgba(244, 245, 240, 0.5); stroke-width: 1; stroke-dasharray: 5 4; }
+.entry rect { fill: #f4f5f0; }
+.entry text { fill: #0a0a0a; font-size: 10.5px; font-weight: 500; }
+.order line { stroke: rgba(204, 255, 0, 0.55); stroke-width: 1; stroke-dasharray: 1.5 4; }
+.order rect { fill: #0a0a0a; stroke: rgba(204, 255, 0, 0.6); stroke-width: 1; }
+.order text { fill: var(--neon); font-size: 10.5px; font-weight: 500; }
+
+.last line { stroke: rgba(204, 255, 0, 0.32); stroke-width: 1; stroke-dasharray: 2 3; }
+.last rect { fill: var(--neon); }
+.last text { fill: #0a0a0a; font-size: 10.5px; font-weight: 500; }

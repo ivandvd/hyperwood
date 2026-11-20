@@ -1,0 +1,136 @@
+/* The mobile app's screens (PhoneApp.tsx), each at a phone's own size: 390 by 844, every measure in its own pixels.
+   The web app's colours and faces (terminal.module.css): one Ink, hairlines, Hyper Neon for what rises, for the long
+   side and for the one thing to press, the app's red for what falls. */
+.screen {
+  --bg: #0a0a0a;
+  --lift: #101110;
+  --line: rgba(244, 245, 240, 0.085);
+  --line-2: rgba(244, 245, 240, 0.16);
+  --t1: #f4f5f0;
+  --t2: rgba(244, 245, 240, 0.62);
+  --t3: rgba(244, 245, 240, 0.4);
+  --neon: #ccff00;
+  --down: #ff5c4a;
+  position: relative; width: 390px; height: 844px; overflow: hidden; display: flex; flex-direction: column;
+  background: var(--bg); color: var(--t1);
+  font-family: var(--font-text); font-size: 14px; line-height: 1.3; letter-spacing: -0.005em; font-synthesis: none;
+  -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; user-select: none; cursor: default;
+}
+.screen svg { display: block; }
+.screen b { font-weight: 600; }
+.screen i, .screen em { font-style: normal; }
+.screen > * { flex: none; }
+
+/* the phone's own line: the time, its signs */
+.status { display: flex; justify-content: space-between; align-items: center; height: 54px; padding: 8px 30px 0 34px; font-size: 16px; }
+.status b { font-weight: 600; letter-spacing: -0.02em; }
+.status span { display: flex; align-items: center; gap: 6px; }
+.status i { display: block; background: var(--t1); }
+.status i[data-kind='cell'] { width: 17px; height: 11px; -webkit-mask: linear-gradient(90deg, #000 0 3px, transparent 3px 4.6px, #000 4.6px 7.6px, transparent 7.6px 9.2px, #000 9.2px 12.2px, transparent 12.2px 13.8px, #000 13.8px 17px); mask: linear-gradient(90deg, #000 0 3px, transparent 3px 4.6px, #000 4.6px 7.6px, transparent 7.6px 9.2px, #000 9.2px 12.2px, transparent 12.2px 13.8px, #000 13.8px 17px); clip-path: polygon(0 62%, 100% 0, 100% 100%, 0 100%); }
+.status i[data-kind='wifi'] { width: 15px; height: 11px; border-radius: 15px 15px 0 0 / 11px 11px 0 0; clip-path: polygon(50% 100%, 0 26%, 14% 0, 86% 0, 100% 26%); }
+.status i[data-kind='battery'] { width: 25px; height: 12px; border-radius: 3.5px; background: none; border: 1px solid var(--t2); position: relative; }
+/* (full, as Apple asks of a phone's status bar shown in marketing) */
+.status i[data-kind='battery']::after { content: ''; position: absolute; inset: 1.5px; border-radius: 1.5px; background: var(--t1); }
+
+/* the app's own line: its mark, where one is, a note at the right */
+.head { display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 20px; border-bottom: 1px solid var(--line); }
+.mark { width: 34px; height: 15px; color: var(--neon); }
+.pair { display: flex; align-items: center; gap: 5px; margin-right: auto; }
+.pair b { font-size: 17px; letter-spacing: -0.02em; }
+.pair svg { width: 15px; height: 15px; color: var(--t3); }
+.head em { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 11.5px; color: var(--neon); }
+.head em svg { width: 13px; height: 13px; }
+
+/* ------------------------------------------------------------------ the trade */
+.price { display: grid; gap: 3px; padding: 18px 20px 6px; }
+.price b { font-family: var(--font-mono); font-size: 38px; font-weight: 500; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.price span { font-family: var(--font-mono); font-size: 13px; color: var(--neon); }
+.chart { margin-top: 2px; }
+.frames { display: flex; justify-content: space-between; padding: 6px 20px 12px; font-family: var(--font-mono); font-size: 12px; color: var(--t3); }
+.frames span, .frames b { padding: 5px 12px; border-radius: 7px; font-weight: 500; }
+.frames b { background: rgba(244, 245, 240, 0.09); color: var(--t1); }
+.position { margin: 0 16px; padding: 13px 14px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--lift); display: grid; gap: 10px; }
+.position > div { display: flex; justify-content: space-between; align-items: center; }
+.position span { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--t3); }
+.position em { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--t3); }
+.position em svg { width: 13px; height: 13px; }
+.position b { display: flex; align-items: center; gap: 9px; font-size: 16px; }
+.position b i { padding: 2px 7px; border-radius: 5px; background: rgba(204, 255, 0, 0.12); color: var(--neon); font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; }
+.position strong { font-family: var(--font-mono); font-size: 15px; font-weight: 500; color: var(--neon); font-variant-numeric: tabular-nums; }
+.position small { font-size: 11.5px; opacity: 0.75; }
+.sides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 16px 12px; }
+.sides b, .sides span { height: 52px; display: grid; place-items: center; border-radius: 14px; font-size: 16px; font-weight: 700; }
+.sides b { background: var(--neon); color: #0a0a0a; }
+.sides span { border: 1px solid rgba(255, 92, 74, 0.5); color: var(--down); }
+
+/* the foot: where one can go, and the phone's own bar */
+.tabs { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); padding: 9px 10px 26px; border-top: 1px solid var(--line); font-size: 10.5px; font-weight: 500; color: var(--t3); }
+.tabs span { display: grid; justify-items: center; gap: 5px; }
+/* (each tab's sign: Phosphor's regular weight, the tab that is on in its fill weight and in Neon: icons.tsx) */
+.tabs i { display: block; width: 24px; height: 24px; }
+.tabs i svg { display: block; width: 100%; height: 100%; }
+.tabs span[data-on] { color: var(--t1); }
+.tabs span[data-on] i { color: var(--neon); }
+.home { position: absolute; left: 50%; bottom: 8px; width: 136px; height: 5px; margin-left: -68px; border-radius: 3px; background: rgba(244, 245, 240, 0.9); }
+
+/* ------------------------------------------------------------------ the receipt */
+.sealed { display: grid; justify-items: center; gap: 6px; padding: 44px 20px 34px; }
+.sealed i { width: 58px; height: 58px; border-radius: 50%; background: var(--neon); color: #0a0a0a; display: grid; place-items: center; margin-bottom: 8px; }
+.sealed i svg { width: 26px; height: 26px; }
+.sealed b { font-size: 25px; letter-spacing: -0.03em; }
+.sealed span { font-family: var(--font-mono); font-size: 12.5px; color: var(--t2); }
+.stages { list-style: none; margin: 0 16px; padding: 6px 16px; border: 1px solid var(--line-2); border-radius: 16px; background: var(--lift); }
+.stages li { position: relative; display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; column-gap: 13px; height: 64px; }
+.stages li + li { border-top: 1px solid var(--line); }
+.stages li i { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line-2); display: grid; place-items: center; }
+.stages li[data-done] i { border-color: var(--neon); background: var(--neon); color: #0a0a0a; }
+.stages li i svg { width: 14px; height: 14px; }
+.stages li[data-now] i { border-color: var(--neon); }
+.stages li[data-now] i::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--neon); }
+.stages li div { display: grid; gap: 1px; }
+.stages li b { font-size: 15.5px; color: var(--t3); }
+.stages li[data-done] b, .stages li[data-now] b { color: var(--t1); }
+.stages li span { font-size: 12px; color: var(--t3); }
+.stages li em { font-family: var(--font-mono); font-size: 12px; color: var(--t3); font-variant-numeric: tabular-nums; }
+.stages li[data-now] em { color: var(--neon); }
+.receipt { margin: 16px 16px 0; padding: 14px 16px 16px; border: 1px solid var(--line-2); border-radius: 16px; }
+.receipt > div:first-child { display: flex; justify-content: space-between; align-items: center; }
+.receipt span { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--t3); }
+.receipt em { display: flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 11.5px; color: var(--neon); }
+.receipt em svg { width: 14px; height: 14px; }
+.receipt p { margin: 9px 0 12px; font-size: 13px; color: var(--t2); }
+.bars { display: flex; flex-wrap: wrap; gap: 8px 10px; }
+.bars i { height: 11px !important; }
+
+/* ------------------------------------------------------------------ the close */
+.closing { padding: 18px 20px 0; }
+.closing > span { font-family: var(--font-mono); font-size: 12.5px; color: var(--t2); }
+.closing dl { display: grid; grid-template-columns: repeat(3, 1fr); margin: 16px 0 0; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.closing dl div { display: grid; gap: 5px; }
+.closing dt { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--t3); }
+.closing dd { margin: 0; font-family: var(--font-mono); font-size: 15.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.closing dd[data-up] { color: var(--neon); }
+.equity { display: grid; gap: 4px; padding: 20px 20px 4px; }
+.equity span { font-size: 13.5px; color: var(--t2); }
+.equity b { font-family: var(--font-mono); font-size: 40px; font-weight: 500; letter-spacing: -0.04em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.ask { margin: 20px 20px 10px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--t3); }
+.options { display: grid; gap: 10px; margin: 0 16px; }
+.options > div { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; column-gap: 13px; padding: 15px 15px; border-radius: 14px; border: 1px solid var(--line-2); background: var(--lift); }
+.options > div > i { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--line-2); display: grid; place-items: center; }
+.options div div { display: grid; gap: 2px; }
+.options b { font-size: 16px; }
+.options span { font-size: 12.5px; color: var(--t3); }
+.options em { display: grid; justify-items: end; font-family: var(--font-mono); font-size: 15.5px; font-weight: 500; color: var(--t2); font-variant-numeric: tabular-nums; }
+.options small { font-size: 11px; color: var(--t3); }
+.options > div[data-on] { border-color: var(--neon); background: rgba(204, 255, 0, 0.06); }
+.options > div[data-on] > i { border-color: var(--neon); }
+.options > div[data-on] > i::after { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--neon); }
+.options > div[data-on] em { color: var(--neon); }
+.options > div[data-on] small { color: rgba(204, 255, 0, 0.7); }
+.sign { all: unset; flex: none; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 9px; height: 54px; margin: auto 16px 0; border-radius: 14px; background: var(--neon); color: #0a0a0a; font-family: var(--font-text); font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.sign svg { width: 17px; height: 17px; }
+.note { margin: 12px 20px 34px; font-size: 12px; color: var(--t3); text-align: center; }
+
+/* (what a tracker is, under the choice) */
+.hint { display: grid; grid-template-columns: 16px minmax(0, 1fr); column-gap: 10px; margin: 16px 20px 0; font-size: 12.5px; line-height: 1.42; color: var(--t3); }
+.hint svg { width: 16px; height: 16px; color: var(--t2); margin-top: 1px; }
