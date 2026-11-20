@@ -7,16 +7,19 @@
  */
 import { useState } from 'react'
 import { home } from '../../content.home'
+import { useRise } from '../rise'
 import s from './soar.module.css'
 import f from './faq.module.css'
 
 export function Faq() {
   const F = home.soar.faq
   const [open, setOpen] = useState(0)
+  // (its headline and its questions rise into place as the scroll brings them in: rise.ts)
+  const riseIn = useRise<HTMLElement>()
   return (
-    <section className={`${s.paper} ${f.faq}`} aria-labelledby="faq-title" data-light="">
+    <section ref={riseIn} id="faq" className={`${s.paper} ${f.faq}`} aria-labelledby="faq-title" data-light="">
       <div className={f.inner}>
-        <h2 id="faq-title" className={f.title}>
+        <h2 id="faq-title" className={f.title} data-rise="">
           <span>{F.title[0]}</span> <b>{F.title[1]}</b>
         </h2>
         <div className={f.list}>
@@ -24,10 +27,10 @@ export function Faq() {
             const shown = open === i
             const id = `faq-${i}`
             return (
-              <div key={item.q} className={f.item} data-open={shown ? '' : undefined}>
+              <div key={item.q} className={f.item} data-open={shown ? '' : undefined} data-rise="" data-keyed="">
                 <h3>
                   <button type="button" aria-expanded={shown} aria-controls={id} id={`${id}-q`} onClick={() => setOpen(shown ? -1 : i)}>
-                    <span>{item.q}</span>
+                    <span data-key="">{item.q}</span>
                     <i aria-hidden="true" />
                   </button>
                 </h3>

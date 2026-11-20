@@ -4,6 +4,7 @@
  * way around it leaves them out.)
  */
 import { BRAND, home } from '../content.home'
+import { LegalLinks } from '../site/LegalLinks'
 import { filmsAfter } from './flags'
 import s from './footer.module.css'
 
@@ -39,7 +40,10 @@ export function Footer() {
         </ul>
         <div className={s.bottom}>
           <span className={s.mark} role="img" aria-label={BRAND} />
-          <span>{F.rights}</span>
+          <span className={s.legal}>
+            <LegalLinks />
+            <span>{F.rights}</span>
+          </span>
         </div>
       </div>
     </footer>

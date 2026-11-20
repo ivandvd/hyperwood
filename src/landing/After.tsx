@@ -19,10 +19,11 @@
  * are not shown.
  *
  * With &flow=soar as well, the page after the hero is laid out part for part as trysoar.com lays out its own (soar/),
- * light and dark by turns; with &ground=ink, all of it on the Ink: the statement, the three films, what Hyperwood is
- * building (soar/Building.tsx), the app's stage under the journey's river (soar/RiverScene.tsx), why no one can trade
- * ahead of an order (soar/Ahead.tsx), how a trade goes as one glass that becomes each stage (soar/how/HowMorph.tsx),
- * then the sizes, the detail, the questions and the last screen.
+ * light and dark by turns; with &ground=ink, all of it on the Ink: the statement, the three films, how it works as
+ * the architecture paper lays it out (soar/works/WorksBlock.tsx: one block with a picture, its three parts changing
+ * in it), the app's stage under the
+ * arc of light (soar/DropScene.tsx; its river, soar/RiverScene.tsx, is AppStage's sky="river"), why no one can trade
+ * ahead of an order (soar/Ahead.tsx), then the questions and the last screen (Finale.tsx: the phone standing).
  */
 import { useEffect, useRef } from 'react'
 import { home } from '../content.home'
@@ -33,21 +34,19 @@ import { orderFilm, payoutFilm, phonesFilm, sealedFilm } from './reel/films'
 import { OrderSet, PayoutSet, PhonesSet, SealedSet } from './reel/sets'
 import { AppStage } from './AppStage'
 import { Ahead } from './soar/Ahead'
-import { Building } from './soar/Building'
 import { FilmBlock } from './FilmBlock'
 import { Finale } from './Finale'
-import { filmsAfter, flowSoar, groundInk } from './flags'
+import { filmsAfter, flowSoar, groundInk, howCards } from './flags'
 import { paperGrain } from './grain'
 import { Reveal } from './Reveal'
 import { Daybreak } from './soar/Daybreak'
-import { Detail } from './soar/Detail'
 import { Faq } from './soar/Faq'
 import { Features } from './soar/Features'
 import { HowItWorks } from './soar/HowItWorks'
-import { HowMorph } from './soar/how/HowMorph'
 import { Opening } from './soar/Opening'
-import { Sizes } from './soar/Sizes'
 import { TryIt } from './soar/TryIt'
+import { Works } from './soar/works/Works'
+import { WorksBlock } from './soar/works/WorksBlock'
 import { watchTone } from './soar/tone'
 import { Statement } from './Statement'
 import { useSeen } from './useSeen'
@@ -164,28 +163,13 @@ export function After() {
             <Opening />
           </>
         )}
-        {groundInk ? (
-          <>
-            <FilmBlock />
-            <Building />
-          </>
-        ) : (
-          <Features />
-        )}
-        <AppStage sky={groundInk ? 'river' : 'drop'} />
-        {groundInk ? (
-          <>
-            <Ahead />
-            <HowMorph />
-          </>
-        ) : (
-          <HowItWorks />
-        )}
+        {groundInk ? <FilmBlock exit /> : <Features />}
+        {groundInk && (howCards ? <Works /> : <WorksBlock />)}
+        <AppStage sky="drop" />
+        {groundInk ? <Ahead /> : <HowItWorks />}
         {!groundInk && <Daybreak from="ink" />}
-        <Sizes />
-        <Detail />
         <Faq />
-        <TryIt />
+        {groundInk ? <Finale call={false} /> : <TryIt />}
       </div>
     )
 

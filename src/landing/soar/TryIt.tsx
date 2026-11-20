@@ -13,12 +13,15 @@ import { useEffect, useRef } from 'react'
 import { home } from '../../content.home'
 import iphone700 from '../../assets/product/iphone-real-700.webp'
 import iphone1350 from '../../assets/product/iphone-real-1350.webp'
+import { useRise } from '../rise'
 import { whenStill } from '../still'
 import s from './soar.module.css'
 
 export function TryIt() {
   const F = home.finale
   const picture = useRef<HTMLImageElement>(null)
+  // (its lines, the phone and the call to action rise into place as the scroll brings them in: rise.ts)
+  const riseIn = useRise<HTMLElement>()
   // (fetched and unpacked at a still moment before the page reaches it)
   useEffect(
     () =>
@@ -31,11 +34,12 @@ export function TryIt() {
     [],
   )
   return (
-    <section className={`${s.paper} ${s.tryit}`} aria-labelledby="tryit-title" data-light="">
+    <section ref={riseIn} className={`${s.paper} ${s.tryit}`} aria-labelledby="tryit-title" data-light="">
       <h2 id="tryit-title" className={s.tryLine}>
-        <span>{F.title[0]}</span> <b>{F.title[1]}</b>
+        <span data-rise="">{F.title[0]}</span> <b data-rise="">{F.title[1]}</b>
       </h2>
       <img
+        data-rise=""
         ref={picture}
         className={s.iphone}
         src={iphone700}
@@ -47,7 +51,7 @@ export function TryIt() {
         loading="lazy"
         decoding="async"
       />
-      <a className={s.whitePill} href={home.launch.href}>
+      <a className={s.whitePill} href={home.launch.href} data-rise="">
         {home.launch.label}
       </a>
     </section>

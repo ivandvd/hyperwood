@@ -49,7 +49,7 @@ export function FilmHero() {
   return (
     <section ref={root} className={s.hero} id="top">
       <a className={s.logo} href="./" aria-label={`${BRAND} home`}>
-        <img src={lockup} alt="" />
+        <img src={lockup} alt="" width={907} height={114} />
       </a>
 
       <FilmStrip ref={strip} className={s.film} labels={film.clips} inFrame={card} />

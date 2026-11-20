@@ -73,7 +73,7 @@ export function SiteHeader({ backed, nav, more, home }: Props) {
   }
 
   const cta = sections.cta
-  const mark = <img className={styles.logo} src={lockup} alt="" />
+  const mark = <img className={styles.logo} src={lockup} alt="" width={907} height={114} />
   return (
     <header className={styles.header} data-backed={backed ? '' : undefined}>
       {home ? (

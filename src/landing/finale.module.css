@@ -15,7 +15,7 @@
 /* (the picture: the phone a little right of the screen's middle, its light and shadow running out towards the line;
    the picture holds only the lit ground, so it begins at the light's left edge and its middle is a little above the
    screen's) */
-.picture { position: absolute; left: 45.71vw; top: calc(50% - 2.07vw); width: 41.16vw; transform: translateY(-50%); pointer-events: none; }
+.picture { position: absolute; left: 45.71vw; top: calc(50% + 0.6vw); width: 41.16vw; transform: translateY(-50%); pointer-events: none; }
 .picture img { display: block; width: 100%; height: auto; }
 .go { position: absolute; z-index: 1; left: 78vw; top: 50%; transform: translateY(-50%); --launch-height: clamp(40px, 2.7vw, 58px); --launch-pad: clamp(18px, 1.3vw, 28px); --launch-type: clamp(14px, 0.95vw, 19px); }
 

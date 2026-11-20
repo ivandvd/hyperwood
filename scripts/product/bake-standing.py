@@ -1,6 +1,7 @@
 """
 Put the standing phone's picture together (src/product/Standing.tsx) from three takes of the same view of
-studio.html?scene=standing (shots/standing.js): the phone alone with nothing behind it, and the pool of light alone
+studio.html?scene=standing (shots.js): the phone alone with nothing behind it (the model of the phone shots, drawn
+by shot.html?shot=standing where that page's own phone stands), and the pool of light alone
 and the shadow alone, both white on black.
 
 The ground is Hyper Neon let through q = pool x (1 - shadow), worked out in full precision. Taken in one piece, the

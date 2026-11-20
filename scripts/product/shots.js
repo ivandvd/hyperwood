@@ -8,13 +8,18 @@
  *   globalThis.__shots = { out: 'C:/somewhere/takes/', base: 'http://localhost:5220', only: ['standing'] }
  *
  * `out` (a folder, with its slash) is required; `base` is the dev server; `only` picks some of: monitor, cards,
- * phones, standing, screen, shots. It writes there:
+ * phones, standing, screen, shots. To try the standing phone's lights: `phoneOnly` (the pool and the shadow are not
+ * taken again), `spp` (how many renders are added up, 256 unless given) and `ask` (more of shot.html's address, as
+ * '&key=1,0.3,96,2'). It writes there:
  *
  *   monitor.png                                the web app on its monitor, nothing behind it (2x)
  *   card-ticket.png, -request.png, -payout.png  the three close views, 700 by 934 on Ink (3x)
  *   phones.png                                 the mobile app on three phones, nothing behind them (2x)
- *   standing-phone.png, -pool.png, -shade.png  the phone that ends the page: the phone alone with nothing behind
- *                                              it, its pool of light and its shadow alone, white on black (2x)
+ *   standing-pool.png, -shade.png              the phone that ends the page: its pool of light and its shadow
+ *                                              alone, white on black (2x)
+ *   standing-phone.png                         that phone alone with nothing behind it: the model of the phone shots
+ *                                              (shot.html?shot=standing), drawn on a page of the same size where the
+ *                                              studio page's own phone stands, so it lies exactly over the two
  *   phone-screen.png                           the mobile app's Trade screen alone at an iPhone 18 Pro's screen
  *                                              size, 1206 by 2622 (3x), for Apple's own picture of the phone
  *                                              (bake-bezel.py)
@@ -52,9 +57,31 @@ async (page) => {
     for (const card of ['ticket', 'request', 'payout'])
       await take({ viewport: { width: 700, height: 934 }, scale: 3, address: 'scene=card&card=' + card, file: 'card-' + card + '.png', clip: { x: 0, y: 0, width: 700, height: 934 } })
   if (want('phones')) await take({ viewport: { width: 2900, height: 1750 }, scale: 2, address: 'scene=phones&w=2600', file: 'phones.png', clear: true })
-  if (want('standing'))
-    for (const part of ['phone', 'pool', 'shade'])
-      await take({ viewport: { width: 3300, height: 2700 }, scale: 2, address: 'scene=standing&w=2300&part=' + part, file: 'standing-' + part + '.png', clear: part === 'phone' })
+  if (want('standing')) {
+    const frame = { width: 3300, height: 2700 }
+    if (!o.phoneOnly)
+      for (const part of ['pool', 'shade']) await take({ viewport: frame, scale: 2, address: 'scene=standing&w=2300&part=' + part, file: 'standing-' + part + '.png' })
+    // the phone: the app's screen alone, then the model with it under its glass, drawn where the studio page's own
+    // phone stands (that page is asked where its rig is)
+    await take({ viewport: { width: 402, height: 874 }, scale: 6, address: 'scene=screen&app=trade', file: 'app-trade.png', clip: { x: 0, y: 0, width: 402, height: 874 } })
+    const ctx = await browser.newContext({ viewport: frame, deviceScaleFactor: 2 })
+    try {
+      await ctx.route('**/shot-screens/*.png', (route) => route.fulfill({ path: o.out + 'app-' + route.request().url().split('/').pop(), contentType: 'image/png' }))
+      const p = await ctx.newPage()
+      await p.goto(base + '/studio.html?scene=standing&w=2300&part=pool', { waitUntil: 'load' })
+      await p.waitForSelector('[data-standing]')
+      const row = await p.evaluate(() => {
+        const box = document.querySelector('[data-standing]').getBoundingClientRect()
+        return [box.left, box.top, box.width].join(',')
+      })
+      await p.goto(base + '/scripts/product/shot.html?shot=standing&frame=3300,2700,2&row=' + row + '&spp=' + (o.spp || 256) + (o.ask || ''), { waitUntil: 'load' })
+      await p.waitForFunction(() => window.__done === true, null, { timeout: 240000 })
+      await p.screenshot({ path: o.out + 'standing-phone.png', omitBackground: true })
+      done.push('standing-phone.png at ' + row)
+    } finally {
+      await Promise.race([ctx.close(), new Promise((r) => setTimeout(r, 8000))])
+    }
+  }
   if (want('screen'))
     await take({ viewport: { width: 402, height: 874 }, scale: 3, address: 'scene=screen', file: 'phone-screen.png', clip: { x: 0, y: 0, width: 402, height: 874 } })
   // the phone shots: the three screens alone at six pixels to the point, then the shots rendered with them under the

@@ -194,7 +194,7 @@ export function Journey({ films = true }: { films?: boolean }) {
   // action, and the tagline.
   const logo = (
     <a className={s.logo} href="#top" aria-label={`${BRAND} home`}>
-      <img src={lockup} alt="" />
+      <img src={lockup} alt="" width={907} height={114} />
     </a>
   )
   // (the line's two lines: they run on in the column beside the gate, and each is a line where everything said

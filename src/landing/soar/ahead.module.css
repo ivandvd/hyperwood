@@ -1,77 +1,36 @@
-/* Why no one can trade ahead of an order here (Ahead.tsx), on the Ink: the claim in two lines in the middle, the claim
-   bright and who cannot dim; the words under it; then the paper's example in a glass panel like How it works': a liquid
-   engine in two lanes (liquid/FrontRun.tsx), each with its name, its book (a vessel of glass whose level is the price)
-   and the price at its level, the words moving with the liquid laid over it; a sentence under it. */
-.ahead { padding: 20vh 0 14vh; color: var(--hw-paper); font-family: var(--font-text); }
+/* Why no one can trade ahead of an order here (Ahead.tsx), on the Ink: a card as wide as the foot's with the liquid in
+   it as a stream (liquid/FlowLiquid.tsx), and in the stream the claim, sealed: a capsule of the page's Ink with the
+   claim in it in two lines, the claim bright and who cannot dim. Under the card, the reason in a paragraph.
+   Everything in hundredths of the width, so it keeps its shape on a wider screen. */
+.ahead { padding: 16vh 0 13vh; color: var(--hw-paper); font-family: var(--font-text); }
+
+/* ------------------------------------------------------------------ the card: the stream, and the capsule in it */
+.card { position: relative; width: 88.6vw; height: 34vw; min-height: 320px; margin: 0 auto; overflow: hidden; border-radius: 2.1vw; background: #17360e; isolation: isolate; }
+.liquid { position: absolute; inset: 0; z-index: -1; display: block; width: 100%; height: 100%; }
+.card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1); pointer-events: none; }
+/* (the capsule: the liquid is told where it is and how round, from this box) */
+.seal {
+  position: absolute; inset: 0; display: grid; place-items: center; width: 63vw; height: 13.6vw; margin: auto; border-radius: 999px;
+  background: var(--hw-ink); box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.09);
+}
 .title {
-  margin: 0 auto; max-width: 17em; text-align: center; font-family: var(--font-display); font-size: clamp(32px, 3.9vw, 84px);
-  font-weight: 600; line-height: 1.04; letter-spacing: -0.042em; text-wrap: balance;
+  margin: 0; text-align: center; font-family: var(--font-display); font-size: clamp(24px, 2.95vw, 72px); font-weight: 600;
+  line-height: 1.12; letter-spacing: -0.042em;
 }
 .claim { display: block; color: var(--hw-white); }
 .who { display: block; color: rgba(244, 245, 240, 0.5); }
+
 .body {
-  margin: 3.4vh auto 0; max-width: 40em; text-align: center; font-size: clamp(16px, 1.15vw, 22px); line-height: 1.5;
+  margin: 5.4vh auto 0; max-width: 40em; padding: 0 var(--edge); text-align: center; font-size: clamp(16px, 1.15vw, 22px); line-height: 1.5;
   letter-spacing: -0.014em; color: rgba(244, 245, 240, 0.62); text-wrap: pretty;
 }
 
-/* ------------------------------------------------------------------ the panel: glass, as How it works' */
-.panel {
-  position: relative; width: min(1180px, 74vw); margin: 7vh auto 0; padding: 2vw 2.4vw 1.8vw; border-radius: 28px;
-  background: linear-gradient(180deg, #141510 0%, #0b0c09 58%, #080907 100%);
-  box-shadow: inset 0 1.5px 0 rgb(255 255 255 / 0.22), inset 0 -1.5px 0 rgb(204 255 0 / 0.32), inset 0 0 0 1px rgb(255 255 255 / 0.05), 0 30px 80px rgb(0 0 0 / 0.55);
-}
-.example { margin: 0; font: 400 11px / 1.4 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 245, 240, 0.5); }
-
-/* the engine: two lanes of 48 hundredths of its height, four between them; room at its right for the prices */
-.engine { position: relative; width: calc(100% - 58px); aspect-ratio: 1000 / 600; margin-top: 1.4vw; }
-.liquid { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
-.lane { position: absolute; left: 0; right: 0; height: 48%; }
-.lane[data-lane="0"] { top: 0; }
-.lane[data-lane="1"] { top: 52%; }
-/* (a hairline between the two lanes, in the gap) */
-.lane[data-lane="1"]::before { content: ''; position: absolute; left: 0; right: -58px; top: -4.2%; height: 1px; background: rgb(244 245 240 / 0.08); }
-.lane p, .engine > p, .engine > i { position: absolute; margin: 0; white-space: nowrap; pointer-events: none; }
-.laneName { left: 0; top: 0; font: 400 11px / 1.3 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 245, 240, 0.55); }
-.laneName[data-lane="1"] { color: var(--hw-neon); }
-/* the book: a vessel of glass, open at its top, where the price's level is the liquid's */
-.book {
-  position: absolute; left: 78%; width: 17%; top: 10%; height: 82%; border: 1px solid rgb(244 245 240 / 0.16); border-top: 0;
-  border-radius: 0 0 16px 16px; background: linear-gradient(180deg, rgb(244 245 240 / 0) 0%, rgb(244 245 240 / 0.025) 100%);
-}
-.book::before, .book::after { content: ''; position: absolute; top: -1px; width: 7px; height: 1px; background: rgb(244 245 240 / 0.3); }
-.book::before { left: -4px; }
-.book::after { right: -4px; }
-.price { left: calc(95% + 9px); top: 64%; transform: translateY(-50%); font: 400 11px / 1 var(--font-mono); letter-spacing: 0.02em; color: rgb(244 245 240 / 0.45); }
-
-/* the words that move with the liquid: placed by the script (their transform); each centred on its point by its own
-   translate */
-.engine > p, .engine > i { left: 0; top: 0; opacity: 0; will-change: transform, opacity; }
-.tag {
-  translate: -50% -100%; padding: 5px 10px; border-radius: 999px; font: 400 11px / 1.2 var(--font-mono); letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--hw-paper); background: rgb(244 245 240 / 0.1); box-shadow: inset 0 0 0 1px rgb(244 245 240 / 0.16);
-}
-.tagSealed { color: var(--hw-neon); background: rgb(204 255 0 / 0.07); box-shadow: inset 0 0 0 1px rgb(204 255 0 / 0.45); }
-.tagBot { translate: 0 -50%; color: rgb(244 245 240 / 0.72); background: rgb(244 245 240 / 0.05); }
-.mark { translate: 0 -50%; font: 400 11px / 1 var(--font-mono); letter-spacing: 0.02em; color: var(--hw-paper); }
-.fill { translate: -50% 0; font: 400 11px / 1.2 var(--font-mono); letter-spacing: 0.04em; color: var(--hw-paper); }
-.fillSealed { color: var(--hw-neon); }
-.cost { translate: -100% -50%; font-family: var(--font-display); font-size: clamp(18px, 1.7vw, 32px); font-weight: 600; letter-spacing: -0.035em; color: var(--hw-white); }
-/* (from the level the order paid down to the one it should have) */
-.bracket { width: 7px; border: 1px solid rgb(244 245 240 / 0.5); border-left: 0; }
-
-.after { margin: 3vh auto 0; max-width: 36em; text-align: center; font-size: 15px; line-height: 1.5; color: rgba(244, 245, 240, 0.45); text-wrap: pretty; }
-
-/* ------------------------------------------------------------------ an upright or narrow screen */
+/* ------------------------------------------------------------------ an upright or narrow screen: the card taller
+   than it is wide, the capsule a rounded box as tall as its words */
 @media (max-width: 1023px), (max-aspect-ratio: 1/1) {
-  .ahead { padding: 24vw 0 18vw; }
-  .title { font-size: clamp(30px, 8vw, 52px); }
-  .body { margin-top: 18px; font-size: 16px; }
-  .panel { width: auto; margin-top: 34px; padding: 18px 14px 16px; border-radius: 20px; }
-  /* (taller lanes, so the drops are not too small) */
-  .engine { width: calc(100% - 50px); aspect-ratio: 1000 / 980; margin-top: 14px; }
-  .lane[data-lane="1"]::before { right: -50px; }
-  .tag, .mark, .fill, .laneName, .price { font-size: 9.5px; }
-  .tag { padding: 4px 8px; letter-spacing: 0.03em; }
-  .cost { font-size: 20px; }
-  .after { font-size: 14px; }
+  .ahead { padding: 22vw 0 18vw; }
+  .card { width: auto; height: 112vw; max-height: 620px; min-height: 0; margin: 0 var(--edge); border-radius: 22px; }
+  .seal { width: calc(100% - 28px); height: fit-content; padding: 34px 16px 36px; border-radius: 44px; }
+  .title { font-size: clamp(26px, 7.4vw, 46px); text-wrap: balance; }
+  .body { margin-top: 30px; font-size: 16px; }
 }

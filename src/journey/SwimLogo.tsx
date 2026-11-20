@@ -225,7 +225,7 @@ export function SwimLogo({ ref }: { ref: Ref<HTMLAnchorElement> }) {
         aria-label={`${BRAND} home`}
         inert
       >
-        <img className={s.word} src={lockup} alt="" />
+        <img className={s.word} src={lockup} alt="" width={907} height={114} />
         <canvas ref={canvas} className={s.swim} aria-hidden="true" />
       </a>
     </>

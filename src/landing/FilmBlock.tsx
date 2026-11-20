@@ -45,6 +45,14 @@ const MOVES: [number, number][] = [
   [0.17, 0.41],
   [0.59, 0.83],
 ]
+/** On the dark page (`exit`: How it works comes after the block, soar/works/Works.tsx), the block is held a little
+ *  longer (filmBlock.module.css), the films change at the same places of the longer stretch, and at its end the last
+ *  film goes out as the others do, its words with it (EXIT, of the held stretch), so the block leaves the screen dark
+ *  and what follows rises into the dark, with nothing of the films over it. */
+const TRAVEL = 240
+const TRAVEL_EXIT = 265
+const MOVES_EXIT = MOVES.map(([a, b]) => [(a * TRAVEL) / TRAVEL_EXIT, (b * TRAVEL) / TRAVEL_EXIT] as [number, number])
+const EXIT: [number, number] = [0.86, 0.98]
 /** The smear: as many pixels as the films have (960 by 720), and how much the film is squeezed up and down on its
  *  way (a smear about as strong as the reference's). */
 const DRAWN = 960
@@ -76,7 +84,7 @@ const smooth = (a: number, b: number, x: number) => {
 /** (a film that says when each of its frames is shown: not every browser has it) */
 type Framed = HTMLVideoElement & { requestVideoFrameCallback?: (step: () => void) => number; cancelVideoFrameCallback?: (id: number) => void }
 
-export function FilmBlock() {
+export function FilmBlock({ exit = false }: { exit?: boolean } = {}) {
   const root = useRef<HTMLElement>(null)
   const frame = useRef<HTMLDivElement>(null)
   /** each film's place in the box, in either copy (sharp, smeared), which go and come together */
@@ -233,7 +241,8 @@ export function FilmBlock() {
       put(tile.current, 'opacity', card.toFixed(3))
       put(tile.current, 'transform', card < 1 ? `translate3d(0, ${((1 - card) * ENTER.tile[2]).toFixed(3)}em, 0)` : 'none')
       // which film: 0 the first, 1 the second, 2 the third, and between two on the way from the one to the next
-      const at = MOVES.reduce((sum, [a, b]) => sum + smooth(a, b, along), 0)
+      // (with `exit`, on to half a film past the last: the last goes out as if a next one were coming)
+      const at = (exit ? MOVES_EXIT : MOVES).reduce((sum, [a, b]) => sum + smooth(a, b, along), 0) + (exit ? 0.5 * smooth(EXIT[0], EXIT[1], along) : 0)
       // The lamp: between two films, where the bulb's light is while the one film goes out and the next comes
       // up. It is as bright as the films are dark, so with the film's own bulb it is one light throughout; it
       // goes over from the one film's bulb (as that film drifts up) to the next's (as that one does) in the dark.
@@ -285,7 +294,8 @@ export function FilmBlock() {
           put(el, 'transform', `translate3d(0, ${(-off * rise + (1 - k) * lift).toFixed(3)}em, 0)`)
         }
       })
-      const shown = Math.round(at)
+      // (none plays once the last has gone out)
+      const shown = at > story.length - 1 + 0.45 ? -1 : Math.round(at)
       play(shown)
       // (what is said of the film the box shows is what a screen reader is told)
       if (shown !== told) {
@@ -324,12 +334,12 @@ export function FilmBlock() {
       all.forEach((v) => v?.pause())
     }
     // (the films are in the page once `ready`: then the effect starts again with them)
-  }, [ready])
+  }, [ready, exit])
 
   const at = (name: FilmName) => ({ '--at': `${films[name].at}%` }) as CSSProperties
 
   return (
-    <section ref={root} className={s.block} aria-label="The films">
+    <section ref={root} className={s.block} aria-label="The films" data-exit={exit ? '' : undefined}>
       <div ref={frame} className={s.frame}>
         <div ref={box} className={s.film}>
           {/* the sharp copy, its edges faded out (and until the films come, their first frames) */}
@@ -394,8 +404,8 @@ export function FilmBlock() {
           {!swimLogo && <MarkTile ref={tile} className={s.tile} />}
           <div className={s.says}>
             {story.map((one, i) => (
-              <div key={one.film} ref={(say) => { bodies.current[i] = say }} className={s.say}>
-                <p className={s.lede}>{one.lede}</p>
+              <div key={one.film} ref={(say) => { bodies.current[i] = say }} className={s.say} data-keyed="">
+                <p className={s.lede} data-key="">{one.lede}</p>
                 <p className={s.body}>{one.body}</p>
               </div>
             ))}

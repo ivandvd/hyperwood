@@ -13,9 +13,11 @@
  */
 import { useEffect, useRef } from 'react'
 import { BRAND, home } from '../../content.home'
+import { LegalLinks } from '../../site/LegalLinks'
 import { icons } from '../../ui/icons'
 import { footCard } from '../flags'
 import { grain } from '../grain'
+import { useRise } from '../rise'
 import s from './soar.module.css'
 
 export function MegaFooter() {
@@ -28,6 +30,8 @@ export function MegaFooter() {
     ['Community', channels.map((link) => ({ label: link.label, href: link.href }))],
   ]
   const card = useRef<HTMLDivElement>(null)
+  // (its rows and columns rise into place as the scroll brings them in: rise.ts; the card has its own rise)
+  const riseIn = useRise<HTMLElement>()
   useEffect(() => {
     const el = card.current
     if (!el) return
@@ -44,8 +48,8 @@ export function MegaFooter() {
     return () => watch.disconnect()
   }, [])
   return (
-    <footer className={`${s.paper} ${s.foot}`} data-light="" data-card={footCard ?? undefined}>
-      <div className={s.footTop}>
+    <footer ref={riseIn} className={`${s.paper} ${s.foot}`} data-light="" data-card={footCard ?? undefined}>
+      <div className={s.footTop} data-rise="">
         <a href="architecture/">Read the architecture</a>
         {footCard ? (
           <div className={s.follow}>
@@ -69,7 +73,7 @@ export function MegaFooter() {
       </div>
       <nav className={s.footCols} aria-label="Footer">
         {columns.map(([heading, links]) => (
-          <div key={heading}>
+          <div key={heading} data-rise="">
             <p>{heading}</p>
             {links.map((link) => (
               <a key={link.label} href={link.href}>
@@ -79,11 +83,11 @@ export function MegaFooter() {
           </div>
         ))}
       </nav>
-      <div className={s.footInfo}>
+      <div className={s.footInfo} data-rise="">
         <p>Product information</p>
         {F.notes.map((note, i) => (
-          <p key={note}>
-            {footCard && <b>{F.leads[i]} </b>}
+          <p key={note} data-keyed="">
+            {footCard && <b data-key="">{F.leads[i]} </b>}
             {note}
           </p>
         ))}
@@ -94,7 +98,10 @@ export function MegaFooter() {
             <span className={s.footLockup} role="img" aria-label={BRAND} />
           </div>
           <div className={s.footBottom}>
-            <span>{F.rights}</span>
+            <span className={s.footLegal}>
+              <span>{F.rights}</span>
+              <LegalLinks />
+            </span>
             <span className={s.footLine}>
               <span>{F.tagline[0]}</span> <b>{F.tagline[1]}</b>
             </span>
@@ -103,7 +110,10 @@ export function MegaFooter() {
       ) : (
         <div className={s.footBottom}>
           <span className={s.footMark} role="img" aria-label={BRAND} />
-          <span>{F.rights}</span>
+          <span className={s.footLegal}>
+            <LegalLinks />
+            <span>{F.rights}</span>
+          </span>
         </div>
       )}
     </footer>

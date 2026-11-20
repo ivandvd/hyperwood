@@ -1,0 +1,100 @@
+/* The foot on the Ink (LiquidFoot.tsx), to the reference's measures (read off its frames at 1425 wide: the card 81
+   px in from either side and 432 tall with corners of 22; its headline 52 px, its sentence 15, its buttons 48 tall;
+   the columns from the page's middle, 169 apart, their links 30 apart; a hairline; the name about 230 px tall, its
+   foot off the page). Everything in hundredths of the width, so it keeps its shape on a wider screen. */
+.foot { position: relative; z-index: 3; overflow: clip; padding-top: 5vw; color: var(--hw-paper); font-family: var(--font-text); background: var(--hw-ink); }
+.foot a { text-decoration: none; }
+
+/* ------------------------------------------------------------------ the card: the liquid, and the words on it */
+.card { position: relative; width: 88.6vw; height: 30.3vw; min-height: 300px; margin: 0 auto; overflow: hidden; border-radius: 2.1vw; background: #18240a; isolation: isolate; }
+.liquid { position: absolute; inset: 0; z-index: -1; display: block; width: 100%; height: 100%; }
+.card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1); pointer-events: none; }
+.say { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; padding: 0 6vw; text-align: center; color: var(--hw-ink); }
+.say h2 {
+  margin: 0; font-family: var(--font-display); font-size: clamp(30px, 3.65vw, 86px); font-weight: 600; line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+.say h2 span { display: block; }
+.say p { margin: 1.25vw 0 0; max-width: 31em; font-size: clamp(14px, 1.05vw, 21px); font-weight: 500; line-height: 1.5; letter-spacing: -0.012em; color: rgba(10, 10, 10, 0.78); text-wrap: balance; }
+/* The two buttons are the page's own (ui/LaunchLink.tsx: under the pointer their letters roll up and their arrow leaves
+   through its corner), in this card's colours: the first the page's Ink with Neon words, the second clear with a
+   hairline of Ink. Under the pointer the first's words turn white, and the second fills with Ink. */
+.actions {
+  display: flex; gap: 0.84vw; margin-top: 2.1vw;
+  --launch-height: clamp(42px, 3.37vw, 68px); --launch-pad: clamp(18px, 1.7vw, 34px); --launch-type: clamp(14px, 1.05vw, 20px); --launch-ring: var(--hw-ink);
+}
+.actions .first { --launch-ground: var(--hw-ink); --launch-ink: var(--hw-neon); --launch-ground-over: var(--hw-ink); --launch-ink-over: var(--hw-white); }
+.actions .second {
+  --launch-ground: transparent; --launch-ink: var(--hw-ink); --launch-ground-over: var(--hw-ink); --launch-ink-over: var(--hw-neon);
+  box-shadow: inset 0 0 0 1.5px rgba(10, 10, 10, 0.55);
+}
+.actions .second:hover, .actions .second:focus-visible { box-shadow: inset 0 0 0 1.5px var(--hw-ink); }
+
+/* ------------------------------------------------------------------ under it: the logo and a line at the left, the
+   ways around the site in columns from the page's middle */
+.body { display: grid; grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.24fr); gap: 4vw; width: 88.6vw; margin: 7.3vw auto 0; }
+.lockup {
+  display: block; width: clamp(128px, 11vw, 230px); aspect-ratio: 907.45 / 113.8; background: var(--hw-paper);
+  -webkit-mask: url('../../../assets/brand/hyperwood-lockup-neon.svg') left center / contain no-repeat;
+  mask: url('../../../assets/brand/hyperwood-lockup-neon.svg') left center / contain no-repeat;
+}
+.brand p { margin: 1.5vw 0 0; max-width: 21em; font-size: clamp(14px, 1.05vw, 20px); line-height: 1.55; color: rgba(244, 245, 240, 0.56); text-wrap: pretty; }
+.columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2vw; }
+.columns div { display: grid; align-content: start; gap: 1.05vw; font-size: clamp(14px, 1.05vw, 20px); }
+.columns p { margin: 0 0 0.25vw; font-size: clamp(12px, 0.88vw, 17px); color: rgba(244, 245, 240, 0.44); }
+.columns a { justify-self: start; color: rgba(244, 245, 240, 0.86); transition: color 0.5s var(--ease-out); }
+@media (hover: hover) { .columns a:hover { color: var(--hw-neon); } }
+
+/* what the papers insist on being said: four notes in a row, each led by a few words */
+.notes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2vw; width: 88.6vw; margin: 6vw auto 0; }
+.notes p { margin: 0; font-size: clamp(12px, 0.84vw, 16px); line-height: 1.55; color: rgba(244, 245, 240, 0.46); text-wrap: pretty; }
+.notes b { font-weight: 600; color: rgba(244, 245, 240, 0.86); }
+
+.bottom {
+  display: flex; justify-content: space-between; gap: 2vw; width: 88.6vw; margin: 2.6vw auto 0; padding-top: 1.9vw;
+  border-top: 1px solid rgba(244, 245, 240, 0.1); font-size: clamp(12px, 0.88vw, 17px); color: rgba(244, 245, 240, 0.44);
+}
+
+/* the name, very large, in the brand's Hyper Neon, its foot off the page's end (Manrope ExtraBold at -0.02 em, as the
+   lockup's word is set). The Neon is whole at the name's head and goes faint towards its foot, where it runs off the
+   page: the Neon let through less and less on one easy curve (nine stops, so it bends nowhere), under a fifth of it left
+   at the page's end. With [data-solid] (&name=solid), Neon all over. */
+.name {
+  margin: 3.4vw 0 0; height: 0.66em; overflow: hidden; text-align: center; white-space: nowrap; user-select: none; pointer-events: none;
+  font-family: var(--font-display); font-size: 16.6vw; font-weight: 800; line-height: 0.92; letter-spacing: -0.02em;
+  color: var(--hw-neon);
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .name:not([data-solid]) {
+    background: linear-gradient(180deg, rgba(204, 255, 0, 1) 0%, rgba(204, 255, 0, 0.98) 12%, rgba(204, 255, 0, 0.93) 24%, rgba(204, 255, 0, 0.85) 36%, rgba(204, 255, 0, 0.74) 48%, rgba(204, 255, 0, 0.6) 60%, rgba(204, 255, 0, 0.46) 72%, rgba(204, 255, 0, 0.3) 86%, rgba(204, 255, 0, 0.18) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+}
+
+/* ------------------------------------------------------------------ an upright or narrow screen */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .foot { padding-top: 12vw; }
+  .card { width: auto; height: auto; min-height: 0; margin: 0 var(--edge); border-radius: 22px; }
+  .say { position: relative; padding: 64px 22px 58px; }
+  .say h2 { font-size: clamp(30px, 8.6vw, 54px); }
+  .say p { margin-top: 14px; font-size: 15.5px; }
+  .actions { flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 24px; --launch-height: 46px; --launch-pad: 20px; --launch-type: 15px; }
+  .body { grid-template-columns: minmax(0, 1fr); gap: 40px; width: auto; margin: 56px var(--edge) 0; }
+  .lockup { width: 150px; }
+  .brand p { margin-top: 16px; font-size: 15.5px; }
+  .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px 20px; }
+  .columns div { gap: 12px; font-size: 15.5px; }
+  .columns p { font-size: 13px; }
+  .notes { grid-template-columns: minmax(0, 1fr); gap: 14px; width: auto; margin: 48px var(--edge) 0; }
+  .notes p { font-size: 13px; }
+  .bottom { flex-direction: column; gap: 6px; width: auto; margin: 26px var(--edge) 0; padding-top: 18px; font-size: 13px; }
+  .name { margin-top: 30px; font-size: 18.4vw; }
+}
+
+/* Room to tap: a line of text is under the height a finger needs. The link takes its line and half the gap on
+   either side (or a field about it that is not seen); nothing moves. */
+.lockup { position: relative; }
+.lockup::after { content: ''; position: absolute; inset: -13px 0; }
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  .columns a { padding: 6px 0; margin: -6px 0; }
+}

@@ -1,11 +1,12 @@
 /**
  * The statement, after the films (the address ?films=after, After.tsx), as the reference has its own after its first
- * screen (bulk.trade, measured on its page): one screen of the page's Ink; five lines of large type at its upper
- * left, the first three light and the last two heavy, each on a line of its own; and under them three steps of
- * light, flush with the screen's left edge, the longest at the foot.
+ * screen (bulk.trade, measured on its page): one screen of the page's Ink with its words in the upper part, and
+ * under them three steps of light, flush with the screen's left edge, the longest at the foot. The words are laid
+ * out as aevo.xyz lays out its own statement: a headline at the left; at the right a paragraph in small type with its
+ * key words in white, and under it two heavy lines.
  *
- * Everything in it moves with the scroll, not by itself. The lines rise one after another as it comes up, each as
- * it clears the foot of the screen. Then it is held on the screen (its frame is sticky for --pin more of scrolling:
+ * Everything in it moves with the scroll, not by itself. The headline's lines, the paragraph and the heavy lines rise
+ * one after another as it comes up, the last of them as it reaches the top. Then it is held on the screen (its frame is sticky for --pin more of scrolling:
  * statement.module.css) while the steps fill with light from the left at the reference's own pace, the lowest
  * first: the lowest while the first third of a screen goes past, the middle one from 0.12 to 0.52 of a screen, the
  * highest from a quarter to three quarters. Then it lets go.
@@ -16,8 +17,15 @@ import { useCallback, useEffect, useRef } from 'react'
 import { home } from '../content.home'
 import s from './statement.module.css'
 
-/** When each line rises: how far the statement has come up the screen (0: its top at the foot, 1: at the top). */
-const LINE = (i: number): [number, number] => [0.32 + 0.09 * i, 0.62 + 0.09 * i]
+/** How many things rise: the headline's lines, the paragraph, the heavy lines. */
+const COUNT = home.statement.title.length + 1 + home.statement.heavy.length
+/** The paragraph, its words between stars in white. */
+const marked = (text: string) => text.split('*').map((part, i) => (i % 2 ? <b key={i} data-key="">{part}</b> : part))
+/** When each line rises: how far the statement has come up the screen (0: its top at the foot, 1: at the top). The
+ *  lines follow one another a tenth of a screen apart, closer when there are more of them, so the last is always in
+ *  place a little after the statement has reached the top. */
+const GAP = Math.min(0.09, 0.45 / Math.max(1, COUNT - 1))
+const LINE = (i: number): [number, number] => [0.32 + GAP * i, 0.62 + GAP * i]
 /** When each step fills, the highest to the lowest: screens of scrolling since the statement came to fill the
  *  screen (the reference's pace). */
 const STEP: [number, number][] = [
@@ -25,7 +33,6 @@ const STEP: [number, number][] = [
   [0.12, 0.52],
   [0, 1 / 3],
 ]
-
 const clamp = (x: number) => Math.min(1, Math.max(0, x))
 const easeOut = (x: number) => 1 - Math.pow(1 - x, 3)
 
@@ -42,21 +49,20 @@ const put = (el: HTMLElement | null | undefined, name: 'opacity' | 'transform', 
 
 export function Statement() {
   const S = home.statement
-  const words = [...S.light.map((line) => ({ line, heavy: false })), ...S.heavy.map((line) => ({ line, heavy: true }))]
   const root = useRef<HTMLElement>(null)
   const frame = useRef<HTMLDivElement>(null)
   const lines = useRef<(HTMLElement | null)[]>([])
   const fills = useRef<(HTMLElement | null)[]>([])
 
-  // The words are as large as the reference's, and no larger than lets the longest line stand on one line
-  // (--st-w: its width in ems, measured once the typeface is there and whenever the words are put in the page).
+  // The headline is as large as the reference's, and no larger than lets its longest line stand on one line in its
+  // column (--st-w: its width in ems, measured once the typeface is there and whenever the words are put in the page).
   const putWords = useCallback((box: HTMLDivElement | null) => {
     if (!box) return
     const measure = () => {
-      const widths = Array.from(box.querySelectorAll('p')).map((p) => {
+      const widths = Array.from(box.querySelectorAll<HTMLElement>('[data-fit]')).map((line) => {
         const range = document.createRange()
-        range.selectNodeContents(p)
-        return range.getBoundingClientRect().width / (parseFloat(getComputedStyle(p).fontSize) || 1)
+        range.selectNodeContents(line)
+        return range.getBoundingClientRect().width / (parseFloat(getComputedStyle(line).fontSize) || 1)
       })
       const widest = Math.max(0, ...widths)
       if (widest > 0) box.style.setProperty('--st-w', widest.toFixed(3))
@@ -131,11 +137,26 @@ export function Statement() {
     <section ref={root} className={s.statement} aria-label="What Hyperwood is">
       <div ref={frame} className={s.frame}>
         <div ref={putWords} className={s.words}>
-          {words.map(({ line, heavy }, i) => (
-            <p key={line} ref={(node) => { lines.current[i] = node }} className={heavy ? s.heavy : s.light}>
-              {line}
+          <h2 className={s.title}>
+            {S.title.map((line, i) => (
+              <span key={line} data-rise="" data-fit="" ref={(node) => { lines.current[i] = node }}>
+                {/* (the space between the lines counts on a narrow screen, where they run on as one sentence) */}
+                {i < S.title.length - 1 ? line + ' ' : line}
+              </span>
+            ))}
+          </h2>
+          <div className={s.side}>
+            <p data-rise="" data-keyed="" className={s.body} ref={(node) => { lines.current[S.title.length] = node }}>
+              {marked(S.body)}
             </p>
-          ))}
+            <div className={s.closing}>
+              {S.heavy.map((line, i) => (
+                <p key={line} data-rise="" ref={(node) => { lines.current[S.title.length + 1 + i] = node }}>
+                  {line}
+                </p>
+              ))}
+            </div>
+          </div>
         </div>
         <div className={s.steps} aria-hidden="true">
           {STEP.map((_, i) => (

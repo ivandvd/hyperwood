@@ -107,17 +107,14 @@ export const home = {
     facts: { label: string; value: string; target?: boolean }[]
   }[],
 
-  /** After those films (the address ?films=after: landing/Statement.tsx): the statement, in five lines, the first
-   *  three light and the last two heavy, said as the reference says its own (bulk.trade: what it combines, what it
-   *  is, its qualities, who it is for). Each line stands on a line of its own on a wide screen, so keep them about
-   *  this long (the page sizes them so that the longest fits). Only what the papers say. A draft for approval. */
+  /** After those films (the address ?films=after: landing/Statement.tsx): the statement, laid out as aevo.xyz lays out
+   *  its own: a headline at the left (the Investor Overview's own words for what Hyperwood is), at the right what it is
+   *  made of in a paragraph with its key words picked out in white (between *stars*), and under that the qualities
+   *  and who it is for, heavy. The headline's lines stand each on a line of its own on a wide screen. Only what the
+   *  papers say. */
   statement: {
-    light: [
-      'Hyperwood is our own chain, an EVM Layer 3',
-      'that settles onto Robinhood Chain, where NVDA,',
-      'GameStop and SpaceX already trade as tokens.',
-      'On it, a confidential engine for long and short.',
-    ],
+    title: ['A private trading network', 'for tokenised stocks.'],
+    body: 'Your position size, your entry and the price you get liquidated at are *nobody else’s business*. Hyperwood is our own chain, an EVM Layer 3 that settles onto Robinhood Chain, where NVDA, GameStop and SpaceX already trade as tokens. On it, *a confidential engine for long and short*.',
     heavy: ['Sealed. Matched. Proven.', 'Built for traders who keep their book closed.'],
   },
 
@@ -160,7 +157,7 @@ export const home = {
     line: ['A confidential network for stocks and indices,', 'designed for you to trade privately.'],
     /** Where the bar across the top has the call to action (the exchange at the right), the column's own, under
      *  the line, says this. It opens what the bar's opens, until the client names another place. */
-    call: { label: 'Trade now', href: '#app' },
+    call: { label: 'Trade now', href: '#launch' },
   },
 
   /** At the gate: what leaves the engine, and what does not. The two sentences are one title; each stands on
@@ -184,7 +181,10 @@ export const home = {
     { label: 'Architecture', href: 'architecture/' },
   ],
   /** (no app is live: until the client names a destination the button shows the preview) */
-  launch: { label: 'Launch App', href: '#app' },
+  /** The call to action. The app is not open yet: until it has an address this points to a place that is not in
+   *  the page, and a link that leads nowhere opens the note that says so (site/Soon.tsx). Put the app's address
+   *  here when it has one. */
+  launch: { label: 'Launch App', href: '#launch' },
   /** On a screen with no room for the bar's links: what the button that opens them and the one that closes them
    *  are called, and the sheet they are on. */
   menu: { label: 'Menu', open: 'Open the menu', close: 'Close the menu' },
@@ -222,55 +222,12 @@ export const home = {
       bright: 'Sealed. Matched. Proven.',
       body: 'We combine a confidential trading engine with settlement anyone can verify. Built for traders who keep their book closed.',
     },
-    /** under the app's stage: two cards, each who it is for and why (the Investor Overview's own reasons) */
-    sizes: {
-      title: ['Built for', 'every size.'],
-      cards: [
-        { lead: 'For traders.', rest: 'Size stops being a liability. A position no one can see is a position no one can hunt.', film: 'booth' },
-        { lead: 'For funds and desks.', rest: 'Hedge without showing the book to competitors, or the order to a rival before the market.', film: 'board' },
-      ],
-    },
-    /** (with &ground=ink) What Hyperwood is, in the Investor Overview's own words (its cover; what it is building is
-     *  said by the statement), its closing figures, and its note on them (soar/Building.tsx). */
-    building: {
-      line: ['A private trading network for tokenised stocks,', 'where your position size, your entry and the price you get liquidated at are nobody else’s business.'],
-      head: 'What we are actually building',
-      body: 'Our own blockchain — an EVM “Layer 3” — that settles onto Robinhood Chain, where tokenised stocks like NVDA, GameStop and SpaceX already trade. On top of it sits a confidential trading engine for long and short positions on those stocks.',
-      figures: [
-        ['~10/sec', 'Private operation capacity at launch'],
-        ['250ms', 'Target block cadence'],
-        ['0%', 'Venture and private-sale allocation'],
-      ] as [string, string][],
-      note: 'Performance figures are engineering targets pending benchmark results.',
-    },
     /** (with &ground=ink) Why no one can trade ahead of an order here, as the Investor Overview argues it (the point is
-     *  structural: no firm is named), and its example of an order sandwiched on a public venue, drawn as a liquid
-     *  engine in two lanes (soar/Ahead.tsx, soar/liquid/FrontRun.tsx). */
+     *  structural: no firm is named). The claim stands sealed in a capsule the liquid runs past, the reason under
+     *  the card (soar/Ahead.tsx, soar/liquid/FlowLiquid.tsx). */
     ahead: {
       title: ['No one can trade ahead of you.', 'Not a bot. Not a market maker. Not us.'],
       body: 'On most venues an order can be read before it fills. It waits in a public queue, where bots trade ahead of it, or it reaches a market maker with a privileged agreement before it reaches the book. Here it is encrypted before it leaves your device: whoever watches the queue sees that a sealed instruction arrived, and nothing else.',
-      example: 'A $40,000 market buy of a tokenised stock',
-      order: 'Buy $40,000',
-      bot: 'A bot reads it',
-      sealed: 'Sealed',
-      notRead: 'Nothing to read',
-      fills: ['Filled at $185.60', 'Filled at $184.00'],
-      cost: '−$1,400',
-      lines: ['A public venue', 'Hyperwood'],
-      after: 'The bot sells into the order’s own buying. The trader never sees a line for it: it is in the fill.',
-      shows: 'One $40,000 market buy, as liquid flowing into a book whose level is the price. On a public venue a bot reads the order, gets into the book first and the level climbs from $184.00 to $185.60; the order fills there, and the bot pulls back out with about $1,400 of it. On Hyperwood the same order travels sealed, the bot cannot read it and sinks away, and it fills at $184.00.',
-    },
-    /** a row of cards, each one part of the exchange, moved along by the arrows or the finger */
-    detail: {
-      title: ['The exchange', 'in detail.'],
-      cards: [
-        { lead: 'Sealed orders', rest: 'Encrypted on your device and signed as one instruction.', picture: 'ticket' },
-        { lead: 'Private matching', rest: 'A confidential engine matches orders. There is no public book.', picture: 'booth' },
-        { lead: 'Proofs', rest: 'Every batch carries a zero-knowledge proof, checked by a public contract.', picture: 'request' },
-        { lead: 'Settlement', rest: 'A Layer 3 that settles to Robinhood Chain, and through it to Ethereum.', picture: 'seal' },
-        { lead: 'Open listings', rest: 'Anyone can list a market with an ETH bond and an approved template.', picture: 'board' },
-        { lead: 'Payouts', rest: 'Close into collateral, or into an equity tracker you can hold or export.', picture: 'payout' },
-      ],
     },
     /** How a trade goes, from the device to the chain (soar/HowItWorks.tsx): the request's four stages as the papers
      *  name them, after the sealing on the device. Each: the stage, what happens there, and, where the papers give
@@ -316,15 +273,6 @@ export const home = {
         },
       ],
       targets: 'Times are development targets, not measurements. Fast confirmation is not Ethereum finality.',
-      /** (with &ground=ink: the glass that becomes each stage, soar/how/HowMorph.tsx) the inbox's last seven blocks,
-       *  250 ms apart, by the second they closed at, this request's last; the request as anyone sees it; the three
-       *  layers the settlement goes down through, from the top; what comes back */
-      glass: {
-        blocks: ['05.50', '05.75', '06.00', '06.25', '06.50', '06.75', '07.00'],
-        request: '0x3fa9…c2d1 · open',
-        layers: ['Hyperwood', 'Robinhood Chain', 'Ethereum'],
-        receipt: 'Encrypted receipt',
-      },
       /** what the pictures beside the stages show, for those who cannot see them */
       shows: [
         'An order being sealed: market NVDA-PERP, long, size 10, leverage 2.5 times and margin $603.48 turn into ciphertext, signed as one instruction.',
@@ -334,65 +282,120 @@ export const home = {
         'The batch going down from Hyperwood to Robinhood Chain and Ethereum, and the receipt coming back.',
       ],
     },
-    /** Questions, each answered only with what the papers say (soar/Faq.tsx). A draft for approval. */
+    /** (with &ground=ink) How it works, as the architecture paper lays it out: one part for each of its first three
+     *  (the network, confidential trading, the equity markets). Only what the paper says. `title` and `lede` are the
+     *  section's own: the block shows the title's first line over each part's headline, and the cards of words show
+     *  both lines and the paragraph. */
+    works: {
+      title: ['How it works.', 'Confidential equity markets on an EVM Layer 3.'],
+      lede: 'Hyperwood is a general purpose EVM network that settles to Robinhood Chain. Its trading core gives private long and short exposure to stocks and equity indices, with ETH for gas and for the bond that lists a market.',
+      /** How the page shows it (soar/works/WorksBlock.tsx): one block, laid out as the reference lays out its own
+       *  (trysoar.com/institutional): a headline, a paragraph and three facts with their icons at one side, a picture
+       *  at the other, the three parts changing in it. Each part: its headline, what it means, its three facts (an
+       *  icon of `fills` in ui/icons.tsx, a name, what it is), its picture (src/assets/works) and what it shows. */
+      parts: [
+        {
+          title: 'Its own chain.',
+          text: 'Hyperwood is a general purpose EVM Layer 3, built on Arbitrum Nitro. Ordinary transactions run as on any EVM chain, and the trading core sits beside them as system contracts. ETH pays the gas.',
+          facts: [
+            ['cube', 'Hyperwood', 'Layer 3. Confidential equity execution.'],
+            ['bridge', 'Robinhood Chain', 'Layer 2. Rollup contracts and bridge.'],
+            ['database', 'Ethereum', 'Layer 1. Settlement and data availability.'],
+          ],
+          picture: 'chain',
+          shows: 'A rocket climbing through a dark sky on a trail of pale fire edged with Neon.',
+        },
+        {
+          title: 'Matched in private. Proven in public.',
+          text: 'Your order is encrypted on your device and matched by a protected engine in secure hardware. TradingCore commits the result only with a valid zero-knowledge proof. If the proof fails, nothing changes.',
+          facts: [
+            ['lock', 'Private', 'Market, side, size, leverage, collateral and PnL.'],
+            ['eye', 'Public', 'Request type, batch timing, state roots and proofs.'],
+            ['book', 'Order book', 'Confidential. Public statistics are aggregated and delayed.'],
+          ],
+          picture: 'private',
+          shows: 'A face in profile, half lost in the dark, its edge lit Neon by a beam of light that crosses it.',
+        },
+        {
+          title: 'Markets on stocks and indices.',
+          text: 'Each market is a perpetual on one stock or equity index, with its own reference price, oracle, funding and margin. It keeps its exchange’s sessions, halts and corporate actions. You get price exposure, not shares.',
+          facts: [
+            ['plus', 'Listing', 'Anyone, with an ETH bond and an approved template.'],
+            ['timer', 'Warmup', 'Its price feed is checked, then it opens with isolated margin.'],
+            ['cycle', 'Lifecycle', 'Proposed, Warmup, Active, Reduce only, Settlement, Retired.'],
+          ],
+          picture: 'markets',
+          shows: 'A dark wave at night with glints of Neon light running along its crest.',
+        },
+      ],
+      /** (with &how=cards: the three cards of words alone, soar/works/Works.tsx) */
+      cards: [
+        {
+          title: 'Its own chain.',
+          text: 'Hyperwood is a general purpose EVM Layer 3, built on Arbitrum Nitro. Ordinary transactions run as on any EVM chain, and the trading core sits beside them as system contracts, there from the first block. It settles onto Robinhood Chain, which settles onto Ethereum. ETH pays the gas.',
+          facts: [
+            ['L3', 'Hyperwood', 'Confidential equity execution'],
+            ['L2', 'Robinhood Chain', 'Rollup contracts and bridge'],
+            ['L1', 'Ethereum', 'Settlement and data availability'],
+          ],
+        },
+        {
+          title: 'Matched in private. Proven in public.',
+          text: 'Your order is encrypted on your device and reaches TradingCore as a sealed instruction. A protected engine, running in secure hardware, matches it on a confidential order book. A zero-knowledge proof shows the batch was settled correctly, and TradingCore commits the new state only once the proof checks out. If it fails, nothing changes.',
+          facts: [
+            ['Private', '', 'Market, side, size, leverage, price limit, collateral, positions and PnL'],
+            ['Public', '', 'Request type and id, batch timing, state roots and proofs'],
+          ],
+        },
+        {
+          title: 'Markets on stocks and indices.',
+          text: 'Each market is a perpetual on one stock or equity index, with its own reference price, oracle, funding and margin, and its exchange’s sessions, halts and corporate actions. Anyone can list one: lock an ETH bond and choose an approved template. A new market warms up first, then opens with isolated margin and limited open interest. You get price exposure, not shares.',
+          facts: [
+            ['Listing', '', 'An ETH bond and an approved template'],
+            ['Lifecycle', '', 'Proposed, Warmup, Active, Reduce only, Settlement, Retired'],
+          ],
+        },
+      ],
+    },
+    /** Questions (soar/Faq.tsx): seven, each answered in a sentence or two, and only with what the Trader Guide and
+     *  the architecture paper say (the page beside each: TG the guide, A the architecture). */
     faq: {
       title: ['Questions.', 'Straight answers.'],
       items: [
         {
+          // A 1, TG 1
           q: 'What is Hyperwood?',
-          a: 'A proposed network for private perpetual futures on stocks and equity indices. It is a Layer 3 that settles to Robinhood Chain, and through it to Ethereum.',
+          a: 'A proposed EVM Layer 3 for private perpetuals on stocks and equity indices. It settles to Robinhood Chain, and through it to Ethereum. You use an EVM wallet and pay gas in ETH.',
         },
         {
-          q: 'What is an equity perpetual?',
-          a: 'A derivative that follows the price of a stock or an equity index, with no expiry date. You go long or short with margin, pay or receive funding while the position is open, and close when you choose.',
-        },
-        {
+          // A 3, TG 3
           q: 'What stays private?',
-          a: 'Which stock you trade, long or short, size and leverage, entry and collateral, profit, loss and liquidation price, and any link between you and a market. Your fills come back as encrypted receipts that only your key opens.',
+          a: 'Your market, long or short, size, leverage, collateral, entry and PnL. Your fills come back as encrypted receipts.',
         },
         {
+          // A 3, TG 3
           q: 'What can others still see?',
-          a: 'That your address sent a request, what kind it was and when; deposits and withdrawals; total open interest; that batches are being processed; and each market’s public specifications. On a thinly traded market, someone watching deposits closely may still infer activity. This is privacy within a defined threat model, not anonymity.',
+          a: 'That your address sent a request, what kind and when, and that batches were proven. The engine runs in secure hardware with zero-knowledge proofs: that is privacy within a defined threat model, not anonymity.',
         },
         {
-          q: 'Who can see inside the engine?',
-          a: 'The first version matches orders inside secure hardware. Zero-knowledge proofs hide the numbers from the public, not necessarily from whoever produces the proof. Removing that trust assumption needs multiparty computation, which is not part of the first version.',
-        },
-        {
-          q: 'How do I know a batch was matched fairly?',
-          a: 'Each batch comes with a zero-knowledge proof that the matching was done correctly: fills are genuine, margin requirements hold and nothing is made from nothing. A public contract checks the proof. If anything is wrong, nothing moves.',
-        },
-        {
-          q: 'How fast is it?',
-          a: 'The targets are blocks about every 250 ms, under a second to an accepted and provisionally matched order, and 5 to 12 seconds to proof-verified state. They are development targets, not measurements. Fast confirmation is not Ethereum finality: a full canonical exit to Ethereum can take about 14 days.',
-        },
-        {
+          // A 4, A 10, TG 1 and 3
           q: 'Do I own the shares?',
-          a: 'No. Markets give synthetic price exposure, not shareholder ownership or issuer permission. When you close, you can take your proceeds as an equity tracker: a separately backed, unlevered long you can hold privately, or export as a public token, which shows the asset and its transfers.',
+          a: 'No. A market gives price exposure, not shareholder rights. When you close, you can keep collateral or convert eligible proceeds to an equity tracker, which is a new unlevered long.',
         },
         {
-          q: 'What do I pay gas in?',
-          a: 'ETH. It is the network’s gas, and the bond for listing a market. The collateral a market accepts is set separately.',
+          // TG 3, A 13
+          q: 'How fast is it?',
+          a: 'The targets: blocks about every 250 ms, feedback on an accepted order in under a second, 5 to 12 seconds to proven state. They are targets, not measurements, and withdrawals take a slower route.',
         },
         {
-          q: 'Who can list a market?',
-          a: 'Anyone, with an ETH bond and an approved template. A new market goes through a warmup that checks its price feed, then starts with isolated margin, a limited open interest allowance and its own insurance. The bond stays locked until everything is settled.',
-        },
-        {
-          q: 'Which markets come first?',
-          a: 'The first stage starts with three to five equity references, one collateral model and one set of risk rules. More markets, collateral and routes follow through the same release checks.',
-        },
-        {
+          // A 4, TG 3
           q: 'Can I trade when the stock market is closed?',
-          a: 'The chain runs around the clock, but each market’s executable price follows its approved data product. Sessions, holidays, halts and corporate actions still apply.',
+          a: 'The chain runs around the clock, but each market follows its approved price data. Halts, closures and corporate actions still apply.',
         },
         {
+          // TG 1, A 2
           q: 'Is Hyperwood live?',
-          a: 'Not yet. It is a proposed network. The plan: an integrated devnet in months 3 to 3.5, a public testnet from months 3.5 to 5.5 with security audits alongside, and the first mainnet stage in months 6.5 to 7, launched with controlled market and capital limits.',
-        },
-        {
-          q: 'Is Hyperwood affiliated with Robinhood?',
-          a: 'No. It is built to settle on Robinhood Chain, which does not establish an affiliation with Robinhood.',
+          a: 'Not yet. It is a proposed network, with no live deployment, guaranteed fill or guaranteed peg, and no affiliation with Robinhood.',
         },
       ],
     },

@@ -44,3 +44,9 @@
 @media (max-width: 480px) {
   .logo { --logo: 17px; }
 }
+
+/* Room to tap: a line of text is under the height a finger needs. The link takes its line and half the gap on
+   either side (or a field about it that is not seen); nothing moves. */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1), (max-height: 520px) {
+  .logo::before { content: ''; position: absolute; inset: -13px -8px; }
+}

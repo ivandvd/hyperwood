@@ -33,12 +33,29 @@ import shotReceipt800 from '../assets/product/shot-receipt-800.webp'
 import shotReceipt1200 from '../assets/product/shot-receipt-1200.webp'
 import shotClose800 from '../assets/product/shot-close-800.webp'
 import shotClose1200 from '../assets/product/shot-close-1200.webp'
-import { cardsUnder, phonesShot } from './flags'
+import { arcPlain, cardsUnder, phonesShot } from './flags'
 import { grain } from './grain'
+import { useRise } from './rise'
 import { DropScene } from './soar/DropScene'
 import { RiverScene } from './soar/RiverScene'
 import { whenStill } from './still'
 import s from './appStage.module.css'
+
+/** With the arc (sky="drop"), when the headline's two lines and the monitor come: from and to (how far the stage has
+ *  come up the screen, in screens: 0 its top at the foot, 1 at the top) and how far each rises as it comes (its own
+ *  ems). The arc opens over 0.08 to 0.72 (DropScene.tsx): the lines come into it as it opens, the monitor last, and
+ *  the monitor is whole well before the stage's top reaches the screen's (it is the stage's subject: while it was
+ *  still coming there, it stood dim under an arc already open). */
+const COME: [from: number, to: number, rise: number][] = [
+  [0.36, 0.66, 0.55],
+  [0.44, 0.74, 0.55],
+  [0.5, 0.86, 1.6],
+]
+/** How far the monitor answers the pointer, across and down (px at the pointer's furthest): a little, and the other
+ *  way from the drop over it, so the two stand at different depths. */
+const SWAY: [x: number, y: number] = [9, 5]
+/** A rise eased gently at both ends, as every scrolled movement on the page is. */
+const rising = (x: number) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, x)))
 
 const PICTURES = [
   [ticket700, ticket1050],
@@ -80,10 +97,87 @@ export function AppStage({ sky = 'gate' }: { sky?: 'gate' | 'drop' | 'river' }) 
   const A = home.appStage
   const root = useRef<HTMLElement>(null)
   const title = useRef<HTMLHeadingElement>(null)
+  // (the phones' words and pictures rise into place as the scroll brings them in: rise.ts)
+  const riseIn = useRise<HTMLDivElement>()
   // (the lights' grain: made once, in the page)
   useEffect(() => {
     root.current?.style.setProperty('--grain', grain())
   }, [])
+  // With the arc (sky="drop"): the headline's two lines and the monitor come with it. As the stage comes up the
+  // screen the arc opens out of the dark (DropScene.tsx), and the two lines rise into it one after the other, then
+  // the monitor, each with the scroll and back with it (COME).
+  useEffect(() => {
+    if (sky !== 'drop') return
+    const el = root.current
+    const head = title.current
+    const screen = el?.querySelector<HTMLElement>(`.${s.monitor}`)
+    if (!el || !head || !screen) return
+    const parts = [...(Array.from(head.children) as HTMLElement[]), screen]
+    const calm = matchMedia('(prefers-reduced-motion: reduce)')
+    let come = 1
+    let raf = 0
+    const said = new Map<HTMLElement, string>()
+    // (read where it is when the page has been scrolled; only write in the frame)
+    const read = () => {
+      come = (innerHeight - el.getBoundingClientRect().top) / Math.max(1, innerHeight)
+    }
+    const update = () => {
+      raf = 0
+      parts.forEach((part, i) => {
+        const [a, b, rise] = COME[Math.min(i, COME.length - 1)]
+        const k = calm.matches ? 1 : rising((come - a) / (b - a))
+        const opacity = k.toFixed(3)
+        const transform = k < 1 ? `translate3d(0, ${((1 - k) * rise).toFixed(3)}em, 0)` : 'none'
+        if (said.get(part) === opacity + transform) return
+        said.set(part, opacity + transform)
+        part.style.opacity = opacity
+        part.style.transform = transform
+      })
+    }
+    const ask = () => {
+      read()
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    parts.forEach((part) => (part.style.willChange = 'transform, opacity'))
+    // The monitor's picture answers the pointer (SWAY): eased towards where the pointer is, a frame at a time, and
+    // written only while it still has some way to go and the stage is on the screen.
+    const picture = screen.querySelector('img')
+    let want: [number, number] = [0, 0]
+    let now: [number, number] = [0, 0]
+    let drift = 0
+    const sway = () => {
+      drift = 0
+      now = [now[0] + (want[0] - now[0]) * 0.06, now[1] + (want[1] - now[1]) * 0.06]
+      if (picture) picture.style.transform = `translate3d(${(-now[0] * SWAY[0]).toFixed(2)}px, ${(-now[1] * SWAY[1]).toFixed(2)}px, 0)`
+      if (Math.abs(want[0] - now[0]) + Math.abs(want[1] - now[1]) > 0.002) drift = requestAnimationFrame(sway)
+    }
+    const point = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse' || calm.matches || come < 0 || come > 3.4) return
+      want = [(event.clientX / innerWidth) * 2 - 1, (event.clientY / innerHeight) * 2 - 1]
+      if (!drift) drift = requestAnimationFrame(sway)
+    }
+    if (picture) picture.style.willChange = 'transform'
+    ask()
+    addEventListener('scroll', ask, { passive: true })
+    addEventListener('resize', ask)
+    addEventListener('pointermove', point, { passive: true })
+    return () => {
+      removeEventListener('scroll', ask)
+      removeEventListener('resize', ask)
+      removeEventListener('pointermove', point)
+      if (raf) cancelAnimationFrame(raf)
+      if (drift) cancelAnimationFrame(drift)
+      parts.forEach((part) => {
+        part.style.opacity = ''
+        part.style.transform = ''
+        part.style.willChange = ''
+      })
+      if (picture) {
+        picture.style.transform = ''
+        picture.style.willChange = ''
+      }
+    }
+  }, [sky])
   // The pictures are fetched and unpacked at a still moment, before the page is scrolled to them: unpacked as they
   // come onto the screen, a large picture can hold a frame back. (Left alone, each is fetched as it comes near.)
   useEffect(
@@ -98,7 +192,7 @@ export function AppStage({ sky = 'gate' }: { sky?: 'gate' | 'drop' | 'river' }) 
   )
   return (
     <section ref={root} id="app" className={s.stage} aria-labelledby="app-title" data-sky={sky}>
-      {sky === 'drop' && <DropScene className={s.scene} />}
+      {sky === 'drop' && <DropScene className={s.scene} plain={arcPlain} />}
       {sky === 'river' && <RiverScene className={s.river} head={title} />}
       <div className={s.sky} aria-hidden="true" hidden={sky !== 'gate'}>
         <div className={s.halo} />
@@ -137,20 +231,22 @@ export function AppStage({ sky = 'gate' }: { sky?: 'gate' | 'drop' | 'river' }) 
       )}
 
       {/* the mobile app: three phones before the horizon the stage ends on */}
-      <div id="mobile" className={s.pocket} data-lines={cardsUnder ? '' : undefined}>
+      <div ref={riseIn} id="mobile" className={s.pocket} data-lines={cardsUnder ? '' : undefined}>
         <h2 className={s.title}>
-          <span>{A.pocket.title[0]}</span> <b>{A.pocket.title[1]}</b>
+          <span data-rise="">{A.pocket.title[0]}</span> <b data-rise="">{A.pocket.title[1]}</b>
         </h2>
-        <p className={s.lede}>{A.pocket.body}</p>
+        <p className={s.lede} data-rise="">
+          {A.pocket.body}
+        </p>
         {phonesShot ? (
           <ul className={s.shots}>
             {SHOTS.map(([small, large], i) => (
               <li key={small}>
-                <div className={s.shot}>
+                <div className={s.shot} data-rise="">
                   <img src={small} srcSet={`${small} 800w, ${large} 1200w`} sizes="(max-width: 599px) 92vw, (max-width: 1023px) 31vw, (max-aspect-ratio: 1/1) 31vw, 29vw" width="1200" height="1500" alt={A.pocket.shots[i]} loading="lazy" decoding="async" />
                 </div>
                 {cardsUnder && (
-                  <p className={s.shotLine}>
+                  <p className={s.shotLine} data-rise="">
                     <b>{A.cards[i].lead}</b> {A.cards[i].rest}
                   </p>
                 )}

@@ -1,0 +1,38 @@
+<!doctype html>
+<!--
+  The share picture (public/og.jpg, 1200 by 630): what a link to the site shows where it is shared. The page's
+  own things, laid out as its last screen is: the lockup, the tagline in two tones with the approved line under it,
+  and the phone standing in its pool of Hyper Neon (the landing page's own picture).
+
+  Open on the dev server at /scripts/site/og.html in a window 1200 by 630, take a picture of it at two pixels to the
+  point, and save it at 1200 by 630 as a JPEG (a share picture is asked for by programs that read only JPEG or PNG).
+  The words are the landing page's: change them there first (content.home.ts: intro, heroLine).
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Hyperwood: the share picture</title>
+    <style>
+      @font-face { font-family: 'Manrope Variable'; font-style: normal; font-weight: 200 800; src: url('/node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2') format('woff2-variations'); }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 1200px; height: 630px; overflow: hidden; background: #0a0a0a; }
+      body { position: relative; font-family: 'Manrope Variable', Arial, sans-serif; color: #f4f5f0; -webkit-font-smoothing: antialiased; font-synthesis: none; }
+      .phone { position: absolute; left: 468px; top: 34px; width: 800px; height: auto; }
+      .lockup { position: absolute; left: 64px; top: 58px; height: 30px; width: auto; }
+      .say { position: absolute; left: 64px; top: 236px; }
+      h1 { font-size: 74px; font-weight: 600; line-height: 1.05; letter-spacing: -0.042em; white-space: nowrap; }
+      h1 span { display: block; color: rgba(244, 245, 240, 0.5); }
+      h1 b { display: block; font-weight: 600; color: #fff; }
+      p { margin-top: 26px; width: 500px; font-size: 24px; font-weight: 500; line-height: 1.42; letter-spacing: -0.014em; color: rgba(244, 245, 240, 0.66); }
+    </style>
+  </head>
+  <body>
+    <img class="phone" src="/src/assets/product/standing-2000.webp" alt="" />
+    <img class="lockup" src="/src/assets/brand/hyperwood-lockup-neon.svg" alt="" />
+    <div class="say">
+      <h1><span>Equity perps.</span> <b>Private positions.</b></h1>
+      <p>Go long or short on stocks and indices. Zero-knowledge proofs verify settlement onchain.</p>
+    </div>
+  </body>
+</html>

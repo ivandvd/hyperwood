@@ -4,19 +4,23 @@
  * left of the camera and its side shows, a soft shadow running out from its foot).
  *
  * Here, on the page's Ink: a light behind the phone lays a pool of Hyper Neon on the ground, and the phone's shadow
- * is the dark in it. The phone is a slab with a body: the frame's shape laid many times one behind another, so its
- * side is one round band. The screen is the mobile app's own markup (PhoneApp.tsx).
+ * is the dark in it.
  *
- * The landing page shows a picture taken of it (studio.html, scripts/product), not this markup. The picture is put
- * together from three takes of the same view (`part`): the phone alone, the pool alone and the shadow alone, the two
- * last in white on black; the ground is then worked out from them in full precision, so that the light falls off
- * with no bands and the shadow is never darker than the page (scripts/product/bake-standing.py).
+ * The landing page shows a picture, not this markup, put together from three takes of the same view: the pool alone
+ * and the shadow alone (`part`), taken of this markup in white on black, and the phone alone, which is the model of
+ * the phone shots in its silver, drawn from the same eye where this markup's phone stands (scripts/product/shot.js,
+ * ?shot=standing: its measures of this view are copied from here and from handset.module.css, and must agree). The
+ * ground is then worked out in full precision, so that the light falls off with no bands and the shadow is never
+ * darker than the page (scripts/product/bake-standing.py).
+ *
+ * The phone drawn here is a stand-in for that model, to see the whole view in the studio page: a slab with a body
+ * (the frame's shape laid many times one behind another), as deep as the model, the app's own markup on its screen.
  */
 import type { CSSProperties, ReactNode } from 'react'
 import h from './handset.module.css'
 
 /** The phone (px, its own), how thick its body is, how it is turned, and how the camera looks down on it (degrees). */
-const PHONE = { w: 414, h: 868, deep: 36 }
+const PHONE = { w: 414, h: 868, deep: 50 }
 const TURN = -38
 const LOOK = -27
 /** The light: where the shadow runs on the ground (degrees from straight towards the camera, to the left), and how
@@ -24,6 +28,22 @@ const LOOK = -27
 const SHADOW = { way: 52, long: 1.45 }
 /** The ground: a square sheet this wide (px), the phone's foot at its middle. */
 const G = 2400
+
+/** The shape round a set of points on the ground (their convex hull), in order. */
+function round(points: number[][]) {
+  const sorted = [...points].sort((p, q) => p[0] - q[0] || p[1] - q[1])
+  const turns = (o: number[], p: number[], q: number[]) => (p[0] - o[0]) * (q[1] - o[1]) - (p[1] - o[1]) * (q[0] - o[0])
+  const side = (list: number[][]) => {
+    const out: number[][] = []
+    for (const p of list) {
+      while (out.length >= 2 && turns(out[out.length - 2], out[out.length - 1], p) <= 0) out.pop()
+      out.push(p)
+    }
+    out.pop()
+    return out
+  }
+  return [...side(sorted), ...side(sorted.reverse())]
+}
 
 /** What is drawn: everything, or one part of it alone (the pool and the shadow in white, to be taken on black). */
 export type StandingPart = 'all' | 'phone' | 'pool' | 'shade'
@@ -41,14 +61,18 @@ export function Standing({ children, width = 1500, part = 'all' }: { children: R
   const run = [-Math.sin(way) * PHONE.h * SHADOW.long, Math.cos(way) * PHONE.h * SHADOW.long]
   const at = ([x, y]: number[]) => (G / 2 + x).toFixed(1) + 'px ' + (G / 2 + y).toFixed(1) + 'px'
   const far = (p: number[]) => [p[0] + run[0], p[1] + run[1]]
-  const shape = 'polygon(' + [a, b, far(b), far(a)].map(at).join(', ') + ')'
+  // (the shadow is the whole foot's, run out along the ground: the glass's line and the back's, the body's depth
+  // behind it; the shape round all eight of their ends)
+  const behind = (p: number[]) => [p[0] - PHONE.deep * Math.sin(turn), p[1] - PHONE.deep * Math.cos(turn)]
+  const foot = [a, b, behind(b), behind(a)]
+  const shape = 'polygon(' + round([...foot, ...foot.map(far)]).map(at).join(', ') + ')'
   // (the shadow is darkest at the foot and gone before its end: the gradient runs the way the shadow does, through
   // the sheet's middle, which is the foot, so the foot is at its half)
   const along = (Math.atan2(run[0], -run[1]) * 180) / Math.PI
   const fade = 'linear-gradient(' + along.toFixed(2) + 'deg, rgb(var(--dark)) 0, rgb(var(--dark)) 50%, rgba(var(--dark), 0.94) 58%, rgba(var(--dark), 0.62) 72%, rgba(var(--dark), 0.2) 84%, rgba(var(--dark), 0) 92%)'
   const colours = { '--light': part === 'pool' ? '255, 255, 255' : '204, 255, 0', '--dark': part === 'shade' ? '255, 255, 255' : '10, 10, 10' } as CSSProperties
   return (
-    <div className={h.row} style={{ width, height: (width / own) * 1500 }}>
+    <div className={h.row} data-standing="" style={{ width, height: (width / own) * 1500 }}>
       <div className={h.standRig} style={{ transform: 'scale(' + width / own + ')' }}>
         <div className={h.world} style={{ transform: 'rotateX(' + LOOK + 'deg)' }}>
           {/* the ground: the pool of light, and the phone's shadow in it, soft at its edges */}

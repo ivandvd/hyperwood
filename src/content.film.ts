@@ -12,7 +12,7 @@ export const film = {
   title: ['Equity perps.', 'Private positions.'],
   /** Beside the film: the approved line. */
   line: 'Go long or short on stocks and indices. Zero-knowledge proofs verify settlement onchain.',
-  launch: { label: 'Launch App', href: './#app' },
+  launch: { label: 'Launch App', href: home.launch.href },
 
   /** The panel in the third column: the way around the site. */
   nav: [

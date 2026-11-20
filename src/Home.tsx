@@ -10,9 +10,10 @@ import { useEffect } from 'react'
 import { Journey } from './journey/Journey'
 import { startGlide } from './journey/glide'
 import { After } from './landing/After'
-import { flowSoar } from './landing/flags'
+import { flowSoar, groundInk } from './landing/flags'
 import { Footer } from './landing/Footer'
 import { MegaFooter } from './landing/soar/MegaFooter'
+import { LiquidFoot } from './landing/soar/foot/LiquidFoot'
 
 const films = new URLSearchParams(window.location.search).get('hero') !== 'mark'
 
@@ -22,7 +23,7 @@ export function Home() {
     <>
       <Journey films={films} />
       <After />
-      {flowSoar ? <MegaFooter /> : <Footer />}
+      {flowSoar ? groundInk ? <LiquidFoot /> : <MegaFooter /> : <Footer />}
     </>
   )
 }

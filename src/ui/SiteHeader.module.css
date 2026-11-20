@@ -39,3 +39,8 @@ a.home { text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .nav, .cta { transform: none; }
 }
+
+/* Room to tap: a line of text is under the height a finger needs. The link takes its line and half the gap on
+   either side (or a field about it that is not seen); nothing moves. */
+.home { position: relative; }
+.home::after { content: ''; position: absolute; inset: -12px -8px; }

@@ -12,6 +12,7 @@ import { initDeck } from './deck/track'
 import { startOpening } from './ui/opening'
 import { heroOpening } from './hero/heroOpening'
 import App from './App'
+import { SiteExtras } from './site/SiteExtras'
 
 // stack or flow: decided from the screen before anything is laid out (deck/track.ts)
 initDeck()
@@ -21,5 +22,6 @@ startOpening(heroOpening())
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
+    <SiteExtras />
   </StrictMode>,
 )

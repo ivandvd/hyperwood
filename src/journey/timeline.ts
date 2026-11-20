@@ -39,6 +39,7 @@ import { EXCHANGE_PICTURES } from './exchange.pictures'
 import { buildMarkField, MARK_FLOW, type MarkField } from './markField'
 import { markTiming, roomTiming } from './timing'
 import { ROW } from './row'
+import { callLate } from '../landing/flags'
 
 const clamp = (x: number, a = 0, b = 1) => Math.max(a, Math.min(b, x))
 /** GLSL's smoothstep. */
@@ -977,8 +978,11 @@ export function startJourney(parts: JourneyParts): () => void {
       // right it stays where the bar has its row, being the last thing in it; where the bar has only the button
       // that opens the way around, it gives way to that button, which stands in its place.)
       const forGate = films && gives ? smooth(beats.stand[0], beats.stand[1], s) * (1 - (filmsAfter ? smooth(0.1, 0.24, dusk) : smooth(0.3, 0.6, dusk))) : 0
+      // (With the films after the hero the first screen is the opening words alone: the call to action is then there
+      // from that screen on, in its one place for the whole page, so that there is one to use before any scrolling.
+      // &call=late brings it in after the hero, as it was.)
       const headerAt = filmsAfter ? headerAfter : beats.header
-      const headerIn = smooth(headerAt[0], headerAt[1], s) * (1 - forGate)
+      const headerIn = (filmsAfter && !callLate ? 1 : smooth(headerAt[0], headerAt[1], s)) * (1 - forGate)
       header.style.opacity = String(headerIn)
       header.style.pointerEvents = headerIn > 0.6 ? 'auto' : 'none'
       header.inert = headerIn < 0.6

@@ -49,3 +49,12 @@
   .wrap { padding: 0; }
   .notes { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* the legal pages, beside the year (site/LegalLinks.tsx) */
+.legal { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 20px; }
+.legal a { color: inherit; text-decoration: none; transition: color 0.3s var(--ease-out); }
+.legal a:hover { color: var(--hw-neon); }
+
+/* Room to tap: a line of text is under the height a finger needs. The link takes its line and half the gap on
+   either side (or a field about it that is not seen); nothing moves. */
+.legal a { padding: 10px 0; margin: -10px 0; }

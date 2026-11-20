@@ -66,7 +66,7 @@ export function Menu({ ways, channels }: { ways: PanelLink[]; channels: PanelLin
       </button>
       {createPortal(
         <div id={id} className={s.sheet} data-open={open ? '' : undefined} role="dialog" aria-modal="true" aria-label={home.menu.label} inert={!open}>
-          <img className={s.logo} src={lockup} alt="" />
+          <img className={s.logo} src={lockup} alt="" width={907} height={114} />
           <button ref={closer} type="button" className={s.close} aria-label={home.menu.close} onClick={shut}>
             {lines}
           </button>

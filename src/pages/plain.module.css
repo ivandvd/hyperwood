@@ -1,0 +1,68 @@
+/* A page of words alone (Plain.tsx), on Ink. The measures are the landing page's: the mark and the call to action
+   where its header has them after the hero and as large (journey/header.module.css and swimLogo.module.css: --u is
+   one pixel of the 1440 design; on a screen without the bar's row, the tokens' edge), its headline type, its text at
+   62 hundredths of white. */
+.page { --u: max(1px, calc(100vw / 1440)); --side: calc(39 * var(--u)); min-height: 100vh; min-height: 100svh; display: grid; grid-template-rows: auto 1fr auto; color: var(--hw-paper); font-family: var(--font-text); }
+
+.top {
+  position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; padding: calc(21 * var(--u)) var(--side);
+  --launch-height: calc(38 * var(--u)); --launch-pad: calc(17 * var(--u)); --launch-type: calc(14 * var(--u));
+  background: linear-gradient(to bottom, rgba(10, 10, 10, 0.96), rgba(10, 10, 10, 0.9) 60%, rgba(10, 10, 10, 0));
+}
+.mark { display: block; }
+.mark i {
+  display: block; width: calc(58.4 * var(--u)); aspect-ratio: 428 / 191; background: var(--hw-neon);
+  -webkit-mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+}
+.mark:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 6px; border-radius: 4px; }
+
+.main { display: grid; grid-template-columns: minmax(0, 0.86fr) minmax(0, 1fr); gap: 6vw; align-items: start; width: min(1280px, 100%); margin: 0 auto; padding: clamp(48px, 9vh, 120px) var(--side) clamp(72px, 12vh, 160px); }
+/* (a page with a name and nothing under it: the page that thanks. It stands in the screen's middle.) */
+.main[data-alone] { grid-template-columns: minmax(0, 1fr); align-content: center; max-width: 60em; }
+.head { position: sticky; top: 120px; }
+.main[data-alone] .head { position: static; }
+.head h1 { margin: 0; font-family: var(--font-display); font-size: clamp(36px, 4.4vw, 76px); font-weight: 600; line-height: 1.05; letter-spacing: -0.042em; text-wrap: balance; }
+.head h1 b { display: block; font-weight: 600; color: var(--hw-white); }
+.head h1 span { display: block; color: rgba(244, 245, 240, 0.5); }
+.lead { margin: 28px 0 0; max-width: 30em; font-size: clamp(16px, 1.2vw, 19px); line-height: 1.5; letter-spacing: -0.014em; color: rgba(244, 245, 240, 0.62); text-wrap: pretty; }
+.updated { margin: 22px 0 0; font: 400 12px / 1.4 var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: rgba(244, 245, 240, 0.44); }
+.back { display: inline-flex; margin-top: 36px; --launch-height: 50px; --launch-pad: 24px; --launch-type: 16px; }
+
+/* what it says: parts one under another, a hairline over each */
+.part { padding: 26px 0 30px; border-top: 1px solid rgba(244, 245, 240, 0.12); }
+.part:last-child { border-bottom: 1px solid rgba(244, 245, 240, 0.12); }
+.part h2 { margin: 0; font-family: var(--font-display); font-size: clamp(19px, 1.45vw, 24px); font-weight: 600; line-height: 1.25; letter-spacing: -0.025em; color: var(--hw-white); }
+.part p { margin: 12px 0 0; max-width: 38em; font-size: clamp(15.5px, 1.1vw, 17.5px); line-height: 1.6; letter-spacing: -0.012em; color: rgba(244, 245, 240, 0.66); text-wrap: pretty; }
+.part a { color: var(--hw-white); text-decoration: underline; text-decoration-color: rgba(244, 245, 240, 0.34); text-underline-offset: 3px; transition: color 0.3s var(--ease-out), text-decoration-color 0.3s var(--ease-out); }
+.part a:hover { color: var(--hw-neon); text-decoration-color: var(--hw-neon); }
+.part a:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 3px; border-radius: 2px; }
+
+.foot {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; margin: 0 var(--side); padding: 22px 0 30px;
+  border-top: 1px solid rgba(244, 245, 240, 0.1); font-size: 14px; color: rgba(244, 245, 240, 0.44);
+}
+.foot nav { display: flex; flex-wrap: wrap; gap: 8px 26px; }
+.foot a { color: rgba(244, 245, 240, 0.72); text-decoration: none; transition: color 0.3s var(--ease-out); }
+.foot a:hover { color: var(--hw-neon); }
+.foot a:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 4px; border-radius: 2px; }
+
+/* a screen without the bar's row (as journey/row.ts has it): the tokens' edge, the call to action as the header's is
+   there, the mark as large as the logo that stays; the name over what the page says */
+@media (max-width: 1023px), (max-aspect-ratio: 1/1), (max-height: 520px) {
+  .page { --side: var(--edge); }
+  .top { padding: var(--header-top) var(--side); --launch-height: 42px; --launch-pad: 20px; --launch-type: 15px; }
+  .mark i { width: 49px; }
+  .main { grid-template-columns: minmax(0, 1fr); gap: 44px; padding-top: 40px; }
+  .head { position: static; }
+  .foot { flex-direction: column; }
+}
+
+/* Room to tap: a line of text is under the height a finger needs. The link takes its line and half the gap on
+   either side (or a field about it that is not seen); nothing moves. */
+.mark { position: relative; }
+.mark::after { content: ''; position: absolute; inset: -12px -8px; }
+@media (max-width: 1023px), (max-aspect-ratio: 1/1), (max-height: 520px) {
+  .foot nav { gap: 0 26px; }
+  .foot a { padding: 9px 0; }
+}

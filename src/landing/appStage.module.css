@@ -110,7 +110,15 @@
 .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.05vw; width: 88vw; margin: 4.2vw auto 0; padding: 0; list-style: none; }
 .shot { position: relative; aspect-ratio: 4 / 5; border-radius: 2.1vw; overflow: hidden; background: var(--hw-ink); will-change: transform; }
 .shot img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
-.shot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1); pointer-events: none; }
+.shot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1); pointer-events: none; transition: box-shadow 0.7s var(--ease-out); }
+/* (on a pointer over it, the shot comes a little nearer and its edge catches the light: slowly, with the page's curve) */
+.shot img { transition: transform 1.2s var(--ease-out); will-change: transform; }
+@media (hover: hover) {
+  .shots > li:hover .shot img { transform: scale(1.04); }
+  .shots > li:hover .shot::after { box-shadow: inset 0 0 0 1px rgba(204, 255, 0, 0.32); }
+  .shots > li:hover .shotLine b { color: var(--hw-neon); }
+}
+.shotLine b { transition: color 0.6s var(--ease-out); }
 .shots > li { min-width: 0; }
 /* (no cards between the monitor and the title: the title comes nearer the monitor's foot) */
 .pocket[data-lines] { margin-top: 6.5vw; }
@@ -181,8 +189,20 @@
   .scene { height: 150vw; }
 }
 
-/* (with &ground=ink: the part above is on the Ink too, so the stage does not come out of the Paper) */
+/* (with &ground=ink: the part above is on the Ink too, so the stage does not come out of the Paper. The canvas is
+   clear, the page's Ink its ground: its light is let in over a short stretch at its top only, where the arc's sides
+   meet the canvas's edge, and the last film's light lands a little under it, DropScene's SEED) */
 :global([data-night]) .stage[data-sky="drop"] { background: none; }
+:global([data-night]) .stage[data-sky="drop"] .scene {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 2.5vw, #000 70%, rgba(0, 0, 0, 0.5) 85%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 2.5vw, #000 70%, rgba(0, 0, 0, 0.5) 85%, transparent 100%);
+}
+@media (max-width: 1023px), (max-aspect-ratio: 1/1) {
+  :global([data-night]) .stage[data-sky="drop"] .scene {
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 4.8vw, #000 70%, rgba(0, 0, 0, 0.5) 85%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 4.8vw, #000 70%, rgba(0, 0, 0, 0.5) 85%, transparent 100%);
+  }
+}
 
 /* ------------------------------------------------------------------ with &ground=ink: the journey's river under the
    headline (soar/RiverScene.tsx). The headline stands on the Ink; the river comes out of the dark a little under it and

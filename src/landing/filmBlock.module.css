@@ -15,6 +15,11 @@
 @supports (height: 100svh) {
   .block { --frame-h: max(100svh, calc(560 * var(--u))); --travel: 240svh; }
 }
+/* (on the dark page, FilmBlock.tsx's `exit`: held a quarter of a screen longer, for the last film to go out) */
+.block[data-exit] { --travel: 265vh; }
+@supports (height: 100svh) {
+  .block[data-exit] { --travel: 265svh; }
+}
 
 .frame {
   --top: calc(80 * var(--u));

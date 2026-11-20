@@ -316,3 +316,9 @@
 :global([data-night]) .foot[data-card] .footInfo p:first-child,
 :global([data-night]) .foot[data-card] .footInfo b { color: var(--hw-white); }
 :global([data-night]) .foot[data-card] .footBottom { color: rgba(244, 245, 240, 0.5); }
+
+/* the legal pages, beside the year in the foot (site/LegalLinks.tsx) */
+.footLegal { display: inline-flex; flex-wrap: wrap; gap: 6px 20px; }
+.footLegal a { color: inherit; text-decoration: none; transition: color 0.3s var(--ease-out); }
+.footLegal a:hover { color: var(--hw-ink); }
+:global([data-night]) .footLegal a:hover { color: var(--hw-neon); }

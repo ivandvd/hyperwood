@@ -24,3 +24,7 @@
 @media (prefers-reduced-motion: reduce) {
   .word img { transform: none; opacity: 1; }
 }
+
+/* Room to tap: a line of text is under the height a finger needs. The link takes its line and half the gap on
+   either side (or a field about it that is not seen); nothing moves. */
+.nav a { padding: 5px 0; margin: -5px 0; }

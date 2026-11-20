@@ -28,8 +28,9 @@ export const sections = {
     ['Network', 'network'],
     ['Roadmap', 'roadmap'],
   ] as Pair[],
-  /** The call to action. `href` has no destination yet: set it when the app has an address. */
-  cta: { label: 'Launch App', href: '#' },
+  /** The call to action. The app has no address yet: until it has, this points to a place that is not in the page,
+   *  and a link that leads nowhere opens the note that says so (site/Soon.tsx). */
+  cta: { label: 'Launch App', href: '#launch' },
 
   /* ------------------------------------------------------------ 03, paper p. 4 */
   markets: {

@@ -1,0 +1,96 @@
+/* The note that a part is not open yet (Soon.tsx): the page's own dialog, in the middle of the screen, on Ink a
+   shade lighter than the page, with a hairline. Behind it the page is dimmed with Ink (no blur: a blur is drawn
+   for the first time when the note first opens, which costs the frames in which it should be coming). */
+:global(html[data-soon-open]) { overflow: hidden; }
+
+.soon {
+  width: min(540px, calc(100vw - 32px)); max-width: none; max-height: calc(100svh - 32px); margin: auto; padding: 0; overflow: auto;
+  border: 0; border-radius: 22px; background: #10110f; color: var(--hw-paper); font-family: var(--font-text);
+  box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.1), 0 30px 90px rgba(0, 0, 0, 0.6); overscroll-behavior: contain;
+}
+.soon::backdrop { background: rgba(10, 10, 10, 0.74); }
+.soon[open] { animation: come 0.5s var(--ease-out) both; }
+.soon[open]::backdrop { animation: dim 0.3s linear both; }
+.soon[data-closing] { animation: go 0.19s ease-in both; }
+.soon[data-closing]::backdrop { animation: undim 0.19s linear both; }
+@keyframes come { from { opacity: 0; transform: translate3d(0, 18px, 0); } to { opacity: 1; transform: none; } }
+@keyframes go { from { opacity: 1; transform: none; } to { opacity: 0; transform: translate3d(0, 10px, 0); } }
+@keyframes dim { from { opacity: 0; } to { opacity: 1; } }
+@keyframes undim { from { opacity: 1; } to { opacity: 0; } }
+
+.note { padding: 26px 30px 30px; }
+.top { display: flex; justify-content: space-between; align-items: center; }
+/* The mark, filling as it does in the opening (index.html): Hyper Neon under the mark's shape, and what is seen
+   filling is the part not yet filled drawing back, once, when the note comes. */
+.mark {
+  position: relative; display: block; width: 66px; aspect-ratio: 428 / 191; overflow: hidden; background: var(--hw-neon);
+  -webkit-mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+  mask: url('../assets/brand/hyperwood-symbol-neon.svg') center / 100% 100% no-repeat;
+}
+.mark i { position: absolute; inset: -2px -3% -2px -2px; background: #2a2b28; transform: translate3d(104%, 0, 0); }
+.soon[open] .mark i { animation: fill 1.5s cubic-bezier(0.1, 0.7, 0.2, 1) 0.12s both; }
+@keyframes fill { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(104%, 0, 0); } }
+.close {
+  display: grid; place-items: center; width: 44px; height: 44px; margin: -8px -12px -8px 0; border: 0; border-radius: 50%; background: none;
+  color: rgba(244, 245, 240, 0.62); cursor: pointer; transition: color 0.3s var(--ease-out), background-color 0.3s var(--ease-out);
+}
+.close svg { display: block; width: 14px; height: 14px; }
+.close:hover { color: var(--hw-white); background: rgba(244, 245, 240, 0.08); }
+.close:focus-visible, .done:focus-visible { outline: 2px solid var(--hw-neon); outline-offset: 2px; }
+
+.title { margin: 30px 0 0; font-family: var(--font-display); font-size: clamp(28px, 2.2vw, 36px); font-weight: 600; line-height: 1.08; letter-spacing: -0.04em; }
+.title span { display: block; color: rgba(244, 245, 240, 0.5); }
+.title b { display: block; font-weight: 600; color: var(--hw-white); }
+.body { margin: 16px 0 0; max-width: 27em; font-size: 16px; line-height: 1.5; letter-spacing: -0.012em; color: rgba(244, 245, 240, 0.66); text-wrap: pretty; }
+
+/* ------------------------------------------------------------------ the offer to write once (when it can be sent) */
+.form { margin: 26px 0 0; padding-top: 22px; border-top: 1px solid rgba(244, 245, 240, 0.1); }
+.ask { display: block; font-size: 15px; line-height: 1.45; letter-spacing: -0.012em; color: rgba(244, 245, 240, 0.86); }
+.field {
+  position: relative; display: flex; gap: 8px; margin-top: 14px; padding: 6px; border-radius: 14px; background: rgba(244, 245, 240, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(244, 245, 240, 0.14); transition: box-shadow 0.3s var(--ease-out);
+}
+.field:focus-within { box-shadow: inset 0 0 0 1.5px rgba(204, 255, 0, 0.7); }
+/* (refused: the field's hairline says so as well as the line under it; the colour is the app's own for a loss) */
+.field[data-wrong] { box-shadow: inset 0 0 0 1.5px #ff6a55; }
+.field input {
+  flex: 1; min-width: 0; height: 44px; padding: 0 12px; border: 0; background: none; outline: none; color: var(--hw-white);
+  font: 500 16px / 1 var(--font-text); letter-spacing: -0.012em;
+}
+.field input::placeholder { color: rgba(244, 245, 240, 0.34); }
+.field button {
+  flex: none; height: 44px; padding: 0 18px; border: 0; border-radius: 9px; background: var(--hw-neon); color: var(--hw-ink); cursor: pointer;
+  font: 700 15px / 1 var(--font-text); letter-spacing: -0.01em; transition: background-color 0.26s ease, opacity 0.26s ease;
+}
+.field button:hover { background: var(--hw-white); }
+.field button:focus-visible { outline: 2px solid var(--hw-white); outline-offset: 2px; }
+.field button:disabled { cursor: progress; opacity: 0.7; }
+/* (busy: a line of Neon runs along the field's foot until the answer comes) */
+.field[data-busy]::after {
+  content: ''; position: absolute; left: 14px; right: 14px; bottom: 0; height: 1.5px; background: var(--hw-neon); transform-origin: 0 50%;
+  animation: busy 1.1s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes busy { 0% { transform: scaleX(0); } 50% { transform: scaleX(1); transform-origin: 0 50%; } 50.01% { transform-origin: 100% 50%; } 100% { transform: scaleX(0); transform-origin: 100% 50%; } }
+.wrong { min-height: 1.4em; margin: 8px 2px 0; font-size: 13.5px; line-height: 1.4; color: #ff8674; }
+
+/* ------------------------------------------------------------------ what can be done meanwhile */
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 28px; --launch-height: 46px; --launch-pad: 20px; --launch-type: 15px; }
+.form + .actions { margin-top: 14px; }
+.done {
+  height: 46px; padding: 0 6px; border: 0; background: none; color: rgba(244, 245, 240, 0.66); cursor: pointer;
+  font: 600 15px / 1 var(--font-text); letter-spacing: -0.012em; transition: color 0.3s var(--ease-out);
+}
+.done:hover { color: var(--hw-white); }
+
+@media (max-width: 480px) {
+  .soon { border-radius: 20px; }
+  .note { padding: 20px 20px 24px; }
+  .title { margin-top: 24px; }
+  .field { flex-direction: column; }
+  .field button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .soon[open], .soon[open]::backdrop, .soon[data-closing], .soon[data-closing]::backdrop { animation: none; }
+  .soon[open] .mark i { animation: none; }
+  .field[data-busy]::after { animation: none; }
+}

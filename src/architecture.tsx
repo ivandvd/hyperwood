@@ -5,9 +5,11 @@ import '@fontsource/ibm-plex-mono/400.css'
 import './styles/tokens.css'
 import './styles/global.css'
 import { Architecture } from './pages/Architecture'
+import { SiteExtras } from './site/SiteExtras'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Architecture />
+    <SiteExtras />
   </StrictMode>,
 )

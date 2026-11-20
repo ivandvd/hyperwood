@@ -35,6 +35,14 @@
   position: fixed; top: var(--header-top); right: var(--edge); z-index: 10;
   opacity: 0; pointer-events: none; /* timeline.ts takes both over */
 }
+/* (it may be there from the first screen: not over the opening, and when the opening lets the page go it comes up
+   out of the dark with the page's first words) */
+:global(html[data-opening]) .bar { visibility: hidden; }
+:global(html:not([data-opening])) .bar { animation: bar-in 0.8s var(--ease-out) 0.35s backwards; }
+@keyframes bar-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  :global(html:not([data-opening])) .bar { animation: none; }
+}
 
 /* a phone: the first link and the last, the mark, the call to action */
 @media (max-width: 760px) {

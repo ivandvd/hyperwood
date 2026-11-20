@@ -28,6 +28,22 @@ export const dawnRiver = flowSoar && asked.get('dawn') === 'river'
  *  appStage.module.css under [data-night]), and there is no way into a light part. */
 export const groundInk = flowSoar && asked.get('ground') === 'ink'
 
+/** &how=cards (with &ground=ink): How it works as three cards of words alone, as it was before (soar/works/Works.tsx).
+ *  Without it, one block with a picture, the three parts changing in it (soar/works/WorksBlock.tsx). */
+export const howCards = groundInk && asked.get('how') === 'cards'
+
+/** &arc=plain: the arc over the app's stage as it was before, one line of Neon with a faint light inside, in place of
+ *  the body of light with its wisps and its dust (soar/DropScene.tsx). */
+export const arcPlain = asked.get('arc') === 'plain'
+
+/** &call=late (with &films=after): the call to action comes in after the hero, as it did before. Without it, it is
+ *  at the upper right from the first screen on, so that there is one to use before any scrolling (journey/timeline.ts). */
+export const callLate = asked.get('call') === 'late'
+
+/** &name=solid (with &ground=ink): the name across the foot's end in Hyper Neon all over. Without it, the Neon goes
+ *  faint towards the name's foot, where it runs off the page (soar/foot/LiquidFoot.tsx). */
+export const nameSolid = asked.get('name') === 'solid'
+
 /** &foot=ink | neon (with &flow=soar): the foot of the page ends in a card with the logo large, Neon on Ink or Ink on
  *  Neon (soar/MegaFooter.tsx), and its words stand darker and larger, as the reference's do. */
 const foot = asked.get('foot')

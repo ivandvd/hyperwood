@@ -5,6 +5,7 @@
 import type { MouseEvent } from 'react'
 import { content } from '../content'
 import { sections } from '../content.sections'
+import { LegalLinks } from '../site/LegalLinks'
 import { glideTo } from '../ui/glide'
 import { Block } from '../sections/parts'
 import { entering, useScroll } from '../sections/motion'
@@ -36,6 +37,7 @@ export function Footer({ nav, more }: Props) {
             </a>
           ))}
           {more && <a href={more.href}>{more.label}</a>}
+          <LegalLinks />
         </nav>
         <ul className={s.cautions}>
           {C.notes.map((note, i) => (
